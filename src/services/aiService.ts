@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, GenerateContentConfig } from "@google/generative-ai";
 import { StorySettings } from "@/components/StoryOptions";
 
 class AIService {
@@ -9,10 +9,7 @@ class AIService {
   constructor() {
     this.genAI = new GoogleGenerativeAI("AIzaSyDonkh1p9UiMvTkKG2vFO9WrbFngqr_PXs");
     this.model = this.genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash-exp",
-      generationConfig: {
-        response_modalities: ["TEXT", "AUDIO"]
-      }
+      model: "gemini-2.0-flash-exp"
     });
   }
 
@@ -28,9 +25,22 @@ class AIService {
           parts: [{ text: prompt }],
         },
       ],
+      generationConfig: {
+        temperature: 0.7,
+      }
     });
 
-    const result = await this.chat.sendMessage("Start the story");
+    const result = await this.chat.sendMessage("Start the story", {
+      generationConfig: new GenerateContentConfig({
+        temperature: 0.7,
+        candidate_count: 1,
+        stop_sequences: [],
+        max_output_tokens: 800,
+        top_p: 0.8,
+        top_k: 40,
+      }),
+    });
+    
     const response = await result.response;
     const text = response.text();
     const audioData = response.audio?.data;
@@ -47,7 +57,17 @@ class AIService {
   async continueStory(message: string) {
     if (!this.chat) throw new Error("Chat not initialized");
     
-    const result = await this.chat.sendMessage(message);
+    const result = await this.chat.sendMessage(message, {
+      generationConfig: new GenerateContentConfig({
+        temperature: 0.7,
+        candidate_count: 1,
+        stop_sequences: [],
+        max_output_tokens: 800,
+        top_p: 0.8,
+        top_k: 40,
+      }),
+    });
+    
     const response = await result.response;
     const text = response.text();
     const audioData = response.audio?.data;
