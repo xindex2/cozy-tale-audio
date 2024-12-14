@@ -6,12 +6,14 @@ import type { StorySettings } from "./StoryOptions";
 import { aiService } from "@/services/aiService";
 import { ChatInterface } from "./story-player/ChatInterface";
 import { AudioControls } from "./story-player/AudioControls";
+import { AudioManager } from "./story-player/AudioManager";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
   audioUrl?: string;
+  backgroundMusicUrl?: string;
 }
 
 export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onBack: () => void }) {
@@ -21,26 +23,47 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
   const [messages, setMessages] = useState<Message[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
+  const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    startStory();
+    // Prompt for ElevenLabs API key if not set
+    const apiKey = prompt("Please enter your ElevenLabs API key:");
+    if (apiKey) {
+      aiService.setApiKey(apiKey);
+      startStory();
+    } else {
+      toast({
+        title: "API Key Required",
+        description: "An ElevenLabs API key is required for voice generation.",
+        variant: "destructive",
+      });
+    }
   }, []);
 
   const startStory = async () => {
     setIsLoading(true);
     try {
-      const { text, audioUrl } = await aiService.startChat(settings);
+      const { text, audioUrl, backgroundMusicUrl } = await aiService.startChat(settings);
       
-      setMessages([{ role: "assistant", content: text, audioUrl }]);
+      setMessages([{ 
+        role: "assistant", 
+        content: text, 
+        audioUrl,
+        backgroundMusicUrl 
+      }]);
+      
       if (audioUrl) {
         setCurrentAudioUrl(audioUrl);
       }
+      if (backgroundMusicUrl) {
+        setCurrentMusicUrl(backgroundMusicUrl);
+      }
+      setIsPlaying(true);
     } catch (error) {
       console.error("Error starting story:", error);
       toast({
@@ -58,14 +81,23 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
     try {
       setMessages((prev) => [...prev, { role: "user", content: text }]);
       
-      const { text: responseText, audioUrl } = await aiService.continueStory(text);
+      const { text: responseText, audioUrl, backgroundMusicUrl } = await aiService.continueStory(text);
       
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: responseText, audioUrl },
+        { 
+          role: "assistant", 
+          content: responseText, 
+          audioUrl,
+          backgroundMusicUrl 
+        },
       ]);
+      
       if (audioUrl) {
         setCurrentAudioUrl(audioUrl);
+      }
+      if (backgroundMusicUrl) {
+        setCurrentMusicUrl(backgroundMusicUrl);
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -121,51 +153,12 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
     }
   };
 
-  useEffect(() => {
-    if (currentAudioUrl) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      audioRef.current = new Audio(currentAudioUrl);
-      audioRef.current.volume = isMuted ? 0 : volume;
-      audioRef.current.loop = true; // Enable looping for background music
-      
-      if (isPlaying) {
-        audioRef.current.play().catch(error => {
-          console.error("Error playing audio:", error);
-          toast({
-            title: "Audio Error",
-            description: "Failed to play audio. Please try again.",
-            variant: "destructive",
-          });
-        });
-      }
-    }
-  }, [currentAudioUrl, volume, isMuted, isPlaying]);
-
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-    if (audioRef.current) {
-      if (!isPlaying) {
-        audioRef.current.play().catch(console.error);
-      } else {
-        audioRef.current.pause();
-      }
-    }
-  };
-
   const handleVolumeChange = (newVolume: number[]) => {
     setVolume(newVolume[0]);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume[0];
-    }
   };
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? volume : 0;
-    }
   };
 
   if (isLoading) {
@@ -205,10 +198,18 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
           />
         </div>
 
+        <AudioManager
+          voiceUrl={currentAudioUrl}
+          backgroundMusicUrl={currentMusicUrl}
+          isPlaying={isPlaying}
+          volume={volume}
+          isMuted={isMuted}
+        />
+
         <div className="flex justify-center">
           <Button
             size="icon"
-            onClick={togglePlay}
+            onClick={() => setIsPlaying(!isPlaying)}
             className="rounded-full w-12 h-12 bg-story-purple hover:bg-story-purple/90"
           >
             {isPlaying ? (
