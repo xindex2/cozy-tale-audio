@@ -32,11 +32,11 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a237e]/5 via-[#1565c0]/10 to-[#0288d1]/5">
-      <div className="container mx-auto px-4 py-12 lg:py-20">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a237e]/5 via-[#1565c0]/10 to-[#0288d1]/5 py-8">
+      <div className="container mx-auto px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="text-center mb-16 animate-fade-in space-y-6">
+          <div className="text-center mb-8 animate-fade-in space-y-4">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-[#1a237e] via-[#1565c0] to-[#0288d1] bg-clip-text text-transparent">
               Bedtime Stories AI
             </h1>
@@ -50,9 +50,9 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Language and Age Group Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
                 <LanguageSelector
                   selectedLanguage={settings.language}
@@ -76,7 +76,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
 
             {/* Music and Voice Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
                 <MusicSelector
                   selectedMusic={settings.music}
@@ -92,7 +92,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
 
             {/* Start Button */}
-            <div className="flex justify-center mt-16">
+            <div className="flex justify-center mt-8">
               <Button
                 onClick={() => onStart(settings)}
                 className="w-full sm:w-[400px] h-20 text-xl font-medium bg-gradient-to-r from-[#1a237e] via-[#1565c0] to-[#0288d1] hover:from-[#0d47a1] hover:to-[#01579b] text-white rounded-2xl shadow-xl transition-all duration-300 hover:shadow-blue-400/30 hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-4 border-0"
