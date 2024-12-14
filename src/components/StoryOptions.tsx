@@ -37,10 +37,10 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="text-center mb-8 animate-fade-in space-y-4 pt-8">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-[#1a237e] via-[#1565c0] to-[#0288d1] bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-[#1a237e] via-[#1565c0] to-[#0288d1] bg-clip-text text-transparent">
               Bedtime Stories AI
             </h1>
-            <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
               Create personalized bedtime stories with AI-powered storytelling
             </p>
             <div className="flex gap-2 justify-center">
@@ -95,11 +95,11 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             <div className="flex justify-center mt-8">
               <Button
                 onClick={() => onStart(settings)}
-                className="w-full sm:w-[400px] h-20 text-xl font-medium bg-gradient-to-r from-[#1a237e] via-[#1565c0] to-[#0288d1] hover:from-[#0d47a1] hover:to-[#01579b] text-white rounded-2xl shadow-xl transition-all duration-300 hover:shadow-blue-400/30 hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-4 border-0"
+                className="w-full sm:w-[400px] h-16 text-lg font-medium bg-gradient-to-r from-[#1a237e] via-[#1565c0] to-[#0288d1] hover:from-[#0d47a1] hover:to-[#01579b] text-white rounded-2xl shadow-xl transition-all duration-300 hover:shadow-blue-400/30 hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-4 border-0"
                 size="lg"
               >
                 Create Your Story
-                <Play className="w-7 h-7" />
+                <Play className="w-6 h-6" />
               </Button>
             </div>
           </div>
