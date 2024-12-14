@@ -121,5 +121,5 @@ class RealtimeApiService {
   }
 }
 
-// Initialize with a placeholder API key - this should be replaced with a proper key
-export const realtimeApi = new RealtimeApiService("YOUR_API_KEY");
+// Initialize with the provided API key
+export const realtimeApi = new RealtimeApiService("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");
