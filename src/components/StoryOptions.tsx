@@ -5,6 +5,7 @@ import { ThemeSelector } from "./story-options/ThemeSelector";
 import { DurationSelector } from "./story-options/DurationSelector";
 import { MusicSelector } from "./story-options/MusicSelector";
 import { VoiceSelector } from "./story-options/VoiceSelector";
+import { LanguageSelector } from "./story-options/LanguageSelector";
 
 interface StoryOptionsProps {
   onStart: (options: StorySettings) => void;
@@ -16,6 +17,7 @@ export interface StorySettings {
   music: string;
   voice: string;
   theme: string;
+  language: string;
 }
 
 export function StoryOptions({ onStart }: StoryOptionsProps) {
@@ -25,6 +27,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
     music: "gentle-lullaby",
     voice: "EXAVITQu4vr4xnSDxMaL",
     theme: "fantasy",
+    language: "en"
   });
 
   return (
@@ -40,6 +43,10 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <LanguageSelector
+          selectedLanguage={settings.language}
+          onLanguageSelect={(language) => setSettings({ ...settings, language })}
+        />
         <AgeGroupSelector
           selectedAge={settings.ageGroup}
           onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}

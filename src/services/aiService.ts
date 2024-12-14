@@ -61,7 +61,8 @@ class AIService {
                    Create moments for interaction but keep them gentle and sleepy.
                    End the story with a calming conclusion that helps prepare for sleep.
                    Do not use any special formatting like asterisks or markdown.
-                   Respond in a way that feels like a natural bedtime conversation.`;
+                   Respond in a way that feels like a natural bedtime conversation.
+                   Please write the story in ${settings.language} language.`;
     
     this.chat = this.model.startChat({
       history: [
@@ -76,10 +77,7 @@ class AIService {
     const response = await result.response;
     const text = response.text().replace(/\*/g, '');
     
-    // Generate voice audio using ElevenLabs
     const voiceAudioUrl = await this.generateVoiceAudio(text, settings.voice);
-    
-    // Create background music URL
     const musicUrl = `/assets/${settings.music}.mp3`;
     
     return { 
@@ -96,8 +94,7 @@ class AIService {
     const response = await result.response;
     const text = response.text().replace(/\*/g, '');
     
-    // Generate voice audio for the response
-    const voiceAudioUrl = await this.generateVoiceAudio(text, "EXAVITQu4vr4xnSDxMaL"); // Using Sarah's voice for continuations
+    const voiceAudioUrl = await this.generateVoiceAudio(text, "EXAVITQu4vr4xnSDxMaL");
     
     return { 
       text, 
