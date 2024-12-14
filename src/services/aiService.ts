@@ -5,7 +5,7 @@ class AIService {
   private genAI: GoogleGenerativeAI;
   private model: any;
   private chat: any;
-  private ELEVEN_LABS_API_KEY: string = ""; // User needs to provide their API key
+  private ELEVEN_LABS_API_KEY: string = "";
 
   constructor() {
     this.genAI = new GoogleGenerativeAI("AIzaSyDonkh1p9UiMvTkKG2vFO9WrbFngqr_PXs");
@@ -22,9 +22,9 @@ class AIService {
     });
   }
 
-  async generateVoiceAudio(text: string, voiceId: string = "pNInz6obpgDQGcFmaJgB"): Promise<string> {
+  async generateVoiceAudio(text: string, voiceId: string): Promise<string> {
     try {
-      const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/" + voiceId, {
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,14 +41,16 @@ class AIService {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate voice audio");
+        const errorData = await response.json();
+        console.error("ElevenLabs API error:", errorData);
+        throw new Error(`Failed to generate voice audio: ${errorData.detail?.message || response.statusText}`);
       }
 
       const audioBlob = await response.blob();
       return URL.createObjectURL(audioBlob);
     } catch (error) {
       console.error("Error generating voice audio:", error);
-      return "";
+      throw error;
     }
   }
 
@@ -95,7 +97,7 @@ class AIService {
     const text = response.text().replace(/\*/g, '');
     
     // Generate voice audio for the response
-    const voiceAudioUrl = await this.generateVoiceAudio(text);
+    const voiceAudioUrl = await this.generateVoiceAudio(text, "EXAVITQu4vr4xnSDxMaL"); // Using Sarah's voice for continuations
     
     return { 
       text, 
