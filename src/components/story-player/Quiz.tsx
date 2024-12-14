@@ -21,6 +21,8 @@ export function Quiz({ questions }: QuizProps) {
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
   const handleAnswerClick = (answerIndex: number) => {
+    if (selectedAnswer !== null) return; // Prevent multiple selections
+    
     setSelectedAnswer(answerIndex);
     setShowCorrectAnswer(true);
     
@@ -28,7 +30,7 @@ export function Quiz({ questions }: QuizProps) {
       setScore(score + 1);
     }
 
-    // Move to next question after 2 seconds regardless of answer
+    // Move to next question after 2 seconds
     setTimeout(() => {
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
@@ -38,6 +40,14 @@ export function Quiz({ questions }: QuizProps) {
         setShowScore(true);
       }
     }, 2000);
+  };
+
+  const resetQuiz = () => {
+    setCurrentQuestion(0);
+    setScore(0);
+    setShowScore(false);
+    setSelectedAnswer(null);
+    setShowCorrectAnswer(false);
   };
 
   if (!questions.length) {
@@ -57,13 +67,7 @@ export function Quiz({ questions }: QuizProps) {
           Your score: {score} out of {questions.length}
         </p>
         <Button
-          onClick={() => {
-            setCurrentQuestion(0);
-            setScore(0);
-            setShowScore(false);
-            setSelectedAnswer(null);
-            setShowCorrectAnswer(false);
-          }}
+          onClick={resetQuiz}
           className="mt-4 bg-gradient-to-r from-blue-500 to-blue-600"
         >
           Try Again

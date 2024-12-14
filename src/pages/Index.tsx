@@ -16,7 +16,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-r from-blue-500 to-blue-600">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-500">
       <Header />
       <main className="flex-1 container py-8">
         {storySettings ? (
