@@ -37,15 +37,15 @@ export function VoiceSelector({ selectedVoice, onVoiceSelect }: VoiceSelectorPro
   ];
 
   return (
-    <Card className="p-6 space-y-4 md:col-span-2 bg-white/90 backdrop-blur-sm border border-blue-100">
-      <div className="flex items-center space-x-2 text-blue-600">
-        <Mic className="h-5 w-5" />
-        <h2 className="text-xl font-semibold">Voice</h2>
+    <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
+      <div className="flex items-center space-x-3">
+        <Mic className="h-8 w-8 text-blue-500" />
+        <h2 className="text-2xl font-semibold text-blue-500">Voice</h2>
       </div>
       <select
         value={selectedVoice}
         onChange={(e) => onVoiceSelect(e.target.value)}
-        className="w-full p-2 border rounded-md bg-white/80 border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+        className="w-full p-4 text-lg border rounded-2xl bg-white border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
       >
         {voices.map((voice) => (
           <option key={voice.id} value={voice.id}>

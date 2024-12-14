@@ -17,19 +17,23 @@ export function ThemeSelector({ selectedTheme, onThemeSelect }: ThemeSelectorPro
   ];
 
   return (
-    <Card className="p-6 space-y-4 bg-gradient-to-r from-blue-50 to-blue-100">
-      <div className="flex items-center space-x-2 text-blue-600">
-        <Sparkles className="h-5 w-5" />
-        <h2 className="text-xl font-semibold">Theme</h2>
+    <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
+      <div className="flex items-center space-x-3">
+        <Sparkles className="h-8 w-8 text-blue-500" />
+        <h2 className="text-2xl font-semibold text-blue-500">Theme</h2>
       </div>
-      <ScrollArea className="h-[300px] w-full rounded-md p-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pr-4">
+      <ScrollArea className="h-[400px] w-full rounded-xl pr-4">
+        <div className="grid grid-cols-2 gap-4">
           {themes.map((theme) => (
             <Button
               key={theme}
               variant={selectedTheme === theme ? "default" : "outline"}
               onClick={() => onThemeSelect(theme)}
-              className="capitalize bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+              className={`h-14 text-base font-medium rounded-2xl capitalize transition-all duration-200 ${
+                selectedTheme === theme 
+                  ? "bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg"
+                  : "hover:bg-blue-50 border-2 border-blue-100"
+              }`}
             >
               {theme}
             </Button>

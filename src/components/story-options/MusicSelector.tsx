@@ -8,7 +8,7 @@ interface MusicOption {
   id: string;
   name: string;
   file: string;
-  category: "Lullaby" | "Nature" | "Ambient" | "Classical";
+  category: "Lullaby" | "Nature" | "Classical";
 }
 
 interface MusicSelectorProps {
@@ -62,38 +62,42 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
   const categories = Array.from(new Set(musicOptions.map(opt => opt.category)));
 
   return (
-    <Card className="p-6 space-y-6 bg-white/90 backdrop-blur-sm border border-blue-100">
-      <div className="flex items-center space-x-2 text-blue-600">
-        <Music className="h-5 w-5" />
-        <h2 className="text-xl font-semibold">Background Music</h2>
+    <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
+      <div className="flex items-center space-x-3">
+        <Music className="h-8 w-8 text-blue-500" />
+        <h2 className="text-2xl font-semibold text-blue-500">Background Music</h2>
       </div>
       
       {categories.map(category => (
-        <div key={category} className="space-y-3">
-          <h3 className="text-sm font-medium text-blue-500">{category}</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div key={category} className="space-y-4">
+          <h3 className="text-lg font-medium text-blue-400">{category}</h3>
+          <div className="grid grid-cols-1 gap-4">
             {musicOptions
               .filter(opt => opt.category === category)
               .map((option) => (
-                <div key={option.id} className="flex flex-col gap-2 bg-white/80 p-3 rounded-lg">
+                <div key={option.id} className="bg-white rounded-2xl p-4 border-2 border-blue-100">
                   <Button
                     variant={selectedMusic === option.id ? "default" : "outline"}
                     onClick={() => onMusicSelect(option.id)}
-                    className="text-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700"
+                    className={`w-full h-14 text-lg font-medium rounded-xl mb-3 transition-all duration-200 ${
+                      selectedMusic === option.id 
+                        ? "bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg"
+                        : "hover:bg-blue-50"
+                    }`}
                   >
                     {option.name}
                   </Button>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-4">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => togglePreview(option.id)}
-                      className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700"
+                      className="h-10 w-10 p-0 rounded-xl text-blue-500 hover:text-blue-600 hover:bg-blue-50"
                     >
                       {isPlaying && selectedMusic === option.id ? (
-                        <Pause className="h-4 w-4" />
+                        <Pause className="h-6 w-6" />
                       ) : (
-                        <Play className="h-4 w-4" />
+                        <Play className="h-6 w-6" />
                       )}
                     </Button>
                     <Slider
@@ -101,7 +105,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
                       max={1}
                       step={0.1}
                       onValueChange={handleVolumeChange}
-                      className="w-20"
+                      className="flex-1"
                     />
                   </div>
                 </div>
