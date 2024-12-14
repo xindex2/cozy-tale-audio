@@ -16,16 +16,19 @@ export function MessageBubble({ role, content, audioUrl }: MessageBubbleProps) {
             : "bg-white border border-gray-200"
         }`}
       >
-        <p className="text-base leading-relaxed whitespace-pre-wrap">{content}</p>
+        <p className="text-base leading-relaxed whitespace-pre-wrap mb-2">{content}</p>
         {audioUrl && (
-          <audio
-            controls
-            autoPlay
-            className="mt-2 w-full"
-            key={audioUrl}
-          >
-            <source src={audioUrl} type="audio/mpeg" />
-          </audio>
+          <div className="mt-2">
+            <audio
+              controls
+              autoPlay
+              className="w-full rounded-md"
+              key={audioUrl}
+            >
+              <source src={audioUrl} type="audio/mpeg" />
+              Your browser does not support the audio element.
+            </audio>
+          </div>
         )}
       </div>
     </div>
