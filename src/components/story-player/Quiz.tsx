@@ -18,21 +18,25 @@ export function Quiz({ questions }: QuizProps) {
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
   const handleAnswerClick = (answerIndex: number) => {
     setSelectedAnswer(answerIndex);
     if (answerIndex === questions[currentQuestion].correctAnswer) {
       setScore(score + 1);
     }
+    setShowCorrectAnswer(true);
 
+    // Move to next question after 2 seconds
     setTimeout(() => {
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
         setSelectedAnswer(null);
+        setShowCorrectAnswer(false);
       } else {
         setShowScore(true);
       }
-    }, 1000);
+    }, 2000);
   };
 
   if (!questions.length) {
@@ -56,6 +60,8 @@ export function Quiz({ questions }: QuizProps) {
             setCurrentQuestion(0);
             setScore(0);
             setShowScore(false);
+            setSelectedAnswer(null);
+            setShowCorrectAnswer(false);
           }}
           className="mt-4 bg-gradient-to-r from-blue-500 to-blue-600"
         >
@@ -74,31 +80,41 @@ export function Quiz({ questions }: QuizProps) {
         <p className="text-gray-700">{questions[currentQuestion].question}</p>
       </div>
       <div className="space-y-2">
-        {questions[currentQuestion].options.map((option, index) => (
-          <Button
-            key={index}
-            onClick={() => handleAnswerClick(index)}
-            disabled={selectedAnswer !== null}
-            className={`w-full justify-start text-left ${
-              selectedAnswer === null
-                ? "bg-gradient-to-r from-blue-500 to-blue-600"
-                : selectedAnswer === index
-                ? index === questions[currentQuestion].correctAnswer
-                  ? "bg-green-500"
-                  : "bg-red-500"
-                : "bg-gray-200"
-            }`}
-          >
-            {selectedAnswer !== null && index === questions[currentQuestion].correctAnswer && (
-              <Check className="w-4 h-4 mr-2" />
-            )}
-            {selectedAnswer === index && index !== questions[currentQuestion].correctAnswer && (
-              <X className="w-4 h-4 mr-2" />
-            )}
-            {option}
-          </Button>
-        ))}
+        {questions[currentQuestion].options.map((option, index) => {
+          const isCorrect = index === questions[currentQuestion].correctAnswer;
+          const isSelected = selectedAnswer === index;
+          
+          return (
+            <Button
+              key={index}
+              onClick={() => !showCorrectAnswer && handleAnswerClick(index)}
+              disabled={showCorrectAnswer}
+              className={`w-full justify-start text-left ${
+                showCorrectAnswer
+                  ? isCorrect
+                    ? "bg-green-500 hover:bg-green-500"
+                    : isSelected
+                    ? "bg-red-500 hover:bg-red-500"
+                    : "bg-gray-200 hover:bg-gray-200"
+                  : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+              }`}
+            >
+              {showCorrectAnswer && isCorrect && (
+                <Check className="w-4 h-4 mr-2" />
+              )}
+              {showCorrectAnswer && isSelected && !isCorrect && (
+                <X className="w-4 h-4 mr-2" />
+              )}
+              {option}
+            </Button>
+          );
+        })}
       </div>
+      {showCorrectAnswer && (
+        <p className="mt-4 text-center text-gray-600">
+          Moving to next question...
+        </p>
+      )}
     </Card>
   );
 }
