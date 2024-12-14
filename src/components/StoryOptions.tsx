@@ -32,11 +32,11 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a237e]/5 via-[#1565c0]/10 to-[#0288d1]/5 py-8">
+    <div className="bg-gradient-to-br from-[#1a237e]/5 via-[#1565c0]/10 to-[#0288d1]/5">
       <div className="container mx-auto px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="text-center mb-8 animate-fade-in space-y-4">
+          <div className="text-center mb-8 animate-fade-in space-y-4 pt-8">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-[#1a237e] via-[#1565c0] to-[#0288d1] bg-clip-text text-transparent">
               Bedtime Stories AI
             </h1>
@@ -50,7 +50,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-6 pb-8">
             {/* Language and Age Group Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
