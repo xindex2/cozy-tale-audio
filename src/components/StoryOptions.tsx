@@ -32,29 +32,34 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500/5 via-blue-500/10 to-blue-600/5">
-      <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
-        <div className="w-full max-w-[1400px] mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a237e]/5 via-[#1565c0]/10 to-[#0288d1]/5">
+      <div className="container mx-auto px-4 py-12 lg:py-20">
+        <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="text-center mb-12 animate-fade-in">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent mb-6">
-              Bedtime Stories
+          <div className="text-center mb-16 animate-fade-in space-y-6">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-[#1a237e] via-[#1565c0] to-[#0288d1] bg-clip-text text-transparent">
+              Bedtime Stories AI
             </h1>
-            <p className="text-lg sm:text-xl text-blue-600/80">
-              Craft Your Perfect Bedtime Story Experience
+            <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto">
+              Create personalized bedtime stories with AI-powered storytelling
             </p>
+            <div className="flex gap-2 justify-center">
+              <div className="h-2 w-2 rounded-full bg-blue-600 animate-pulse"></div>
+              <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse delay-100"></div>
+              <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse delay-200"></div>
+            </div>
           </div>
 
-          <div className="space-y-8 sm:space-y-10">
+          <div className="space-y-8">
             {/* Language and Age Group Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="w-full">
+              <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
                 <LanguageSelector
                   selectedLanguage={settings.language}
                   onLanguageSelect={(language) => setSettings({ ...settings, language })}
                 />
               </div>
-              <div className="w-full">
+              <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
                 <AgeGroupSelector
                   selectedAge={settings.ageGroup}
                   onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
@@ -63,7 +68,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
 
             {/* Theme Section */}
-            <div className="w-full">
+            <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
               <ThemeSelector
                 selectedTheme={settings.theme}
                 onThemeSelect={(theme) => setSettings({ ...settings, theme })}
@@ -72,13 +77,13 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
 
             {/* Music and Voice Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="w-full">
+              <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
                 <MusicSelector
                   selectedMusic={settings.music}
                   onMusicSelect={(music) => setSettings({ ...settings, music })}
                 />
               </div>
-              <div className="w-full">
+              <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
                 <VoiceSelector
                   selectedVoice={settings.voice}
                   onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
@@ -87,14 +92,14 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
 
             {/* Start Button */}
-            <div className="flex justify-center mt-12">
+            <div className="flex justify-center mt-16">
               <Button
                 onClick={() => onStart(settings)}
-                className="w-full sm:w-[320px] h-16 text-lg font-medium bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-blue-400/20 hover:shadow-xl flex items-center justify-center gap-3 border-0"
+                className="w-full sm:w-[400px] h-20 text-xl font-medium bg-gradient-to-r from-[#1a237e] via-[#1565c0] to-[#0288d1] hover:from-[#0d47a1] hover:to-[#01579b] text-white rounded-2xl shadow-xl transition-all duration-300 hover:shadow-blue-400/30 hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-4 border-0"
                 size="lg"
               >
                 Create Your Story
-                <Play className="w-6 h-6" />
+                <Play className="w-7 h-7" />
               </Button>
             </div>
           </div>
