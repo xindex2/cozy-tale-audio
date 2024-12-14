@@ -6,7 +6,7 @@ import type { StorySettings } from "./StoryOptions";
 import { aiService } from "@/services/aiService";
 import { ChatInterface } from "./story-player/ChatInterface";
 import { AudioControls } from "./story-player/AudioControls";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface StoryPlayerProps {
   settings: StorySettings;
@@ -39,7 +39,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
   const startStory = async () => {
     try {
       const storyText = await aiService.startChat(settings);
-      const audioUrl = await aiService.generateSpeech(storyText, settings.voice);
+      const audioUrl = await aiService.generateSpeech(storyText);
       
       setMessages([{ role: "assistant", content: storyText, audioUrl }]);
       setCurrentAudioUrl(audioUrl);
@@ -58,7 +58,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
       setMessages((prev) => [...prev, { role: "user", content: text }]);
       
       const response = await aiService.continueStory(text);
-      const audioUrl = await aiService.generateSpeech(response, settings.voice);
+      const audioUrl = await aiService.generateSpeech(response);
       
       setMessages((prev) => [
         ...prev,
