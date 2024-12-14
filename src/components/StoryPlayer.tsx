@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Pause, Play, SkipBack } from "lucide-react";
+import { Pause, Play, SkipBack, Loader } from "lucide-react";
 import type { StorySettings } from "./StoryOptions";
 import { aiService } from "@/services/aiService";
 import { ChatInterface } from "./story-player/ChatInterface";
@@ -27,6 +27,8 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -37,6 +39,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
   }, []);
 
   const startStory = async () => {
+    setIsLoading(true);
     try {
       const storyText = await aiService.startChat(settings);
       const audioUrl = await aiService.generateSpeech(storyText);
@@ -50,10 +53,13 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
         description: "Failed to start the story. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSendMessage = async (text: string) => {
+    setIsSending(true);
     try {
       setMessages((prev) => [...prev, { role: "user", content: text }]);
       
@@ -72,6 +78,8 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
         description: "Failed to process your message. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -87,8 +95,6 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
 
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
-        // Here you would typically send this blob to a speech-to-text service
-        // For now, we'll just add it as a message
         setMessages((prev) => [
           ...prev,
           { 
@@ -154,6 +160,17 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-4xl mx-auto p-6 animate-fade-in">
+        <Card className="p-8 flex flex-col items-center justify-center min-h-[400px]">
+          <Loader className="h-8 w-8 animate-spin text-story-purple mb-4" />
+          <p className="text-muted-foreground">Creating your story...</p>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-4xl mx-auto p-6 space-y-8 animate-fade-in">
       <Card className="p-8 space-y-6">
@@ -176,6 +193,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
             onStartRecording={startRecording}
             onStopRecording={stopRecording}
             isRecording={isRecording}
+            isSending={isSending}
           />
         </div>
 
