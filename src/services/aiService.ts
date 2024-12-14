@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, GenerateContentConfig } from "@google/generative-ai";
+import { GoogleGenerativeAI, GenerationConfig } from "@google/generative-ai";
 import { StorySettings } from "@/components/StoryOptions";
 
 class AIService {
@@ -31,14 +31,14 @@ class AIService {
     });
 
     const result = await this.chat.sendMessage("Start the story", {
-      generationConfig: new GenerateContentConfig({
+      generationConfig: {
         temperature: 0.7,
-        candidate_count: 1,
-        stop_sequences: [],
-        max_output_tokens: 800,
-        top_p: 0.8,
-        top_k: 40,
-      }),
+        candidateCount: 1,
+        stopSequences: [],
+        maxOutputTokens: 800,
+        topP: 0.8,
+        topK: 40,
+      } as GenerationConfig
     });
     
     const response = await result.response;
@@ -58,14 +58,14 @@ class AIService {
     if (!this.chat) throw new Error("Chat not initialized");
     
     const result = await this.chat.sendMessage(message, {
-      generationConfig: new GenerateContentConfig({
+      generationConfig: {
         temperature: 0.7,
-        candidate_count: 1,
-        stop_sequences: [],
-        max_output_tokens: 800,
-        top_p: 0.8,
-        top_k: 40,
-      }),
+        candidateCount: 1,
+        stopSequences: [],
+        maxOutputTokens: 800,
+        topP: 0.8,
+        topK: 40,
+      } as GenerationConfig
     });
     
     const response = await result.response;
