@@ -6,6 +6,7 @@ import { DurationSelector } from "./story-options/DurationSelector";
 import { MusicSelector } from "./story-options/MusicSelector";
 import { VoiceSelector } from "./story-options/VoiceSelector";
 import { LanguageSelector } from "./story-options/LanguageSelector";
+import { Play } from "lucide-react";
 
 interface StoryOptionsProps {
   onStart: (options: StorySettings) => void;
@@ -32,7 +33,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8 space-y-12">
-      <div className="text-center space-y-4">
+      <div className="text-center space-y-4 mb-12">
         <h1 className="text-6xl font-bold text-blue-500">
           Bedtime Stories
         </h1>
@@ -41,8 +42,9 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div className="space-y-8">
+      <div className="space-y-8 max-w-5xl mx-auto">
+        {/* First row: Language and Age Group */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <LanguageSelector
             selectedLanguage={settings.language}
             onLanguageSelect={(language) => setSettings({ ...settings, language })}
@@ -52,19 +54,17 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
           />
         </div>
-        
-        <div className="space-y-8">
+
+        {/* Second row: Theme */}
+        <div className="w-full">
           <ThemeSelector
             selectedTheme={settings.theme}
             onThemeSelect={(theme) => setSettings({ ...settings, theme })}
           />
-          <DurationSelector
-            selectedDuration={settings.duration}
-            onDurationSelect={(duration) => setSettings({ ...settings, duration })}
-          />
         </div>
-        
-        <div className="space-y-8">
+
+        {/* Third row: Music and Voice */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <MusicSelector
             selectedMusic={settings.music}
             onMusicSelect={(music) => setSettings({ ...settings, music })}
@@ -74,15 +74,19 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
           />
         </div>
-      </div>
 
-      <Button
-        onClick={() => onStart(settings)}
-        className="w-full max-w-md mx-auto block mt-16 h-16 text-xl font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-2xl shadow-lg transition-all duration-200 hover:shadow-xl"
-        size="lg"
-      >
-        Start Story
-      </Button>
+        {/* Fourth row: Start Button */}
+        <div className="flex justify-center pt-8">
+          <Button
+            onClick={() => onStart(settings)}
+            className="w-full max-w-md h-16 text-xl font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-2xl shadow-lg transition-all duration-200 hover:shadow-xl flex items-center justify-center gap-3"
+            size="lg"
+          >
+            Start Story
+            <Play className="w-6 h-6" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
