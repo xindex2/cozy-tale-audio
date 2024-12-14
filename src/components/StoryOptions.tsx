@@ -33,11 +33,11 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500/5 via-blue-500/10 to-blue-600/5">
-      <div className="w-[80%] mx-auto py-8 sm:py-12 md:py-16">
-        <div className="w-full">
+      <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
+        <div className="w-full max-w-[1400px] mx-auto">
           {/* Header Section */}
-          <div className="text-center mb-8 sm:mb-12 animate-fade-in">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent mb-4">
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent mb-6">
               Bedtime Stories
             </h1>
             <p className="text-lg sm:text-xl text-blue-600/80">
@@ -45,9 +45,9 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </p>
           </div>
 
-          <div className="space-y-6 sm:space-y-8">
+          <div className="space-y-8 sm:space-y-10">
             {/* Language and Age Group Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="w-full">
                 <LanguageSelector
                   selectedLanguage={settings.language}
@@ -71,7 +71,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
 
             {/* Music and Voice Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="w-full">
                 <MusicSelector
                   selectedMusic={settings.music}
@@ -87,14 +87,14 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
 
             {/* Start Button */}
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center mt-12">
               <Button
                 onClick={() => onStart(settings)}
-                className="w-full sm:w-[280px] h-14 text-lg font-medium bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-blue-400/20 hover:shadow-xl flex items-center justify-center gap-3 border-0"
+                className="w-full sm:w-[320px] h-16 text-lg font-medium bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-blue-400/20 hover:shadow-xl flex items-center justify-center gap-3 border-0"
                 size="lg"
               >
                 Create Your Story
-                <Play className="w-5 h-5" />
+                <Play className="w-6 h-6" />
               </Button>
             </div>
           </div>
