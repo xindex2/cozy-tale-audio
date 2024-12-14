@@ -13,16 +13,28 @@ interface StoryPlayerProps {
 export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(0.5);
+  const [volume, setVolume] = useState(0.3); // Lower default volume
   const [isMuted, setIsMuted] = useState(false);
+  const [audioError, setAudioError] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (settings.music) {
-      audioRef.current = new Audio("/lullaby.mp3"); // You'll need to add this audio file
-      audioRef.current.loop = true;
-      audioRef.current.volume = volume;
+      try {
+        audioRef.current = new Audio("/assets/gentle-lullaby.mp3");
+        audioRef.current.loop = true;
+        audioRef.current.volume = volume;
+        
+        // Add error handling
+        audioRef.current.onerror = () => {
+          console.error("Error loading audio file");
+          setAudioError(true);
+        };
+      } catch (error) {
+        console.error("Error creating audio element:", error);
+        setAudioError(true);
+      }
     }
 
     return () => {
@@ -35,8 +47,11 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
 
   useEffect(() => {
     if (isPlaying) {
-      if (settings.music && audioRef.current) {
-        audioRef.current.play();
+      if (settings.music && audioRef.current && !audioError) {
+        audioRef.current.play().catch(error => {
+          console.error("Error playing audio:", error);
+          setAudioError(true);
+        });
       }
       intervalRef.current = setInterval(() => {
         setProgress((prev) => {
@@ -64,7 +79,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPlaying, settings.duration, settings.music]);
+  }, [isPlaying, settings.duration, settings.music, audioError]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -105,7 +120,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
           ></div>
         </div>
 
-        {settings.music && (
+        {settings.music && !audioError && (
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
