@@ -33,8 +33,8 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500/5 via-blue-500/10 to-blue-600/5">
-      <div className="w-full px-4 py-8 sm:py-12 md:py-16">
-        <div className="max-w-7xl mx-auto">
+      <div className="w-[80%] mx-auto py-8 sm:py-12 md:py-16">
+        <div className="w-full">
           {/* Header Section */}
           <div className="text-center mb-8 sm:mb-12 animate-fade-in">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent mb-4">
