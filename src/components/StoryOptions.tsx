@@ -32,7 +32,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
   });
 
   return (
-    <div className="bg-gradient-to-br from-[#1a237e]/5 via-[#1565c0]/10 to-[#0288d1]/5">
+    <div>
       <div className="container mx-auto px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
