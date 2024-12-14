@@ -5,6 +5,7 @@ class AIService {
   private genAI: GoogleGenerativeAI;
   private model: any;
   private chat: any;
+  private ELEVEN_LABS_API_KEY: string = ""; // User needs to provide this
 
   constructor() {
     this.genAI = new GoogleGenerativeAI("AIzaSyDonkh1p9UiMvTkKG2vFO9WrbFngqr_PXs");
@@ -27,7 +28,10 @@ class AIService {
 
     const result = await this.chat.sendMessage("Start the story");
     const response = await result.response;
-    return response.text();
+    const text = response.text();
+    
+    const audioUrl = await this.generateSpeech(text);
+    return { text, audioUrl };
   }
 
   async continueStory(message: string) {
@@ -35,14 +39,49 @@ class AIService {
     
     const result = await this.chat.sendMessage(message);
     const response = await result.response;
-    return response.text();
+    const text = response.text();
+    
+    const audioUrl = await this.generateSpeech(text);
+    return { text, audioUrl };
   }
 
-  async generateSpeech(text: string) {
-    // Note: Currently, Gemini doesn't support direct text-to-speech.
-    // For now, we'll return the text and handle TTS in a future update
-    // when Google adds TTS support to their API
-    return text;
+  async generateSpeech(text: string): Promise<string> {
+    if (!this.ELEVEN_LABS_API_KEY) {
+      console.warn("ElevenLabs API key not set. Using text-only output.");
+      return "";
+    }
+
+    try {
+      const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "xi-api-key": this.ELEVEN_LABS_API_KEY,
+        },
+        body: JSON.stringify({
+          text,
+          model_id: "eleven_monolingual_v1",
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.5,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate speech");
+      }
+
+      const audioBlob = await response.blob();
+      return URL.createObjectURL(audioBlob);
+    } catch (error) {
+      console.error("Error generating speech:", error);
+      return "";
+    }
+  }
+
+  setElevenLabsApiKey(apiKey: string) {
+    this.ELEVEN_LABS_API_KEY = apiKey;
   }
 }
 

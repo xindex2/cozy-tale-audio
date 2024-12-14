@@ -35,11 +35,12 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
   const startStory = async () => {
     setIsLoading(true);
     try {
-      const storyText = await aiService.startChat(settings);
-      const audioUrl = await aiService.generateSpeech(storyText);
+      const { text, audioUrl } = await aiService.startChat(settings);
       
-      setMessages([{ role: "assistant", content: storyText, audioUrl }]);
-      setCurrentAudioUrl(audioUrl);
+      setMessages([{ role: "assistant", content: text, audioUrl }]);
+      if (audioUrl) {
+        setCurrentAudioUrl(audioUrl);
+      }
     } catch (error) {
       console.error("Error starting story:", error);
       toast({
@@ -57,14 +58,15 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
     try {
       setMessages((prev) => [...prev, { role: "user", content: text }]);
       
-      const response = await aiService.continueStory(text);
-      const audioUrl = await aiService.generateSpeech(response);
+      const { text: responseText, audioUrl } = await aiService.continueStory(text);
       
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: response, audioUrl },
+        { role: "assistant", content: responseText, audioUrl },
       ]);
-      setCurrentAudioUrl(audioUrl);
+      if (audioUrl) {
+        setCurrentAudioUrl(audioUrl);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       toast({
