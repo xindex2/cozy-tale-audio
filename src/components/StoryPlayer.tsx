@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Pause, Play, SkipBack, Volume2, VolumeX } from "lucide-react";
 import type { StorySettings } from "./StoryOptions";
+import { realtimeApi } from "@/services/realtimeApi";
 
 interface StoryPlayerProps {
   settings: StorySettings;
@@ -13,10 +14,12 @@ interface StoryPlayerProps {
 export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(0.3); // Lower default volume
+  const [volume, setVolume] = useState(0.3);
   const [isMuted, setIsMuted] = useState(false);
   const [audioError, setAudioError] = useState(false);
+  const [storyText, setStoryText] = useState("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -26,7 +29,6 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
         audioRef.current.loop = true;
         audioRef.current.volume = volume;
         
-        // Add error handling
         audioRef.current.onerror = () => {
           console.error("Error loading audio file");
           setAudioError(true);
@@ -37,13 +39,34 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
       }
     }
 
+    // Connect to OpenAI Realtime API
+    wsRef.current = realtimeApi.connect();
+    
+    if (wsRef.current) {
+      wsRef.current.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === "conversation.item.created" && data.item.role === "assistant") {
+          const content = data.item.content[0];
+          if (content.type === "text") {
+            setStoryText((prev) => prev + content.text);
+          }
+          // Handle audio content when implemented
+        }
+      };
+    }
+
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
+      if (wsRef.current) {
+        realtimeApi.disconnect();
+        wsRef.current = null;
+      }
     };
-  }, [settings.music]);
+  }, [settings.music, volume]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -53,6 +76,12 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
           setAudioError(true);
         });
       }
+      
+      // Start story generation when play is pressed
+      if (wsRef.current && progress === 0) {
+        realtimeApi.generateStory(settings);
+      }
+
       intervalRef.current = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 100) {
@@ -79,7 +108,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPlaying, settings.duration, settings.music, audioError]);
+  }, [isPlaying, settings, audioError]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -108,9 +137,11 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
         <div className="space-y-2 text-center">
           <h2 className="text-2xl font-semibold">Your Bedtime Story</h2>
           <p className="text-muted-foreground">
-            Theme: {settings.theme} • Age: {settings.ageGroup} • Duration:{" "}
-            {settings.duration}min • Voice: {settings.voice}
+            Theme: {settings.theme} • Age: {settings.ageGroup} • Duration: {settings.duration}min • Voice: {settings.voice}
           </p>
+          <div className="mt-4 text-left max-h-40 overflow-y-auto p-4 bg-muted rounded-lg">
+            {storyText || "Your story will appear here..."}
+          </div>
         </div>
 
         <div className="w-full bg-secondary rounded-full h-2">
@@ -128,11 +159,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
               onClick={toggleMute}
               className="rounded-full"
             >
-              {isMuted ? (
-                <VolumeX className="h-4 w-4" />
-              ) : (
-                <Volume2 className="h-4 w-4" />
-              )}
+              {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </Button>
             <Slider
               value={[volume]}
@@ -158,11 +185,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
             onClick={() => setIsPlaying(!isPlaying)}
             className="rounded-full w-12 h-12 bg-story-purple hover:bg-story-purple/90"
           >
-            {isPlaying ? (
-              <Pause className="h-6 w-6" />
-            ) : (
-              <Play className="h-6 w-6 ml-1" />
-            )}
+            {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-1" />}
           </Button>
         </div>
       </Card>
