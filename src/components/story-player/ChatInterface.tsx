@@ -48,15 +48,22 @@ export function ChatInterface({
               }`}
             >
               <div
-                className={`max-w-[80%] p-3 rounded-lg ${
+                className={`max-w-[80%] p-4 rounded-lg shadow-md ${
                   message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
+                    ? "bg-story-purple text-white"
+                    : "bg-white border border-gray-200"
                 }`}
               >
-                <p>{message.content}</p>
+                <p className="text-base leading-relaxed whitespace-pre-wrap">
+                  {message.content}
+                </p>
                 {message.audioUrl && (
-                  <audio controls className="mt-2 w-full">
+                  <audio
+                    controls
+                    autoPlay
+                    className="mt-2 w-full"
+                    key={message.audioUrl}
+                  >
                     <source src={message.audioUrl} type="audio/mpeg" />
                   </audio>
                 )}
@@ -65,10 +72,12 @@ export function ChatInterface({
           ))}
           {isSending && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] p-3 rounded-lg bg-muted">
+              <div className="max-w-[80%] p-4 rounded-lg bg-white border border-gray-200">
                 <div className="flex items-center space-x-2">
-                  <Loader className="h-4 w-4 animate-spin" />
-                  <span className="text-sm text-muted-foreground">Thinking...</span>
+                  <Loader className="h-4 w-4 animate-spin text-story-purple" />
+                  <span className="text-sm text-muted-foreground">
+                    Thinking...
+                  </span>
                 </div>
               </div>
             </div>
@@ -76,7 +85,7 @@ export function ChatInterface({
         </div>
       </ScrollArea>
 
-      <div className="border-t p-4 flex gap-2">
+      <div className="border-t p-4 flex gap-2 bg-white/50 backdrop-blur-sm">
         <Input
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}

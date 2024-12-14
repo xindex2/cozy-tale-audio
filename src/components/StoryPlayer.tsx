@@ -8,20 +8,14 @@ import { ChatInterface } from "./story-player/ChatInterface";
 import { AudioControls } from "./story-player/AudioControls";
 import { useToast } from "@/hooks/use-toast";
 
-interface StoryPlayerProps {
-  settings: StorySettings;
-  onBack: () => void;
-}
-
 interface Message {
   role: "user" | "assistant";
   content: string;
   audioUrl?: string;
 }
 
-export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
+export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onBack: () => void }) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [isMuted, setIsMuted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -129,10 +123,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
     if (currentAudioUrl) {
       audioRef.current = new Audio(currentAudioUrl);
       audioRef.current.volume = isMuted ? 0 : volume;
-      
-      if (isPlaying) {
-        audioRef.current.play().catch(console.error);
-      }
+      audioRef.current.play().catch(console.error);
     }
 
     return () => {
@@ -140,7 +131,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
         audioRef.current.pause();
       }
     };
-  }, [currentAudioUrl, isPlaying, volume, isMuted]);
+  }, [currentAudioUrl, volume, isMuted]);
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
@@ -173,7 +164,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6 space-y-8 animate-fade-in">
-      <Card className="p-8 space-y-6">
+      <Card className="p-8 space-y-6 bg-white/90 backdrop-blur-sm">
         <div className="flex justify-between items-center">
           <Button variant="outline" size="icon" onClick={onBack}>
             <SkipBack className="h-4 w-4" />
@@ -186,7 +177,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
           />
         </div>
 
-        <div className="h-[400px]">
+        <div className="h-[400px] bg-gray-50/50 rounded-lg">
           <ChatInterface
             messages={messages}
             onSendMessage={handleSendMessage}
