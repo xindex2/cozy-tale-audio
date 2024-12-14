@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Pause, Play, SkipBack, Loader } from "lucide-react";
@@ -26,6 +26,7 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
   const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [storyTitle, setStoryTitle] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -110,43 +111,32 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
 
   if (isLoading) {
     return (
-      <div className="w-full max-w-6xl mx-auto p-6 animate-fade-in">
-        <Card className="p-8 flex flex-col items-center justify-center min-h-[400px] bg-white/90">
+      <div className="w-full max-w-7xl mx-auto p-6 animate-fade-in">
+        <Card className="p-8 flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-r from-blue-50 to-blue-100">
           <Loader className="h-8 w-8 animate-spin text-blue-500 mb-4" />
-          <p className="text-muted-foreground">Creating your story...</p>
+          <p className="text-blue-600">Creating your story...</p>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6 animate-fade-in">
-      <div className="grid grid-cols-3 gap-6">
-        {/* Story Section - Takes up 2/3 of the space */}
-        <div className="col-span-2">
+    <div className="w-full max-w-7xl mx-auto p-6 animate-fade-in">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Story Section - Takes up 2/3 of the space on desktop */}
+        <div className="lg:col-span-2">
           <Card className="p-8 space-y-6 bg-gradient-to-r from-blue-50 to-blue-100 backdrop-blur-sm border border-blue-200">
             <div className="flex justify-between items-center">
               <Button variant="outline" size="icon" onClick={onBack}>
                 <SkipBack className="h-4 w-4" />
               </Button>
+              <h1 className="text-2xl font-bold text-blue-800">{storyTitle || "Your Story"}</h1>
               <AudioControls
                 volume={volume}
                 isMuted={isMuted}
                 onVolumeChange={(newVolume) => setVolume(newVolume[0])}
                 onToggleMute={() => setIsMuted(!isMuted)}
               />
-            </div>
-
-            <div className="bg-white/50 rounded-lg overflow-hidden border border-blue-100">
-              {messages.map((message, index) => (
-                <div key={index} className="mb-4">
-                  <StoryDisplay
-                    text={message.content}
-                    audioUrl={message.audioUrl}
-                    isPlaying={isPlaying}
-                  />
-                </div>
-              ))}
             </div>
 
             <AudioManager
@@ -173,8 +163,8 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
           </Card>
         </div>
 
-        {/* Chat Section - Takes up 1/3 of the space */}
-        <div className="col-span-1 h-[800px]">
+        {/* Chat/Quiz Section - Takes up 1/3 of the space on desktop */}
+        <div className="h-[800px]">
           <ChatPanel
             messages={messages}
             onSendMessage={handleSendMessage}

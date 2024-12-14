@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, Mic } from "lucide-react";
+import { Send, MessageSquare, BrainCircuit } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Quiz } from "./Quiz";
 
 interface Message {
   role: "user" | "assistant";
@@ -18,6 +20,20 @@ interface ChatPanelProps {
 
 export function ChatPanel({ messages, onSendMessage, isLoading }: ChatPanelProps) {
   const [input, setInput] = useState("");
+  
+  // Sample quiz questions (in real app, these would be generated based on the story)
+  const sampleQuestions = [
+    {
+      question: "What was the main character's goal in the story?",
+      options: ["To find treasure", "To make friends", "To save the kingdom", "To learn magic"],
+      correctAnswer: 2
+    },
+    {
+      question: "Where did the story take place?",
+      options: ["In a castle", "In a forest", "In a city", "In space"],
+      correctAnswer: 0
+    }
+  ];
 
   const handleSend = () => {
     if (input.trim()) {
@@ -27,50 +43,66 @@ export function ChatPanel({ messages, onSendMessage, isLoading }: ChatPanelProps
   };
 
   return (
-    <Card className="h-full flex flex-col bg-white/90 backdrop-blur-sm border border-blue-100">
-      <div className="p-4 border-b border-blue-100">
-        <h2 className="text-lg font-semibold text-blue-600">Story Chat</h2>
-      </div>
-      
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[80%] p-3 rounded-lg ${
-                  message.role === "user"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100"
-                }`}
-              >
-                {message.content}
-              </div>
-            </div>
-          ))}
+    <Card className="h-full flex flex-col bg-gradient-to-r from-blue-50 to-blue-100">
+      <Tabs defaultValue="chat" className="flex-1 flex flex-col">
+        <div className="p-4 border-b border-blue-100">
+          <TabsList className="w-full bg-white/50">
+            <TabsTrigger value="chat" className="flex-1">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Chat
+            </TabsTrigger>
+            <TabsTrigger value="quiz" className="flex-1">
+              <BrainCircuit className="w-4 h-4 mr-2" />
+              Quiz
+            </TabsTrigger>
+          </TabsList>
         </div>
-      </ScrollArea>
 
-      <div className="p-4 border-t border-blue-100">
-        <div className="flex gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about the story..."
-            onKeyPress={(e) => e.key === "Enter" && handleSend()}
-            disabled={isLoading}
-          />
-          <Button 
-            onClick={handleSend}
-            disabled={isLoading}
-            className="bg-blue-500 hover:bg-blue-600"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+        <TabsContent value="chat" className="flex-1 flex flex-col p-4">
+          <ScrollArea className="flex-1">
+            <div className="space-y-4">
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`max-w-[80%] p-3 rounded-lg ${
+                      message.role === "user"
+                        ? "bg-blue-500 text-white"
+                        : "bg-white"
+                    }`}
+                  >
+                    {message.content}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+
+          <div className="mt-4 flex gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask about the story..."
+              onKeyPress={(e) => e.key === "Enter" && handleSend()}
+              disabled={isLoading}
+              className="bg-white/90"
+            />
+            <Button 
+              onClick={handleSend}
+              disabled={isLoading}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="quiz" className="flex-1 p-4">
+          <Quiz questions={sampleQuestions} />
+        </TabsContent>
+      </Tabs>
     </Card>
   );
 }
