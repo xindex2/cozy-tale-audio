@@ -32,70 +32,71 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 py-8 sm:py-12 md:py-16">
-      <div className="w-full max-w-[1000px] mx-auto">
-        <div className="text-center mb-12 sm:mb-16">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-blue-500 mb-4">
-            Bedtime Stories
-          </h1>
-          <p className="text-lg sm:text-xl text-blue-400">
-            Customize your perfect bedtime story
-          </p>
-        </div>
-
-        <div className="space-y-8 sm:space-y-12">
-          {/* First row: Language and Age Group */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 justify-items-center">
-            <div className="w-full max-w-[200px]">
-              <LanguageSelector
-                selectedLanguage={settings.language}
-                onLanguageSelect={(language) => setSettings({ ...settings, language })}
-              />
-            </div>
-            <div className="w-full max-w-[200px]">
-              <AgeGroupSelector
-                selectedAge={settings.ageGroup}
-                onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
-              />
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-500/5 via-blue-500/10 to-blue-600/5">
+      <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20">
+        <div className="max-w-4xl mx-auto">
+          {/* Header Section */}
+          <div className="text-center mb-12 sm:mb-16 animate-fade-in">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent mb-4">
+              Bedtime Stories
+            </h1>
+            <p className="text-lg sm:text-xl text-blue-600/80">
+              Craft Your Perfect Bedtime Story Experience
+            </p>
           </div>
 
-          {/* Second row: Theme */}
-          <div className="flex justify-center">
-            <div className="w-full max-w-[500px]">
+          <div className="grid gap-8 sm:gap-10">
+            {/* Language and Age Group Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+              <div className="w-full sm:max-w-[280px] mx-auto">
+                <LanguageSelector
+                  selectedLanguage={settings.language}
+                  onLanguageSelect={(language) => setSettings({ ...settings, language })}
+                />
+              </div>
+              <div className="w-full sm:max-w-[280px] mx-auto">
+                <AgeGroupSelector
+                  selectedAge={settings.ageGroup}
+                  onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
+                />
+              </div>
+            </div>
+
+            {/* Theme Section */}
+            <div className="w-full max-w-[600px] mx-auto">
               <ThemeSelector
                 selectedTheme={settings.theme}
                 onThemeSelect={(theme) => setSettings({ ...settings, theme })}
               />
             </div>
-          </div>
 
-          {/* Third row: Music and Voice */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 justify-items-center">
-            <div className="w-full max-w-[200px]">
-              <MusicSelector
-                selectedMusic={settings.music}
-                onMusicSelect={(music) => setSettings({ ...settings, music })}
-              />
+            {/* Music and Voice Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+              <div className="w-full sm:max-w-[280px] mx-auto">
+                <MusicSelector
+                  selectedMusic={settings.music}
+                  onMusicSelect={(music) => setSettings({ ...settings, music })}
+                />
+              </div>
+              <div className="w-full sm:max-w-[280px] mx-auto">
+                <VoiceSelector
+                  selectedVoice={settings.voice}
+                  onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
+                />
+              </div>
             </div>
-            <div className="w-full max-w-[200px]">
-              <VoiceSelector
-                selectedVoice={settings.voice}
-                onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
-              />
-            </div>
-          </div>
 
-          {/* Fourth row: Start Button */}
-          <div className="flex justify-center pt-4 sm:pt-6">
-            <Button
-              onClick={() => onStart(settings)}
-              className="w-full max-w-[200px] h-14 text-lg font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-2xl shadow-lg transition-all duration-200 hover:shadow-xl flex items-center justify-center gap-3"
-              size="lg"
-            >
-              Start Story
-              <Play className="w-5 h-5" />
-            </Button>
+            {/* Start Button */}
+            <div className="flex justify-center mt-8">
+              <Button
+                onClick={() => onStart(settings)}
+                className="w-full sm:w-[280px] h-14 text-lg font-medium bg-gradient-to-r from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 text-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-blue-400/20 hover:shadow-xl flex items-center justify-center gap-3 border-0"
+                size="lg"
+              >
+                Create Your Story
+                <Play className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
