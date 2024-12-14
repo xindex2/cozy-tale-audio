@@ -9,27 +9,39 @@ class RealtimeApiService {
   }
 
   connect() {
-    const url = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01";
-    this.ws = new WebSocket(url, {
-      headers: {
-        "Authorization": `Bearer ${this.apiKey}`,
-        "OpenAI-Beta": "realtime=v1",
-      },
-    });
+    // Include authorization in the URL as a query parameter
+    const encodedKey = encodeURIComponent(`Bearer ${this.apiKey}`);
+    const url = `wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01&authorization=${encodedKey}`;
+    
+    try {
+      this.ws = new WebSocket(url);
 
-    this.ws.onopen = () => {
-      console.log("Connected to OpenAI Realtime API");
-    };
+      this.ws.onopen = () => {
+        console.log("Connected to OpenAI Realtime API");
+        // Send beta header information as a message after connection
+        if (this.ws) {
+          this.ws.send(JSON.stringify({
+            type: "metadata",
+            metadata: {
+              "OpenAI-Beta": "realtime=v1"
+            }
+          }));
+        }
+      };
 
-    this.ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
+      this.ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
 
-    this.ws.onclose = () => {
-      console.log("Disconnected from OpenAI Realtime API");
-    };
+      this.ws.onclose = () => {
+        console.log("Disconnected from OpenAI Realtime API");
+      };
 
-    return this.ws;
+      return this.ws;
+    } catch (error) {
+      console.error("Error creating WebSocket:", error);
+      return null;
+    }
   }
 
   generateStory(settings: StorySettings) {
@@ -69,4 +81,5 @@ class RealtimeApiService {
   }
 }
 
+// Initialize with a placeholder API key - this should be replaced with a proper key
 export const realtimeApi = new RealtimeApiService("YOUR_API_KEY");
