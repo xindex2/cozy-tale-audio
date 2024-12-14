@@ -16,7 +16,16 @@ export function LanguageSelector({ selectedLanguage, onLanguageSelect }: Languag
     { code: "pt", name: "Portuguese" },
     { code: "nl", name: "Dutch" },
     { code: "pl", name: "Polish" },
-    { code: "hi", name: "Hindi" }
+    { code: "hi", name: "Hindi" },
+    { code: "ja", name: "Japanese" },
+    { code: "ko", name: "Korean" },
+    { code: "zh", name: "Chinese" },
+    { code: "ru", name: "Russian" },
+    { code: "ar", name: "Arabic" },
+    { code: "tr", name: "Turkish" },
+    { code: "vi", name: "Vietnamese" },
+    { code: "th", name: "Thai" },
+    { code: "id", name: "Indonesian" }
   ];
 
   return (

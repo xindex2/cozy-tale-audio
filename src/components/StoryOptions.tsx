@@ -51,12 +51,18 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
           </div>
 
           <div className="space-y-6 pb-8">
-            {/* Language and Age Group Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Language, Voice and Age Group Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
                 <LanguageSelector
                   selectedLanguage={settings.language}
                   onLanguageSelect={(language) => setSettings({ ...settings, language })}
+                />
+              </div>
+              <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
+                <VoiceSelector
+                  selectedVoice={settings.voice}
+                  onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
                 />
               </div>
               <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
@@ -75,20 +81,12 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
               />
             </div>
 
-            {/* Music and Voice Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
-                <MusicSelector
-                  selectedMusic={settings.music}
-                  onMusicSelect={(music) => setSettings({ ...settings, music })}
-                />
-              </div>
-              <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
-                <VoiceSelector
-                  selectedVoice={settings.voice}
-                  onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
-                />
-              </div>
+            {/* Music Section */}
+            <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
+              <MusicSelector
+                selectedMusic={settings.music}
+                onMusicSelect={(music) => setSettings({ ...settings, music })}
+              />
             </div>
 
             {/* Start Button */}
