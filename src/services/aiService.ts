@@ -9,14 +9,22 @@ class AIService {
   constructor() {
     this.genAI = new GoogleGenerativeAI("AIzaSyDonkh1p9UiMvTkKG2vFO9WrbFngqr_PXs");
     this.model = this.genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash-exp"
+      model: "gemini-pro",
+      generationConfig: {
+        temperature: 0.7,
+        candidateCount: 1,
+        stopSequences: [],
+        maxOutputTokens: 800,
+        topP: 0.8,
+        topK: 40,
+      } as GenerationConfig
     });
   }
 
   async startChat(settings: StorySettings) {
     const prompt = `You are a storyteller creating ${settings.theme} stories for children aged ${settings.ageGroup}. 
                    The story should last approximately ${settings.duration} minutes when read aloud. 
-                   Make it engaging and interactive.`;
+                   Make it engaging and interactive. Do not use markdown formatting like * or **.`;
     
     this.chat = this.model.startChat({
       history: [
@@ -25,31 +33,14 @@ class AIService {
           parts: [{ text: prompt }],
         },
       ],
-      generationConfig: {
-        temperature: 0.7,
-      }
     });
 
-    const result = await this.chat.sendMessage("Start the story", {
-      generationConfig: {
-        temperature: 0.7,
-        candidateCount: 1,
-        stopSequences: [],
-        maxOutputTokens: 800,
-        topP: 0.8,
-        topK: 40,
-      } as GenerationConfig
-    });
-    
+    const result = await this.chat.sendMessage("Start the story");
     const response = await result.response;
-    const text = response.text();
-    const audioData = response.audio?.data;
+    const text = response.text().replace(/\*/g, '');
     
-    let audioUrl = "";
-    if (audioData) {
-      const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
-      audioUrl = URL.createObjectURL(audioBlob);
-    }
+    // Create audio URL from the selected background music
+    const audioUrl = `/assets/${settings.music}.mp3`;
     
     return { text, audioUrl };
   }
@@ -57,26 +48,12 @@ class AIService {
   async continueStory(message: string) {
     if (!this.chat) throw new Error("Chat not initialized");
     
-    const result = await this.chat.sendMessage(message, {
-      generationConfig: {
-        temperature: 0.7,
-        candidateCount: 1,
-        stopSequences: [],
-        maxOutputTokens: 800,
-        topP: 0.8,
-        topK: 40,
-      } as GenerationConfig
-    });
-    
+    const result = await this.chat.sendMessage(message);
     const response = await result.response;
-    const text = response.text();
-    const audioData = response.audio?.data;
+    const text = response.text().replace(/\*/g, '');
     
-    let audioUrl = "";
-    if (audioData) {
-      const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
-      audioUrl = URL.createObjectURL(audioBlob);
-    }
+    // Return the same background music URL for consistency
+    const audioUrl = "/assets/gentle-lullaby.mp3";
     
     return { text, audioUrl };
   }

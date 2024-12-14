@@ -123,20 +123,35 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
 
   useEffect(() => {
     if (currentAudioUrl) {
-      audioRef.current = new Audio(currentAudioUrl);
-      audioRef.current.volume = isMuted ? 0 : volume;
-      audioRef.current.play().catch(console.error);
-    }
-
-    return () => {
       if (audioRef.current) {
         audioRef.current.pause();
       }
-    };
-  }, [currentAudioUrl, volume, isMuted]);
+      audioRef.current = new Audio(currentAudioUrl);
+      audioRef.current.volume = isMuted ? 0 : volume;
+      audioRef.current.loop = true; // Enable looping for background music
+      
+      if (isPlaying) {
+        audioRef.current.play().catch(error => {
+          console.error("Error playing audio:", error);
+          toast({
+            title: "Audio Error",
+            description: "Failed to play audio. Please try again.",
+            variant: "destructive",
+          });
+        });
+      }
+    }
+  }, [currentAudioUrl, volume, isMuted, isPlaying]);
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
+    if (audioRef.current) {
+      if (!isPlaying) {
+        audioRef.current.play().catch(console.error);
+      } else {
+        audioRef.current.pause();
+      }
+    }
   };
 
   const handleVolumeChange = (newVolume: number[]) => {
