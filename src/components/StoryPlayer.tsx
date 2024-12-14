@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { Pause, Play, SkipBack, Volume2, VolumeX } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Pause, Play, SkipBack, Volume2, VolumeX, Mic } from "lucide-react";
 import type { StorySettings } from "./StoryOptions";
 import { realtimeApi } from "@/services/realtimeApi";
 
@@ -18,9 +19,12 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
   const [isMuted, setIsMuted] = useState(false);
   const [audioError, setAudioError] = useState(false);
   const [storyText, setStoryText] = useState("");
+  const [userInput, setUserInput] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
   useEffect(() => {
     if (settings.music) {
@@ -51,7 +55,6 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
           if (content.type === "text") {
             setStoryText((prev) => prev + content.text);
           }
-          // Handle audio content when implemented
         }
       };
     }
@@ -65,8 +68,50 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
         realtimeApi.disconnect();
         wsRef.current = null;
       }
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop();
+      }
     };
   }, [settings.music, volume]);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0 && wsRef.current) {
+          // Convert to base64 and send to WebSocket
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64Audio = (reader.result as string).split(',')[1];
+            realtimeApi.sendAudio(base64Audio);
+          };
+          reader.readAsDataURL(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.start(1000); // Collect data every second
+      setIsRecording(true);
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      setIsRecording(false);
+    }
+  };
+
+  const handleSendText = () => {
+    if (wsRef.current && userInput.trim()) {
+      realtimeApi.sendText(userInput.trim());
+      setUserInput("");
+    }
+  };
 
   useEffect(() => {
     if (isPlaying) {
@@ -142,6 +187,23 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
           <div className="mt-4 text-left max-h-40 overflow-y-auto p-4 bg-muted rounded-lg">
             {storyText || "Your story will appear here..."}
           </div>
+        </div>
+
+        <div className="flex gap-2">
+          <Input
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            placeholder="Type your message..."
+            onKeyPress={(e) => e.key === 'Enter' && handleSendText()}
+          />
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => isRecording ? stopRecording() : startRecording()}
+            className={`rounded-full ${isRecording ? 'bg-red-500 hover:bg-red-600' : ''}`}
+          >
+            <Mic className="h-4 w-4" />
+          </Button>
         </div>
 
         <div className="w-full bg-secondary rounded-full h-2">

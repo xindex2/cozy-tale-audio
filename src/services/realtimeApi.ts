@@ -44,6 +44,46 @@ class RealtimeApiService {
     }
   }
 
+  sendText(text: string) {
+    if (!this.ws) return;
+
+    // Send text message
+    this.ws.send(JSON.stringify({
+      type: "conversation.item.create",
+      item: {
+        type: "message",
+        role: "user",
+        content: [{
+          type: "input_text",
+          text: text
+        }]
+      }
+    }));
+
+    // Request response
+    this.ws.send(JSON.stringify({ type: "response.create" }));
+  }
+
+  sendAudio(base64Audio: string) {
+    if (!this.ws) return;
+
+    // Send audio message
+    this.ws.send(JSON.stringify({
+      type: "conversation.item.create",
+      item: {
+        type: "message",
+        role: "user",
+        content: [{
+          type: "input_audio",
+          audio: base64Audio
+        }]
+      }
+    }));
+
+    // Request response
+    this.ws.send(JSON.stringify({ type: "response.create" }));
+  }
+
   generateStory(settings: StorySettings) {
     if (!this.ws) return;
 
