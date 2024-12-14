@@ -8,21 +8,23 @@ class AIService {
 
   constructor() {
     this.genAI = new GoogleGenerativeAI("AIzaSyDonkh1p9UiMvTkKG2vFO9WrbFngqr_PXs");
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
   }
 
   async startChat(settings: StorySettings) {
-    const prompt = {
-      contents: [{
-        parts: [{
-          text: `You are a storyteller creating ${settings.theme} stories for children aged ${settings.ageGroup}. 
-                 The story should last approximately ${settings.duration} minutes when read aloud. 
-                 Make it engaging and interactive.`
-        }]
-      }]
-    };
+    const prompt = `You are a storyteller creating ${settings.theme} stories for children aged ${settings.ageGroup}. 
+                   The story should last approximately ${settings.duration} minutes when read aloud. 
+                   Make it engaging and interactive.`;
     
-    this.chat = this.model.startChat(prompt);
+    this.chat = this.model.startChat({
+      history: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ],
+    });
+
     const result = await this.chat.sendMessage("Start the story");
     const response = await result.response;
     return response.text();
@@ -37,22 +39,10 @@ class AIService {
   }
 
   async generateSpeech(text: string) {
-    // Using Gemini's text-to-speech capability
-    const result = await this.model.generateContent({
-      contents: [{ text }],
-      generation_config: {
-        temperature: 0.7,
-        candidate_count: 1,
-        stop_sequences: [],
-        max_output_tokens: 2048,
-        top_p: 0.8,
-        top_k: 40,
-        response_modalities: ["AUDIO"]
-      }
-    });
-    
-    const response = await result.response;
-    return response.text();
+    // Note: Currently, Gemini doesn't support direct text-to-speech.
+    // For now, we'll return the text and handle TTS in a future update
+    // when Google adds TTS support to their API
+    return text;
   }
 }
 
