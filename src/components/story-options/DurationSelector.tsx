@@ -20,16 +20,16 @@ export function DurationSelector({ selectedDuration, onDurationSelect }: Duratio
         <Clock className="h-5 w-5" />
         <h2 className="text-xl font-semibold">Duration</h2>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-1 gap-3">
         {durations.map(({ label, value }) => (
           <Button
             key={value}
             variant={selectedDuration === value ? "default" : "outline"}
             onClick={() => onDurationSelect(value)}
-            className={`flex-1 ${
+            className={`w-full h-12 text-base font-medium ${
               selectedDuration === value
                 ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-                : ""
+                : "hover:bg-blue-50"
             }`}
           >
             {label}
