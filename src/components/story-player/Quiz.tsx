@@ -22,12 +22,13 @@ export function Quiz({ questions }: QuizProps) {
 
   const handleAnswerClick = (answerIndex: number) => {
     setSelectedAnswer(answerIndex);
+    setShowCorrectAnswer(true);
+    
     if (answerIndex === questions[currentQuestion].correctAnswer) {
       setScore(score + 1);
     }
-    setShowCorrectAnswer(true);
 
-    // Move to next question after 2 seconds
+    // Move to next question after 2 seconds regardless of answer
     setTimeout(() => {
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
