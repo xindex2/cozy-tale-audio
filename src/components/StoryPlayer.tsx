@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
-import { Pause, Play, SkipBack, Volume2, VolumeX, Mic } from "lucide-react";
+import { Pause, Play, SkipBack, Volume2, VolumeX, Mic, Send } from "lucide-react";
 import type { StorySettings } from "./StoryOptions";
 import { realtimeApi } from "@/services/realtimeApi";
 
@@ -15,12 +15,13 @@ interface StoryPlayerProps {
 export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(0.3);
+  const [volume, setVolume] = useState(0.5);
   const [isMuted, setIsMuted] = useState(false);
   const [audioError, setAudioError] = useState(false);
   const [storyText, setStoryText] = useState("");
   const [userInput, setUserInput] = useState("");
   const [isRecording, setIsRecording] = useState(false);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -29,7 +30,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
   useEffect(() => {
     if (settings.music) {
       try {
-        audioRef.current = new Audio("/assets/gentle-lullaby.mp3");
+        audioRef.current = new Audio(`/assets/${settings.music}.mp3`);
         audioRef.current.loop = true;
         audioRef.current.volume = volume;
         
@@ -47,15 +48,30 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
     wsRef.current = realtimeApi.connect();
     
     if (wsRef.current) {
+      wsRef.current.onopen = () => {
+        console.log("Connected to OpenAI Realtime API");
+        if (wsRef.current) {
+          // Start story generation when connection is established
+          realtimeApi.generateStory(settings);
+        }
+      };
+
       wsRef.current.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        
         if (data.type === "conversation.item.created" && data.item.role === "assistant") {
           const content = data.item.content[0];
           if (content.type === "text") {
             setStoryText((prev) => prev + content.text);
           }
         }
+      };
+
+      wsRef.current.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+
+      wsRef.current.onclose = () => {
+        console.log("Disconnected from OpenAI Realtime API");
       };
     }
 
@@ -72,7 +88,18 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
         mediaRecorderRef.current.stop();
       }
     };
-  }, [settings.music, volume]);
+  }, [settings.music, volume, settings]);
+
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    
+    if (isMusicPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(console.error);
+    }
+    setIsMusicPlaying(!isMusicPlaying);
+  };
 
   const startRecording = async () => {
     try {
@@ -81,7 +108,6 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
       
       mediaRecorderRef.current.ondataavailable = (event) => {
         if (event.data.size > 0 && wsRef.current) {
-          // Convert to base64 and send to WebSocket
           const reader = new FileReader();
           reader.onloadend = () => {
             const base64Audio = (reader.result as string).split(',')[1];
@@ -91,7 +117,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
         }
       };
 
-      mediaRecorderRef.current.start(1000); // Collect data every second
+      mediaRecorderRef.current.start(1000);
       setIsRecording(true);
     } catch (error) {
       console.error("Error accessing microphone:", error);
@@ -120,11 +146,6 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
           console.error("Error playing audio:", error);
           setAudioError(true);
         });
-      }
-      
-      // Start story generation when play is pressed
-      if (wsRef.current && progress === 0) {
-        realtimeApi.generateStory(settings);
       }
 
       intervalRef.current = setInterval(() => {
@@ -185,7 +206,7 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
             Theme: {settings.theme} • Age: {settings.ageGroup} • Duration: {settings.duration}min • Voice: {settings.voice}
           </p>
           <div className="mt-4 text-left max-h-40 overflow-y-auto p-4 bg-muted rounded-lg">
-            {storyText || "Your story will appear here..."}
+            {storyText || "Your story will begin when you press play..."}
           </div>
         </div>
 
@@ -195,12 +216,20 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
             onChange={(e) => setUserInput(e.target.value)}
             placeholder="Type your message..."
             onKeyPress={(e) => e.key === 'Enter' && handleSendText()}
+            className="flex-1"
           />
+          <Button
+            variant="outline"
+            onClick={handleSendText}
+            className="px-4"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
           <Button
             variant="outline"
             size="icon"
             onClick={() => isRecording ? stopRecording() : startRecording()}
-            className={`rounded-full ${isRecording ? 'bg-red-500 hover:bg-red-600' : ''}`}
+            className={`rounded-full ${isRecording ? 'bg-red-500 hover:bg-red-600 text-white' : ''}`}
           >
             <Mic className="h-4 w-4" />
           </Button>
@@ -214,22 +243,34 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
         </div>
 
         {settings.music && !audioError && (
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleMute}
-              className="rounded-full"
-            >
-              {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-            </Button>
-            <Slider
-              value={[volume]}
-              max={1}
-              step={0.1}
-              onValueChange={handleVolumeChange}
-              className="w-32"
-            />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleMusic}
+                className="text-sm"
+              >
+                {isMusicPlaying ? "Stop Preview" : "Preview Music"}
+              </Button>
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleMute}
+                  className="rounded-full"
+                >
+                  {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                </Button>
+                <Slider
+                  value={[volume]}
+                  max={1}
+                  step={0.1}
+                  onValueChange={handleVolumeChange}
+                  className="w-32"
+                />
+              </div>
+            </div>
           </div>
         )}
 
