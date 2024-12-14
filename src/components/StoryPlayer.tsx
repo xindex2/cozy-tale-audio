@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Pause, Play, SkipBack } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Pause, Play, SkipBack, Volume2, VolumeX } from "lucide-react";
 import type { StorySettings } from "./StoryOptions";
 
 interface StoryPlayerProps {
@@ -12,22 +13,72 @@ interface StoryPlayerProps {
 export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [volume, setVolume] = useState(0.5);
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    let interval: number;
+    if (settings.music) {
+      audioRef.current = new Audio("/lullaby.mp3"); // You'll need to add this audio file
+      audioRef.current.loop = true;
+      audioRef.current.volume = volume;
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [settings.music]);
+
+  useEffect(() => {
     if (isPlaying) {
-      interval = setInterval(() => {
+      if (settings.music && audioRef.current) {
+        audioRef.current.play();
+      }
+      intervalRef.current = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 100) {
             setIsPlaying(false);
+            if (audioRef.current) {
+              audioRef.current.pause();
+            }
             return 100;
           }
           return prev + 100 / (settings.duration * 60);
         });
       }, 1000);
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     }
-    return () => clearInterval(interval);
-  }, [isPlaying, settings.duration]);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isPlaying, settings.duration, settings.music]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = isMuted ? 0 : volume;
+    }
+  }, [volume, isMuted]);
+
+  const handleVolumeChange = (newVolume: number[]) => {
+    setVolume(newVolume[0]);
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+  };
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6 space-y-8 animate-fade-in">
@@ -42,8 +93,8 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
         <div className="space-y-2 text-center">
           <h2 className="text-2xl font-semibold">Your Bedtime Story</h2>
           <p className="text-muted-foreground">
-            Age: {settings.ageGroup} • Duration: {settings.duration}min •{" "}
-            Voice: {settings.voice}
+            Theme: {settings.theme} • Age: {settings.ageGroup} • Duration:{" "}
+            {settings.duration}min • Voice: {settings.voice}
           </p>
         </div>
 
@@ -53,6 +104,30 @@ export function StoryPlayer({ settings, onBack }: StoryPlayerProps) {
             style={{ width: `${progress}%` }}
           ></div>
         </div>
+
+        {settings.music && (
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleMute}
+              className="rounded-full"
+            >
+              {isMuted ? (
+                <VolumeX className="h-4 w-4" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
+            </Button>
+            <Slider
+              value={[volume]}
+              max={1}
+              step={0.1}
+              onValueChange={handleVolumeChange}
+              className="w-32"
+            />
+          </div>
+        )}
 
         <div className="flex justify-center space-x-4">
           <Button

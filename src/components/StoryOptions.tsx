@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Moon, Clock, Music, Mic } from "lucide-react";
+import { Moon, Clock, Music, Mic, Sparkles } from "lucide-react";
 
 interface StoryOptionsProps {
   onStart: (options: StorySettings) => void;
@@ -12,6 +12,7 @@ export interface StorySettings {
   duration: number;
   music: boolean;
   voice: string;
+  theme: string;
 }
 
 export function StoryOptions({ onStart }: StoryOptionsProps) {
@@ -20,11 +21,22 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
     duration: 5,
     music: true,
     voice: "alloy",
+    theme: "fantasy",
   });
 
   const ageGroups = ["3-5", "6-8", "9-12"];
   const durations = [5, 10, 15];
   const voices = ["alloy", "echo", "shimmer", "ash", "ballad", "coral", "sage", "verse"];
+  const themes = [
+    "fantasy",
+    "adventure",
+    "animals",
+    "space",
+    "underwater",
+    "fairy tales",
+    "nature",
+    "magic school",
+  ];
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6 space-y-8 animate-fade-in">
@@ -48,6 +60,25 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
                 className="flex-1"
               >
                 {age} years
+              </Button>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-6 space-y-4">
+          <div className="flex items-center space-x-2 text-story-orange">
+            <Sparkles className="h-5 w-5" />
+            <h2 className="text-xl font-semibold">Theme</h2>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {themes.map((theme) => (
+              <Button
+                key={theme}
+                variant={settings.theme === theme ? "default" : "outline"}
+                onClick={() => setSettings({ ...settings, theme })}
+                className="capitalize"
+              >
+                {theme}
               </Button>
             ))}
           </div>
@@ -86,7 +117,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
           </Button>
         </Card>
 
-        <Card className="p-6 space-y-4">
+        <Card className="p-6 space-y-4 md:col-span-2">
           <div className="flex items-center space-x-2 text-story-purple">
             <Mic className="h-5 w-5" />
             <h2 className="text-xl font-semibold">Voice</h2>
