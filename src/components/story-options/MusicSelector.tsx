@@ -71,7 +71,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
       {categories.map(category => (
         <div key={category} className="space-y-4">
           <h3 className="text-lg font-medium text-blue-400">{category}</h3>
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {musicOptions
               .filter(opt => opt.category === category)
               .map((option) => (
