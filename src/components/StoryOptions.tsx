@@ -33,10 +33,10 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500/5 via-blue-500/10 to-blue-600/5">
-      <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20">
-        <div className="max-w-4xl mx-auto">
+      <div className="w-full px-4 py-8 sm:py-12 md:py-16">
+        <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="text-center mb-12 sm:mb-16 animate-fade-in">
+          <div className="text-center mb-8 sm:mb-12 animate-fade-in">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent mb-4">
               Bedtime Stories
             </h1>
@@ -45,16 +45,16 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </p>
           </div>
 
-          <div className="grid gap-8 sm:gap-10">
+          <div className="space-y-6 sm:space-y-8">
             {/* Language and Age Group Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-              <div className="w-full sm:max-w-[280px] mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="w-full">
                 <LanguageSelector
                   selectedLanguage={settings.language}
                   onLanguageSelect={(language) => setSettings({ ...settings, language })}
                 />
               </div>
-              <div className="w-full sm:max-w-[280px] mx-auto">
+              <div className="w-full">
                 <AgeGroupSelector
                   selectedAge={settings.ageGroup}
                   onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
@@ -63,7 +63,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
 
             {/* Theme Section */}
-            <div className="w-full max-w-[600px] mx-auto">
+            <div className="w-full">
               <ThemeSelector
                 selectedTheme={settings.theme}
                 onThemeSelect={(theme) => setSettings({ ...settings, theme })}
@@ -71,14 +71,14 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
 
             {/* Music and Voice Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-              <div className="w-full sm:max-w-[280px] mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="w-full">
                 <MusicSelector
                   selectedMusic={settings.music}
                   onMusicSelect={(music) => setSettings({ ...settings, music })}
                 />
               </div>
-              <div className="w-full sm:max-w-[280px] mx-auto">
+              <div className="w-full">
                 <VoiceSelector
                   selectedVoice={settings.voice}
                   onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
