@@ -7,6 +7,7 @@ import { aiService } from "@/services/aiService";
 import { ChatInterface } from "./story-player/ChatInterface";
 import { AudioControls } from "./story-player/AudioControls";
 import { AudioManager } from "./story-player/AudioManager";
+import { StoryDisplay } from "./story-player/StoryDisplay";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -174,7 +175,7 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6 space-y-8 animate-fade-in">
-      <Card className="p-8 space-y-6 bg-white/90 backdrop-blur-sm">
+      <Card className="p-8 space-y-6 bg-gradient-to-r from-blue-50 to-blue-100 backdrop-blur-sm border border-blue-200">
         <div className="flex justify-between items-center">
           <Button variant="outline" size="icon" onClick={onBack}>
             <SkipBack className="h-4 w-4" />
@@ -187,7 +188,16 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
           />
         </div>
 
-        <div className="h-[400px] bg-gray-50/50 rounded-lg">
+        <div className="h-[400px] bg-white/50 rounded-lg overflow-hidden border border-blue-100">
+          {messages.map((message, index) => (
+            <div key={index} className="mb-4">
+              <StoryDisplay
+                text={message.content}
+                audioUrl={message.audioUrl}
+                isPlaying={isPlaying}
+              />
+            </div>
+          ))}
           <ChatInterface
             messages={messages}
             onSendMessage={handleSendMessage}
@@ -210,7 +220,7 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
           <Button
             size="icon"
             onClick={() => setIsPlaying(!isPlaying)}
-            className="rounded-full w-12 h-12 bg-story-purple hover:bg-story-purple/90"
+            className="rounded-full w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
           >
             {isPlaying ? (
               <Pause className="h-6 w-6" />

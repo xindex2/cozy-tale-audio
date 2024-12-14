@@ -23,14 +23,14 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
     ageGroup: "6-8",
     duration: 5,
     music: "gentle-lullaby",
-    voice: "puck",
+    voice: "EXAVITQu4vr4xnSDxMaL",
     theme: "fantasy",
   });
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6 space-y-8 animate-fade-in" 
          style={{ 
-           background: "linear-gradient(90deg, hsla(277, 75%, 84%, 1) 0%, hsla(297, 50%, 51%, 1) 100%)",
+           background: "linear-gradient(90deg, hsla(221, 45%, 73%, 1) 0%, hsla(220, 78%, 29%, 1) 100%)",
            borderRadius: "1rem",
            padding: "2rem"
          }}>
@@ -64,7 +64,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
 
       <Button
         onClick={() => onStart(settings)}
-        className="w-full max-w-md mx-auto block mt-8 bg-story-purple hover:bg-story-purple/90 text-white"
+        className="w-full max-w-md mx-auto block mt-8 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
         size="lg"
       >
         Start Story
