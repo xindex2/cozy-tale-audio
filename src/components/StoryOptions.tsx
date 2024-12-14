@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Moon, Clock, Music, Mic, Sparkles } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Moon, Clock, Music, Mic, Sparkles, Play, Pause, Volume2 } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 
 interface StoryOptionsProps {
   onStart: (options: StorySettings) => void;
@@ -23,29 +25,17 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
     voice: "alloy",
     theme: "fantasy",
   });
+  const [previewVolume, setPreviewVolume] = useState(0.5);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const ageGroups = ["3-5", "6-8", "9-12", "adult"];
   const durations = [5, 10, 15, 20];
   const voices = ["alloy", "echo", "shimmer", "ash", "ballad", "coral", "sage", "verse"];
   const themes = [
-    "fantasy",
-    "adventure",
-    "animals",
-    "space",
-    "underwater",
-    "fairy tales",
-    "nature",
-    "magic school",
-    "mystery",
-    "science fiction",
-    "historical",
-    "romance",
-    "horror",
-    "comedy",
-    "drama",
-    "thriller",
-    "western",
-    "mythology"
+    "fantasy", "adventure", "animals", "space", "underwater", "fairy tales",
+    "nature", "magic school", "mystery", "science fiction", "historical",
+    "romance", "horror", "comedy", "drama", "thriller", "western", "mythology"
   ];
   const musicOptions = [
     { id: "gentle-lullaby", name: "Gentle Lullaby" },
@@ -57,6 +47,33 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
     { id: "ambient", name: "Ambient" },
     { id: "classical", name: "Classical" }
   ];
+
+  const togglePreview = async (musicId: string) => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio(`/assets/${musicId}.mp3`);
+      audioRef.current.loop = true;
+      audioRef.current.volume = previewVolume;
+    }
+
+    if (isPlaying && audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else if (audioRef.current) {
+      try {
+        await audioRef.current.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.error("Error playing audio:", error);
+      }
+    }
+  };
+
+  const handleVolumeChange = (newVolume: number[]) => {
+    setPreviewVolume(newVolume[0]);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume[0];
+    }
+  };
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6 space-y-8 animate-fade-in" 
@@ -95,18 +112,20 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             <Sparkles className="h-5 w-5" />
             <h2 className="text-xl font-semibold">Theme</h2>
           </div>
-          <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-            {themes.map((theme) => (
-              <Button
-                key={theme}
-                variant={settings.theme === theme ? "default" : "outline"}
-                onClick={() => setSettings({ ...settings, theme })}
-                className="capitalize"
-              >
-                {theme}
-              </Button>
-            ))}
-          </div>
+          <ScrollArea className="h-48 w-full rounded-md">
+            <div className="grid grid-cols-2 gap-2 pr-4">
+              {themes.map((theme) => (
+                <Button
+                  key={theme}
+                  variant={settings.theme === theme ? "default" : "outline"}
+                  onClick={() => setSettings({ ...settings, theme })}
+                  className="capitalize"
+                >
+                  {theme}
+                </Button>
+              ))}
+            </div>
+          </ScrollArea>
         </Card>
 
         <Card className="p-6 space-y-4 bg-white/90">
@@ -135,14 +154,36 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
           </div>
           <div className="grid grid-cols-2 gap-2">
             {musicOptions.map((option) => (
-              <Button
-                key={option.id}
-                variant={settings.music === option.id ? "default" : "outline"}
-                onClick={() => setSettings({ ...settings, music: option.id })}
-                className="text-sm"
-              >
-                {option.name}
-              </Button>
+              <div key={option.id} className="flex flex-col gap-2">
+                <Button
+                  variant={settings.music === option.id ? "default" : "outline"}
+                  onClick={() => setSettings({ ...settings, music: option.id })}
+                  className="text-sm"
+                >
+                  {option.name}
+                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => togglePreview(option.id)}
+                    className="h-8 w-8 p-0"
+                  >
+                    {isPlaying && settings.music === option.id ? (
+                      <Pause className="h-4 w-4" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Slider
+                    value={[previewVolume]}
+                    max={1}
+                    step={0.1}
+                    onValueChange={handleVolumeChange}
+                    className="w-20"
+                  />
+                </div>
+              </div>
             ))}
           </div>
         </Card>
