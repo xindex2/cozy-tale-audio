@@ -7,24 +7,22 @@ class AIService {
   private chat: any;
 
   constructor() {
-    this.genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+    this.genAI = new GoogleGenerativeAI("AIzaSyDonkh1p9UiMvTkKG2vFO9WrbFngqr_PXs");
     this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
   }
 
   async startChat(settings: StorySettings) {
-    const prompt = `You are a storyteller creating ${settings.theme} stories for children aged ${settings.ageGroup}. 
-                   The story should last approximately ${settings.duration} minutes when read aloud. 
-                   Make it engaging and interactive.`;
+    const prompt = {
+      contents: [{
+        parts: [{
+          text: `You are a storyteller creating ${settings.theme} stories for children aged ${settings.ageGroup}. 
+                 The story should last approximately ${settings.duration} minutes when read aloud. 
+                 Make it engaging and interactive.`
+        }]
+      }]
+    };
     
-    this.chat = this.model.startChat({
-      history: [
-        {
-          role: "user",
-          parts: prompt,
-        },
-      ],
-    });
-
+    this.chat = this.model.startChat(prompt);
     const result = await this.chat.sendMessage("Start the story");
     const response = await result.response;
     return response.text();
@@ -39,7 +37,7 @@ class AIService {
   }
 
   async generateSpeech(text: string) {
-    // Using Gemini 2.0's built-in text-to-speech capability
+    // Using Gemini's text-to-speech capability
     const result = await this.model.generateContent({
       contents: [{ text }],
       generation_config: {
