@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Pause, Play, SkipBack, Loader } from "lucide-react";
+import { Pause, Play, SkipBack, Loader, BookOpen, List } from "lucide-react";
 import type { StorySettings } from "./StoryOptions";
 import { aiService } from "@/services/aiService";
 import { ChatPanel } from "./story-player/ChatPanel";
@@ -17,6 +17,12 @@ interface Message {
   backgroundMusicUrl?: string;
 }
 
+interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+}
+
 export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onBack: () => void }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
@@ -27,6 +33,9 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [storyTitle, setStoryTitle] = useState("");
+  const [storyContent, setStoryContent] = useState("");
+  const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
+  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,14 +55,9 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
   const startStory = async () => {
     setIsLoading(true);
     try {
-      const { text, audioUrl, backgroundMusicUrl } = await aiService.startChat(settings);
-      
-      setMessages([{ 
-        role: "assistant", 
-        content: text, 
-        audioUrl,
-        backgroundMusicUrl 
-      }]);
+      const { text, audioUrl, backgroundMusicUrl, title } = await aiService.startChat(settings);
+      setStoryTitle(title || "Your Bedtime Story");
+      setStoryContent(text);
       
       if (audioUrl) {
         setCurrentAudioUrl(audioUrl);
@@ -71,6 +75,53 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const generateQuiz = async () => {
+    setIsGeneratingQuiz(true);
+    try {
+      // Mock quiz generation - in real app, this would call an AI service
+      const questions: QuizQuestion[] = [
+        {
+          question: "What is the main character's goal in the story?",
+          options: ["To find treasure", "To make friends", "To save the kingdom", "To learn magic"],
+          correctAnswer: 2
+        },
+        {
+          question: "Where does the story take place?",
+          options: ["In a castle", "In a forest", "In a city", "In space"],
+          correctAnswer: 0
+        },
+        {
+          question: "What is the main challenge faced by the character?",
+          options: ["A dragon", "A storm", "A riddle", "A curse"],
+          correctAnswer: 3
+        },
+        {
+          question: "Who helps the main character?",
+          options: ["A wizard", "A fairy", "A talking animal", "A friendly ghost"],
+          correctAnswer: 1
+        },
+        {
+          question: "How does the story end?",
+          options: ["With a celebration", "With a lesson learned", "With a new beginning", "With a mystery solved"],
+          correctAnswer: 1
+        }
+      ];
+      setQuiz(questions);
+      toast({
+        title: "Quiz Generated",
+        description: "Test your knowledge about the story!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate quiz. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingQuiz(false);
     }
   };
 
@@ -121,16 +172,16 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6 animate-fade-in">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="w-full max-w-7xl mx-auto p-4 lg:p-6 animate-fade-in">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Story Section - Takes up 2/3 of the space on desktop */}
-        <div className="lg:col-span-2">
-          <Card className="p-8 space-y-6 bg-gradient-to-r from-blue-50 to-blue-100 backdrop-blur-sm border border-blue-200">
+        <div className="lg:col-span-2 space-y-4">
+          <Card className="p-4 lg:p-8 space-y-6 bg-gradient-to-r from-blue-50 to-blue-100 backdrop-blur-sm border border-blue-200">
             <div className="flex justify-between items-center">
               <Button variant="outline" size="icon" onClick={onBack}>
                 <SkipBack className="h-4 w-4" />
               </Button>
-              <h1 className="text-2xl font-bold text-blue-800">{storyTitle || "Your Story"}</h1>
+              <h1 className="text-xl lg:text-2xl font-bold text-blue-800">{storyTitle}</h1>
               <AudioControls
                 volume={volume}
                 isMuted={isMuted}
@@ -146,6 +197,14 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
               volume={volume}
               isMuted={isMuted}
             />
+
+            <div className="prose prose-blue max-w-none">
+              {storyContent.split('\n').map((paragraph, index) => (
+                <p key={index} className="text-gray-800 leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
 
             <div className="flex justify-center">
               <Button
@@ -164,11 +223,14 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
         </div>
 
         {/* Chat/Quiz Section - Takes up 1/3 of the space on desktop */}
-        <div className="h-[800px]">
+        <div className="h-[600px] lg:h-[800px]">
           <ChatPanel
             messages={messages}
             onSendMessage={handleSendMessage}
             isLoading={isSending}
+            quiz={quiz}
+            onGenerateQuiz={generateQuiz}
+            isGeneratingQuiz={isGeneratingQuiz}
           />
         </div>
       </div>
