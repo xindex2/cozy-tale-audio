@@ -21,7 +21,7 @@ const Index = () => {
         {storySettings ? (
           <StoryPlayer settings={storySettings} onBack={handleBack} />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <StoryOptions onStart={handleStart} />
           </div>
         )}
