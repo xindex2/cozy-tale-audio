@@ -87,7 +87,10 @@ export default {
         float: "float 3s ease-in-out infinite",
         "fade-in": "fade-in 0.5s ease-out",
       },
+      backgroundImage: {
+        'brand-gradient': 'linear-gradient(to right, var(--tw-gradient-stops))',
+      },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;

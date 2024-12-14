@@ -35,9 +35,10 @@ export function ChatPanel({
   isGeneratingQuiz
 }: ChatPanelProps) {
   const [input, setInput] = useState("");
-  const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
-  const [showScore, setShowScore] = useState(false);
-  const [score, setScore] = useState(0);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [completedQuestions, setCompletedQuestions] = useState<number[]>([]);
+  const [showFinalScore, setShowFinalScore] = useState(false);
 
   const handleSend = () => {
     if (input.trim()) {
@@ -46,20 +47,26 @@ export function ChatPanel({
     }
   };
 
-  const handleQuizSubmit = () => {
-    if (selectedAnswers.length === quiz.length) {
-      const newScore = selectedAnswers.reduce((acc, answer, index) => {
-        return acc + (answer === quiz[index].correctAnswer ? 1 : 0);
-      }, 0);
-      setScore(newScore);
-      setShowScore(true);
+  const handleAnswerSelect = (answerIndex: number) => {
+    setSelectedAnswer(answerIndex);
+    if (answerIndex === quiz[currentQuestionIndex].correctAnswer) {
+      setTimeout(() => {
+        setCompletedQuestions([...completedQuestions, currentQuestionIndex]);
+        if (currentQuestionIndex < quiz.length - 1) {
+          setCurrentQuestionIndex(currentQuestionIndex + 1);
+          setSelectedAnswer(null);
+        } else {
+          setShowFinalScore(true);
+        }
+      }, 1000);
     }
   };
 
   const resetQuiz = () => {
-    setSelectedAnswers([]);
-    setShowScore(false);
-    setScore(0);
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    setCompletedQuestions([]);
+    setShowFinalScore(false);
   };
 
   return (
@@ -89,7 +96,7 @@ export function ChatPanel({
                   <div
                     className={`max-w-[80%] p-3 rounded-lg ${
                       message.role === "user"
-                        ? "bg-blue-500 text-white"
+                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
                         : "bg-white"
                     }`}
                   >
@@ -108,6 +115,7 @@ export function ChatPanel({
               onKeyPress={(e) => e.key === "Enter" && handleSend()}
               disabled={isLoading}
               className="bg-white/90"
+              aria-label="Chat with the story - ask questions or share your thoughts"
             />
             <Button 
               onClick={handleSend}
@@ -142,12 +150,12 @@ export function ChatPanel({
                   )}
                 </Button>
               </div>
-            ) : showScore ? (
+            ) : showFinalScore ? (
               <div className="space-y-4">
                 <div className="text-center p-4 bg-white rounded-lg">
                   <h3 className="text-xl font-bold text-blue-800">Quiz Complete!</h3>
                   <p className="text-lg mt-2">
-                    Your score: {score} out of {quiz.length}
+                    You've completed all questions correctly!
                   </p>
                 </div>
                 <Button
@@ -159,36 +167,30 @@ export function ChatPanel({
               </div>
             ) : (
               <div className="space-y-6">
-                {quiz.map((question, qIndex) => (
-                  <div key={qIndex} className="space-y-3">
-                    <h3 className="font-medium text-gray-800">
-                      {qIndex + 1}. {question.question}
-                    </h3>
-                    <div className="space-y-2">
-                      {question.options.map((option, oIndex) => (
-                        <Button
-                          key={oIndex}
-                          variant={selectedAnswers[qIndex] === oIndex ? "default" : "outline"}
-                          className="w-full justify-start text-left"
-                          onClick={() => {
-                            const newAnswers = [...selectedAnswers];
-                            newAnswers[qIndex] = oIndex;
-                            setSelectedAnswers(newAnswers);
-                          }}
-                        >
-                          {option}
-                        </Button>
-                      ))}
-                    </div>
+                <div key={currentQuestionIndex} className="space-y-3">
+                  <h3 className="font-medium text-gray-800">
+                    Question {currentQuestionIndex + 1}: {quiz[currentQuestionIndex].question}
+                  </h3>
+                  <div className="space-y-2">
+                    {quiz[currentQuestionIndex].options.map((option, oIndex) => (
+                      <Button
+                        key={oIndex}
+                        variant={selectedAnswer === oIndex ? "default" : "outline"}
+                        className={`w-full justify-start text-left ${
+                          selectedAnswer === oIndex
+                            ? selectedAnswer === quiz[currentQuestionIndex].correctAnswer
+                              ? "bg-green-500 hover:bg-green-600"
+                              : "bg-red-500 hover:bg-red-600"
+                            : "bg-gradient-to-r from-blue-500 to-blue-600"
+                        }`}
+                        onClick={() => handleAnswerSelect(oIndex)}
+                        disabled={selectedAnswer !== null}
+                      >
+                        {option}
+                      </Button>
+                    ))}
                   </div>
-                ))}
-                <Button
-                  onClick={handleQuizSubmit}
-                  disabled={selectedAnswers.length !== quiz.length}
-                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600"
-                >
-                  Submit Answers
-                </Button>
+                </div>
               </div>
             )}
           </ScrollArea>
