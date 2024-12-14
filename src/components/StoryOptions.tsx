@@ -32,8 +32,8 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-16">
-      <div className="w-full max-w-6xl mx-auto px-6">
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-[1200px] mx-auto px-6">
         <div className="text-center space-y-6 mb-16">
           <h1 className="text-6xl font-bold text-blue-500">
             Bedtime Stories
@@ -43,44 +43,54 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
           </p>
         </div>
 
-        <div className="space-y-12 max-w-4xl mx-auto">
+        <div className="space-y-16 max-w-[800px] mx-auto">
           {/* First row: Language and Age Group */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <LanguageSelector
-              selectedLanguage={settings.language}
-              onLanguageSelect={(language) => setSettings({ ...settings, language })}
-            />
-            <AgeGroupSelector
-              selectedAge={settings.ageGroup}
-              onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 justify-items-center">
+            <div className="w-[300px]">
+              <LanguageSelector
+                selectedLanguage={settings.language}
+                onLanguageSelect={(language) => setSettings({ ...settings, language })}
+              />
+            </div>
+            <div className="w-[300px]">
+              <AgeGroupSelector
+                selectedAge={settings.ageGroup}
+                onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
+              />
+            </div>
           </div>
 
           {/* Second row: Theme */}
-          <div className="w-full px-4">
-            <ThemeSelector
-              selectedTheme={settings.theme}
-              onThemeSelect={(theme) => setSettings({ ...settings, theme })}
-            />
+          <div className="w-full flex justify-center">
+            <div className="w-[700px]">
+              <ThemeSelector
+                selectedTheme={settings.theme}
+                onThemeSelect={(theme) => setSettings({ ...settings, theme })}
+              />
+            </div>
           </div>
 
           {/* Third row: Music and Voice */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <MusicSelector
-              selectedMusic={settings.music}
-              onMusicSelect={(music) => setSettings({ ...settings, music })}
-            />
-            <VoiceSelector
-              selectedVoice={settings.voice}
-              onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 justify-items-center">
+            <div className="w-[300px]">
+              <MusicSelector
+                selectedMusic={settings.music}
+                onMusicSelect={(music) => setSettings({ ...settings, music })}
+              />
+            </div>
+            <div className="w-[300px]">
+              <VoiceSelector
+                selectedVoice={settings.voice}
+                onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
+              />
+            </div>
           </div>
 
           {/* Fourth row: Start Button */}
-          <div className="flex justify-center pt-12">
+          <div className="flex justify-center pt-8">
             <Button
               onClick={() => onStart(settings)}
-              className="w-full max-w-md h-16 text-xl font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-2xl shadow-lg transition-all duration-200 hover:shadow-xl flex items-center justify-center gap-3"
+              className="w-[300px] h-16 text-xl font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-2xl shadow-lg transition-all duration-200 hover:shadow-xl flex items-center justify-center gap-3"
               size="lg"
             >
               Start Story
