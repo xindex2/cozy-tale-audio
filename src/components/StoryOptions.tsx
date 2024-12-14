@@ -37,20 +37,21 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
     "nature", "magic school", "mystery", "science fiction", "historical",
     "romance", "horror", "comedy", "drama", "thriller", "western", "mythology"
   ];
+
   const musicOptions = [
-    { id: "gentle-lullaby", name: "Gentle Lullaby" },
-    { id: "peaceful-dreams", name: "Peaceful Dreams" },
-    { id: "nature-sounds", name: "Nature Sounds" },
-    { id: "ocean-waves", name: "Ocean Waves" },
-    { id: "soft-piano", name: "Soft Piano" },
-    { id: "meditation", name: "Meditation" },
-    { id: "ambient", name: "Ambient" },
-    { id: "classical", name: "Classical" }
+    { id: "gentle-lullaby", name: "Gentle Lullaby", file: "/assets/gentle-lullaby.mp3" },
+    { id: "peaceful-dreams", name: "Peaceful Dreams", file: "/assets/peaceful-dreams.mp3" },
+    { id: "nature-sounds", name: "Nature Sounds", file: "/assets/nature-sounds.mp3" },
+    { id: "ocean-waves", name: "Ocean Waves", file: "/assets/ocean-waves.mp3" },
+    { id: "soft-piano", name: "Soft Piano", file: "/assets/soft-piano.mp3" }
   ];
 
   const togglePreview = async (musicId: string) => {
+    const musicOption = musicOptions.find(opt => opt.id === musicId);
+    if (!musicOption) return;
+
     if (!audioRef.current) {
-      audioRef.current = new Audio(`/assets/${musicId}.mp3`);
+      audioRef.current = new Audio(musicOption.file);
       audioRef.current.loop = true;
       audioRef.current.volume = previewVolume;
     }
@@ -216,4 +217,3 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
       </Button>
     </div>
   );
-}

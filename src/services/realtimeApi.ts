@@ -2,13 +2,8 @@ import { StorySettings } from "@/components/StoryOptions";
 
 class RealtimeApiService {
   private ws: WebSocket | null = null;
-  private apiKey: string;
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 3;
-
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
-  }
 
   connect() {
     if (this.ws?.readyState === WebSocket.OPEN) {
@@ -17,12 +12,9 @@ class RealtimeApiService {
     }
 
     try {
-      // Include authorization in the URL as a query parameter
-      const encodedKey = encodeURIComponent(`Bearer ${this.apiKey}`);
-      const url = `wss://api.openai.com/v1/audio/speech?model=tts-1&voice=alloy&authorization=${encodedKey}`;
+      // Connect to OpenAI's streaming API
+      this.ws = new WebSocket('wss://api.openai.com/v1/audio/speech');
       
-      this.ws = new WebSocket(url);
-
       this.ws.onopen = () => {
         console.log("Connected to OpenAI Realtime API");
         this.reconnectAttempts = 0;
@@ -60,15 +52,16 @@ class RealtimeApiService {
       return;
     }
 
-    // Send story generation request
+    // Send story generation request with OpenAI API format
     this.ws.send(JSON.stringify({
-      type: "story.generate",
-      settings: {
-        theme: settings.theme,
-        ageGroup: settings.ageGroup,
-        duration: settings.duration,
-        voice: settings.voice
-      }
+      model: "gpt-4-turbo-preview",
+      messages: [
+        {
+          role: "system",
+          content: `You are a storyteller creating ${settings.theme} stories for ${settings.ageGroup} year olds. The story should last approximately ${settings.duration} minutes.`
+        }
+      ],
+      stream: true
     }));
   }
 
@@ -79,8 +72,14 @@ class RealtimeApiService {
     }
 
     this.ws.send(JSON.stringify({
-      type: "message",
-      content: text
+      model: "gpt-4-turbo-preview",
+      messages: [
+        {
+          role: "user",
+          content: text
+        }
+      ],
+      stream: true
     }));
   }
 
@@ -91,8 +90,8 @@ class RealtimeApiService {
     }
 
     this.ws.send(JSON.stringify({
-      type: "audio",
-      data: base64Audio
+      audio: base64Audio,
+      model: "whisper-1"
     }));
   }
 
@@ -104,5 +103,5 @@ class RealtimeApiService {
   }
 }
 
-// Initialize with the provided API key
-export const realtimeApi = new RealtimeApiService("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");
+// Initialize with OpenAI API key
+export const realtimeApi = new RealtimeApiService();
