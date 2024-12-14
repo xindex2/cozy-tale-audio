@@ -23,7 +23,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
     ageGroup: "6-8",
     duration: 5,
     music: "gentle-lullaby",
-    voice: "alloy",
+    voice: "puck",
     theme: "fantasy",
   });
 
