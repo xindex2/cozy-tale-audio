@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AgeGroupSelector } from "./story-options/AgeGroupSelector";
 import { ThemeSelector } from "./story-options/ThemeSelector";
@@ -32,59 +31,61 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
   });
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8 space-y-12">
-      <div className="text-center space-y-4 mb-12">
-        <h1 className="text-6xl font-bold text-blue-500">
-          Bedtime Stories
-        </h1>
-        <p className="text-xl text-blue-400">
-          Customize your perfect bedtime story
-        </p>
-      </div>
-
-      <div className="space-y-8 max-w-5xl mx-auto">
-        {/* First row: Language and Age Group */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <LanguageSelector
-            selectedLanguage={settings.language}
-            onLanguageSelect={(language) => setSettings({ ...settings, language })}
-          />
-          <AgeGroupSelector
-            selectedAge={settings.ageGroup}
-            onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
-          />
+    <div className="min-h-screen flex items-center justify-center py-16">
+      <div className="w-full max-w-6xl mx-auto px-6">
+        <div className="text-center space-y-6 mb-16">
+          <h1 className="text-6xl font-bold text-blue-500">
+            Bedtime Stories
+          </h1>
+          <p className="text-xl text-blue-400">
+            Customize your perfect bedtime story
+          </p>
         </div>
 
-        {/* Second row: Theme */}
-        <div className="w-full">
-          <ThemeSelector
-            selectedTheme={settings.theme}
-            onThemeSelect={(theme) => setSettings({ ...settings, theme })}
-          />
-        </div>
+        <div className="space-y-12 max-w-4xl mx-auto">
+          {/* First row: Language and Age Group */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <LanguageSelector
+              selectedLanguage={settings.language}
+              onLanguageSelect={(language) => setSettings({ ...settings, language })}
+            />
+            <AgeGroupSelector
+              selectedAge={settings.ageGroup}
+              onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
+            />
+          </div>
 
-        {/* Third row: Music and Voice */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <MusicSelector
-            selectedMusic={settings.music}
-            onMusicSelect={(music) => setSettings({ ...settings, music })}
-          />
-          <VoiceSelector
-            selectedVoice={settings.voice}
-            onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
-          />
-        </div>
+          {/* Second row: Theme */}
+          <div className="w-full px-4">
+            <ThemeSelector
+              selectedTheme={settings.theme}
+              onThemeSelect={(theme) => setSettings({ ...settings, theme })}
+            />
+          </div>
 
-        {/* Fourth row: Start Button */}
-        <div className="flex justify-center pt-8">
-          <Button
-            onClick={() => onStart(settings)}
-            className="w-full max-w-md h-16 text-xl font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-2xl shadow-lg transition-all duration-200 hover:shadow-xl flex items-center justify-center gap-3"
-            size="lg"
-          >
-            Start Story
-            <Play className="w-6 h-6" />
-          </Button>
+          {/* Third row: Music and Voice */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <MusicSelector
+              selectedMusic={settings.music}
+              onMusicSelect={(music) => setSettings({ ...settings, music })}
+            />
+            <VoiceSelector
+              selectedVoice={settings.voice}
+              onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
+            />
+          </div>
+
+          {/* Fourth row: Start Button */}
+          <div className="flex justify-center pt-12">
+            <Button
+              onClick={() => onStart(settings)}
+              className="w-full max-w-md h-16 text-xl font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-2xl shadow-lg transition-all duration-200 hover:shadow-xl flex items-center justify-center gap-3"
+              size="lg"
+            >
+              Start Story
+              <Play className="w-6 h-6" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
