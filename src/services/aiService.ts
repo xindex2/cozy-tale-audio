@@ -5,12 +5,10 @@ class AIService {
   private genAI: GoogleGenerativeAI;
   private model: any;
   private chat: any;
-  private elevenLabsApiKey: string;
 
   constructor() {
     this.genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
-    this.elevenLabsApiKey = import.meta.env.VITE_ELEVEN_LABS_API_KEY;
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
   }
 
   async startChat(settings: StorySettings) {
@@ -40,29 +38,23 @@ class AIService {
     return response.text();
   }
 
-  async generateSpeech(text: string, voiceId: string = "21m00Tcm4TlvDq8ikWAM") {
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'xi-api-key': this.elevenLabsApiKey,
-      },
-      body: JSON.stringify({
-        text,
-        model_id: "eleven_monolingual_v1",
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.5,
-        },
-      }),
+  async generateSpeech(text: string) {
+    // Using Gemini 2.0's built-in text-to-speech capability
+    const result = await this.model.generateContent({
+      contents: [{ text }],
+      generation_config: {
+        temperature: 0.7,
+        candidate_count: 1,
+        stop_sequences: [],
+        max_output_tokens: 2048,
+        top_p: 0.8,
+        top_k: 40,
+        response_modalities: ["AUDIO"]
+      }
     });
-
-    if (!response.ok) {
-      throw new Error('Failed to generate speech');
-    }
-
-    const audioBlob = await response.blob();
-    return URL.createObjectURL(audioBlob);
+    
+    const response = await result.response;
+    return response.text();
   }
 }
 
