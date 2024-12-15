@@ -1,9 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Music } from "lucide-react";
+import { Music, Play, Pause, Volume2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 
 interface MusicSelectorProps {
   selectedMusic: string;
@@ -12,6 +14,9 @@ interface MusicSelectorProps {
 
 export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorProps) {
   const [useMusic, setUseMusic] = useState(selectedMusic !== "no-music");
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const [previewVolume, setPreviewVolume] = useState(0.15); // Default volume at 15%
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     setUseMusic(selectedMusic !== "no-music");
@@ -33,10 +38,51 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
     setUseMusic(checked);
     if (!checked) {
       onMusicSelect("no-music");
+      stopPreview();
     } else if (selectedMusic === "no-music") {
       onMusicSelect(musicOptions[0].id);
     }
   };
+
+  const togglePreview = (musicId: string, url: string) => {
+    if (playingId === musicId) {
+      stopPreview();
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      const audio = new Audio(url);
+      audio.volume = previewVolume;
+      audio.play();
+      audioRef.current = audio;
+      setPlayingId(musicId);
+
+      audio.addEventListener('ended', () => {
+        setPlayingId(null);
+        audioRef.current = null;
+      });
+    }
+  };
+
+  const stopPreview = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setPlayingId(null);
+  };
+
+  useEffect(() => {
+    return () => {
+      stopPreview();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = previewVolume;
+    }
+  }, [previewVolume]);
 
   return (
     <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
@@ -58,6 +104,17 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
           </Label>
         </div>
 
+        <div className="flex items-center space-x-2">
+          <Volume2 className="h-4 w-4 text-gray-500" />
+          <Slider
+            value={[previewVolume]}
+            max={1}
+            step={0.01}
+            onValueChange={(value) => setPreviewVolume(value[0])}
+            className="w-32"
+          />
+        </div>
+
         {useMusic && (
           <RadioGroup
             value={selectedMusic}
@@ -76,8 +133,28 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
                   htmlFor={option.id}
                   className="flex flex-col p-4 border-2 rounded-xl cursor-pointer hover:bg-blue-50 peer-data-[state=checked]:border-blue-500 peer-data-[state=checked]:bg-blue-50"
                 >
-                  <span className="font-semibold text-lg">{option.name}</span>
-                  <span className="text-sm text-gray-500">{option.description}</span>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <span className="font-semibold text-lg">{option.name}</span>
+                      <p className="text-sm text-gray-500">{option.description}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        togglePreview(option.id, option.url);
+                      }}
+                      className="ml-2"
+                    >
+                      {playingId === option.id ? (
+                        <Pause className="h-4 w-4" />
+                      ) : (
+                        <Play className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </Label>
               </div>
             ))}
