@@ -14,7 +14,6 @@ export function VoiceSelector({ selectedVoice, onVoiceSelect }: VoiceSelectorPro
   const [useVoice, setUseVoice] = useState(selectedVoice !== "no-voice");
 
   useEffect(() => {
-    // Initialize the voice state based on the selectedVoice prop
     setUseVoice(selectedVoice !== "no-voice");
   }, [selectedVoice]);
 
@@ -36,55 +35,72 @@ export function VoiceSelector({ selectedVoice, onVoiceSelect }: VoiceSelectorPro
     if (!checked) {
       onVoiceSelect("no-voice");
     } else if (selectedVoice === "no-voice") {
-      onVoiceSelect(voices[0].id); // Default to first voice when enabling
+      onVoiceSelect(voices[0].id);
     }
   };
 
   return (
-    <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
-      <div className="flex items-center space-x-3">
-        <Mic className="h-8 w-8 text-blue-500" />
-        <h2 className="text-2xl font-semibold text-blue-500">Story Narration</h2>
-      </div>
-
-      <div className="space-y-6">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="use-voice"
-            checked={useVoice}
-            onCheckedChange={handleVoiceToggle}
-            className="data-[state=checked]:bg-blue-500"
-          />
-          <Label htmlFor="use-voice" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Enable voice narration
-          </Label>
+    <div className="space-y-4">
+      <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
+        <div className="flex items-center space-x-3">
+          <Mic className="h-8 w-8 text-blue-500" />
+          <h2 className="text-2xl font-semibold text-blue-500">Story Narration</h2>
         </div>
 
-        {useVoice && (
-          <div className="space-y-2">
-            <Label>Select a voice</Label>
-            <Select
-              value={selectedVoice}
-              onValueChange={onVoiceSelect}
-              disabled={!useVoice}
+        <div className="space-y-6">
+          <div className="flex items-center space-x-3 bg-blue-50 p-4 rounded-xl">
+            <Checkbox
+              id="use-voice"
+              checked={useVoice}
+              onCheckedChange={handleVoiceToggle}
+              className="data-[state=checked]:bg-blue-500"
+            />
+            <Label 
+              htmlFor="use-voice" 
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a voice" />
-              </SelectTrigger>
-              <SelectContent>
-                {voices.map((voice) => (
-                  <SelectItem key={voice.id} value={voice.id}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{voice.name}</span>
-                      <span className="text-sm text-gray-500">{voice.description}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              Enable voice narration
+            </Label>
           </div>
-        )}
+
+          {useVoice && (
+            <div className="space-y-3">
+              <Label className="text-gray-700">Select a voice</Label>
+              <Select
+                value={selectedVoice}
+                onValueChange={onVoiceSelect}
+                disabled={!useVoice}
+              >
+                <SelectTrigger className="w-full p-4 text-lg bg-white border-gray-200 hover:border-blue-500 transition-colors">
+                  <SelectValue placeholder="Select a voice" />
+                </SelectTrigger>
+                <SelectContent>
+                  {voices.map((voice) => (
+                    <SelectItem 
+                      key={voice.id} 
+                      value={voice.id}
+                      className="py-3 px-4 hover:bg-blue-50"
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-900">{voice.name}</span>
+                        <span className="text-sm text-gray-500">{voice.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+      </Card>
+      
+      <div className="bg-blue-50 p-6 rounded-xl shadow-sm">
+        <p className="text-base text-gray-700 leading-relaxed">
+          <span className="font-bold text-blue-600">🎙️ Voice Selection:</span> Choose from our curated collection 
+          of professional narrators to bring your story to life. Each voice has been carefully selected to provide 
+          the perfect storytelling experience.
+        </p>
       </div>
-    </Card>
+    </div>
   );
 }
