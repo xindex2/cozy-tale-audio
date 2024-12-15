@@ -143,9 +143,9 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
               </div>
               <div className="space-y-6">
                 <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
-                  <DurationSelector
-                    selectedDuration={settings.duration}
-                    onDurationSelect={(duration) => setSettings({ ...settings, duration })}
+                  <LanguageSelector
+                    selectedLanguage={settings.language}
+                    onLanguageSelect={(language) => setSettings({ ...settings, language })}
                   />
                 </div>
               </div>
@@ -159,11 +159,11 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
               />
             </div>
 
-            {/* Language Section */}
+            {/* Duration Section */}
             <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
-              <LanguageSelector
-                selectedLanguage={settings.language}
-                onLanguageSelect={(language) => setSettings({ ...settings, language })}
+              <DurationSelector
+                selectedDuration={settings.duration}
+                onDurationSelect={(duration) => setSettings({ ...settings, duration })}
               />
             </div>
 
