@@ -37,12 +37,12 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
       <div className="container mx-auto px-4">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="text-center mb-4 animate-fade-in space-y-4 pt-8">
+          <div className="text-center mb-4 space-y-4 pt-8">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-[#1a237e] via-[#1565c0] to-[#0288d1] bg-clip-text text-transparent">
               Bedtime Stories AI
             </h1>
 
-            {/* Features Section - Moved here */}
+            {/* Features Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-8">
               <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100">
                 <div className="flex flex-col items-center text-center space-y-3">
@@ -81,9 +81,17 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
               </Card>
             </div>
 
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-              Create personalized bedtime stories with AI-powered storytelling
-            </p>
+            <div className="space-y-4">
+              <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+                Create personalized bedtime stories with AI-powered storytelling that adapts to your child's age and interests.
+              </p>
+              <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
+                Simply choose your preferences below - select the age group, story duration, preferred voice, and theme. Our AI will craft a unique, engaging story complete with professional narration and optional background music. Each story comes with interactive features to enhance comprehension and make bedtime reading both fun and educational.
+              </p>
+              <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
+                After the story, engage with our AI-powered quiz to check understanding, or use the chat feature to discuss the story's themes and characters. Every story can be saved to your library for future reading sessions.
+              </p>
+            </div>
           </div>
 
           <div className="space-y-6 pb-8">
