@@ -100,7 +100,7 @@ export default function Auth() {
             },
           }}
           providers={[]}
-          redirectTo={window.location.origin + "/auth/callback"}
+          redirectTo={`${window.location.origin}/auth/callback`}
           showLinks={true}
         />
       </Card>
