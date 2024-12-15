@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { debounce } from "lodash";
 
 interface StoryDisplayProps {
@@ -34,31 +34,41 @@ export function StoryDisplay({ text, audioUrl, isPlaying, currentTime, duration 
     };
   }, []);
 
+  let wordCount = 0;
+  
   return (
     <div 
       ref={containerRef}
       className="prose prose-lg max-w-none space-y-4 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto"
     >
-      {text.split(". ").map((sentence, index) => (
-        <p key={index} className="text-gray-800 leading-relaxed">
-          {sentence.split(" ").map((word, wordIndex) => {
-            const globalWordIndex = words.slice(0, index).length + wordIndex;
-            return (
-              <span
-                key={wordIndex}
-                className={`transition-all duration-200 ${
-                  globalWordIndex <= currentWordIndex 
-                    ? "text-blue-600 font-semibold" 
-                    : ""
-                }`}
-              >
-                {word}{" "}
-              </span>
-            );
-          })}
-          {index < text.split(". ").length - 1 ? ". " : ""}
-        </p>
-      ))}
+      {text.split(". ").map((sentence, index) => {
+        const sentenceWords = sentence.split(" ");
+        const sentenceStartIndex = wordCount;
+        wordCount += sentenceWords.length;
+        
+        return (
+          <p key={index} className="text-gray-800 leading-relaxed">
+            {sentenceWords.map((word, wordIndex) => {
+              const globalWordIndex = sentenceStartIndex + wordIndex;
+              return (
+                <span
+                  key={wordIndex}
+                  className={`transition-colors duration-200 ${
+                    globalWordIndex === currentWordIndex 
+                      ? "bg-blue-200 font-semibold" 
+                      : globalWordIndex < currentWordIndex
+                      ? "text-gray-500"
+                      : ""
+                  }`}
+                >
+                  {word}{" "}
+                </span>
+              );
+            })}
+            {index < text.split(". ").length - 1 ? ". " : ""}
+          </p>
+        );
+      })}
     </div>
   );
 }

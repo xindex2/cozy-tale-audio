@@ -32,13 +32,13 @@ export function AudioManager({
           const audio = new Audio(voiceUrl);
           audio.volume = isMuted ? 0 : volume;
           
-          if (isPlaying) {
-            await audio.play();
-          }
-          
           audio.ontimeupdate = () => {
             onTimeUpdate?.(audio.currentTime);
           };
+          
+          if (isPlaying) {
+            await audio.play();
+          }
           
           voiceRef.current = audio;
         } catch (error) {
@@ -64,7 +64,7 @@ export function AudioManager({
           }
           const audio = new Audio(backgroundMusicUrl);
           audio.loop = true;
-          audio.volume = isMuted ? 0 : volume * 0.3;
+          audio.volume = isMuted ? 0 : volume * 0.15; // Set background music to 15% of main volume
           
           if (isPlaying) {
             await audio.play();
@@ -101,7 +101,7 @@ export function AudioManager({
       voiceRef.current.volume = isMuted ? 0 : volume;
     }
     if (musicRef.current) {
-      musicRef.current.volume = isMuted ? 0 : volume * 0.3;
+      musicRef.current.volume = isMuted ? 0 : volume * 0.15; // Keep background music at 15%
     }
   }, [volume, isMuted]);
 
