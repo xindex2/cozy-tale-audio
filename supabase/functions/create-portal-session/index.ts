@@ -32,34 +32,20 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
-    const { priceId } = await req.json();
-
     const customers = await stripe.customers.list({
       email: email,
       limit: 1
     });
 
-    let customer_id = undefined;
-    if (customers.data.length > 0) {
-      customer_id = customers.data[0].id;
+    if (customers.data.length === 0) {
+      throw new Error('No customer found');
     }
 
-    console.log('Creating payment session...');
-    const session = await stripe.checkout.sessions.create({
-      customer: customer_id,
-      customer_email: customer_id ? undefined : email,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      success_url: `${req.headers.get('origin')}/billing?success=true`,
-      cancel_url: `${req.headers.get('origin')}/pricing?success=false`,
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customers.data[0].id,
+      return_url: `${req.headers.get('origin')}/billing`,
     });
 
-    console.log('Payment session created:', session.id);
     return new Response(
       JSON.stringify({ url: session.url }),
       { 
@@ -68,7 +54,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error creating payment session:', error);
+    console.error('Error creating portal session:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 

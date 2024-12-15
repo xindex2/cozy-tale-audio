@@ -3,17 +3,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function Billing() {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { data: subscription, isLoading } = useQuery({
     queryKey: ['subscription-status'],
     queryFn: async () => {
+      const session = await supabase.auth.getSession();
+      if (!session.data.session) {
+        navigate('/auth');
+        return null;
+      }
+
       const response = await fetch('/functions/v1/check-subscription', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          'Authorization': `Bearer ${session.data.session.access_token}`,
         },
       });
       if (!response.ok) throw new Error('Failed to fetch subscription status');
@@ -23,13 +31,20 @@ export default function Billing() {
 
   const handleManageSubscription = async () => {
     try {
+      const session = await supabase.auth.getSession();
+      if (!session.data.session) {
+        navigate('/auth');
+        return;
+      }
+
       const response = await fetch('/functions/v1/create-portal-session', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          'Authorization': `Bearer ${session.data.session.access_token}`,
         },
       });
-      const { url } = await response.json();
+      const { url, error } = await response.json();
+      if (error) throw new Error(error);
       if (url) window.location.href = url;
     } catch (error) {
       toast({
@@ -61,9 +76,16 @@ export default function Billing() {
                 {subscription?.subscribed ? "Active" : "No active subscription"}
               </p>
             </div>
-            <Button onClick={handleManageSubscription}>
-              Manage Subscription
-            </Button>
+            <div className="flex gap-4">
+              <Button onClick={handleManageSubscription}>
+                Manage Subscription
+              </Button>
+              {!subscription?.subscribed && (
+                <Button variant="outline" onClick={() => navigate('/pricing')}>
+                  View Plans
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

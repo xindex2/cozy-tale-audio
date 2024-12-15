@@ -37,18 +37,24 @@ export default function Pricing() {
 
   const handleSubscribe = async (priceId: string) => {
     try {
+      const session = await supabase.auth.getSession();
+      if (!session.data.session) {
+        navigate('/auth?redirect=/pricing');
+        return;
+      }
+
       const response = await fetch('/functions/v1/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          'Authorization': `Bearer ${session.data.session.access_token}`,
         },
+        body: JSON.stringify({ priceId }),
       });
 
-      const { url } = await response.json();
-      if (url) {
-        window.location.href = url;
-      }
+      const { url, error } = await response.json();
+      if (error) throw new Error(error);
+      if (url) window.location.href = url;
     } catch (error) {
       toast({
         title: "Error",
