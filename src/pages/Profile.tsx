@@ -8,11 +8,14 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { Tables } from "@/integrations/supabase/types";
+
+type Profile = Tables<'profiles'>;
 
 export default function Profile() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
@@ -52,7 +55,7 @@ export default function Profile() {
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      const filePath = `${profile.id}-${Math.random()}.${fileExt}`;
+      const filePath = `${profile?.id}-${Math.random()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -69,13 +72,14 @@ export default function Profile() {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
-        .eq('id', profile.id);
+        .eq('id', profile?.id);
 
       if (updateError) {
         throw updateError;
       }
 
-      setProfile({ ...profile, avatar_url: publicUrl });
+      setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
+      
       toast({
         title: "Success",
         description: "Avatar updated successfully",
@@ -115,7 +119,7 @@ export default function Profile() {
             <div className="space-y-6">
               <div className="flex flex-col items-center gap-4">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={profile?.avatar_url} />
+                  <AvatarImage src={profile?.avatar_url ?? undefined} />
                   <AvatarFallback>{profile?.email?.[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex items-center gap-4">
