@@ -3,24 +3,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-
-interface Story {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-}
+import { StoriesTable } from "@/components/dashboard/StoriesTable";
+import { DashboardActions } from "@/components/dashboard/DashboardActions";
+import { Story } from "@/types/story";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -78,12 +65,14 @@ export default function Dashboard() {
       return data as Story[];
     },
     retry: 1,
-    onError: (error) => {
-      toast({
-        variant: "destructive",
-        title: "Error fetching stories",
-        description: error instanceof Error ? error.message : "An error occurred while fetching stories",
-      });
+    meta: {
+      onError: (error: Error) => {
+        toast({
+          variant: "destructive",
+          title: "Error fetching stories",
+          description: error.message || "An error occurred while fetching stories",
+        });
+      }
     }
   });
 
@@ -165,53 +154,16 @@ export default function Dashboard() {
       <Header />
       <main className="container py-8">
         <div className="flex flex-col gap-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">My Stories</h1>
-            <div className="flex gap-4">
-              <Button onClick={handleSubscribe} disabled={isLoading} className="bg-purple-600 hover:bg-purple-700">
-                {isLoading ? "Loading..." : "Upgrade to Pro"}
-              </Button>
-              <Button onClick={handleCreateNew} className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Create New Story
-              </Button>
-            </div>
-          </div>
+          <DashboardActions
+            onCreateNew={handleCreateNew}
+            onSubscribe={handleSubscribe}
+            isLoading={isLoading}
+          />
 
           {storiesLoading ? (
             <div className="text-center py-8">Loading stories...</div>
           ) : stories && stories.length > 0 ? (
-            <div className="bg-white rounded-lg shadow">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {stories.map((story) => (
-                    <TableRow key={story.id}>
-                      <TableCell className="font-medium">{story.title}</TableCell>
-                      <TableCell>
-                        {new Date(story.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(story.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <StoriesTable stories={stories} onDelete={handleDelete} />
           ) : (
             <div className="text-center py-8 bg-white rounded-lg shadow">
               <p className="text-gray-500">No stories yet. Create your first story!</p>
