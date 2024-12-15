@@ -40,67 +40,57 @@ export function VoiceSelector({ selectedVoice, onVoiceSelect }: VoiceSelectorPro
   };
 
   return (
-    <div className="space-y-4">
-      <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
-        <div className="flex items-center space-x-3">
-          <Mic className="h-8 w-8 text-blue-500" />
-          <h2 className="text-2xl font-semibold text-blue-500">Story Narration</h2>
-        </div>
-
-        <div className="space-y-6">
-          <div className="flex items-center space-x-3 bg-blue-50 p-4 rounded-xl">
-            <Checkbox
-              id="use-voice"
-              checked={useVoice}
-              onCheckedChange={handleVoiceToggle}
-              className="data-[state=checked]:bg-blue-500"
-            />
-            <Label 
-              htmlFor="use-voice" 
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Enable voice narration
-            </Label>
-          </div>
-
-          {useVoice && (
-            <div className="space-y-3">
-              <Label className="text-gray-700">Select a voice</Label>
-              <Select
-                value={selectedVoice}
-                onValueChange={onVoiceSelect}
-                disabled={!useVoice}
-              >
-                <SelectTrigger className="w-full p-4 text-lg bg-white border-gray-200 hover:border-blue-500 transition-colors">
-                  <SelectValue placeholder="Select a voice" />
-                </SelectTrigger>
-                <SelectContent>
-                  {voices.map((voice) => (
-                    <SelectItem 
-                      key={voice.id} 
-                      value={voice.id}
-                      className="py-3 px-4 hover:bg-blue-50"
-                    >
-                      <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">{voice.name}</span>
-                        <span className="text-sm text-gray-500">{voice.description}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </div>
-      </Card>
-      
-      <div className="bg-blue-50 p-6 rounded-xl shadow-sm">
-        <p className="text-base text-gray-700 leading-relaxed">
-          <span className="font-bold text-blue-600">🎙️ Voice Selection:</span> Choose from our curated collection 
-          of professional narrators to bring your story to life. Each voice has been carefully selected to provide 
-          the perfect storytelling experience.
-        </p>
+    <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
+      <div className="flex items-center space-x-3">
+        <Mic className="h-8 w-8 text-blue-500" />
+        <h2 className="text-2xl font-semibold text-blue-500">Story Narration</h2>
       </div>
-    </div>
+
+      <div className="space-y-6">
+        <div className="flex items-center space-x-3 bg-blue-50 p-4 rounded-xl">
+          <Checkbox
+            id="use-voice"
+            checked={useVoice}
+            onCheckedChange={handleVoiceToggle}
+            className="data-[state=checked]:bg-blue-500"
+          />
+          <Label 
+            htmlFor="use-voice" 
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Enable voice narration
+          </Label>
+        </div>
+
+        {useVoice && (
+          <div className="space-y-3">
+            <Label className="text-gray-700">Select a voice</Label>
+            <Select
+              value={selectedVoice}
+              onValueChange={onVoiceSelect}
+              disabled={!useVoice}
+            >
+              <SelectTrigger className="w-full p-4 text-lg bg-white border-gray-200 hover:border-blue-500 transition-colors rounded-xl">
+                <SelectValue placeholder="Select a voice" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-gray-200 rounded-xl shadow-lg">
+                {voices.map((voice) => (
+                  <SelectItem 
+                    key={voice.id} 
+                    value={voice.id}
+                    className="py-3 px-4 hover:bg-blue-50 transition-colors cursor-pointer"
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium text-gray-900">{voice.name}</span>
+                      <span className="text-sm text-gray-500">{voice.description}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+    </Card>
   );
 }
