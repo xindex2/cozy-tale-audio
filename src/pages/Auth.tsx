@@ -5,19 +5,41 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Book } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AuthPage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
+      if (event === 'SIGNED_UP') {
+        toast({
+          title: "Welcome!",
+          description: "Your account has been created successfully.",
+        });
+      } else if (event === 'SIGNED_IN') {
         navigate("/dashboard");
+      } else if (event === 'USER_DELETED' || event === 'SIGNED_OUT') {
+        navigate("/");
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    // Listen for auth errors
+    const authListener = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'USER_UPDATED') {
+        toast({
+          title: "Success",
+          description: "Your profile has been updated.",
+        });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      authListener.data.subscription.unsubscribe();
+    };
+  }, [navigate, toast]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-500 flex items-center justify-center p-4">
@@ -54,6 +76,21 @@ export default function AuthPage() {
                 confirmation_text: 'Check your email for the confirmation link',
               },
             },
+          }}
+          onError={(error) => {
+            if (error.message.includes('user_already_exists')) {
+              toast({
+                title: "Account exists",
+                description: "An account with this email already exists. Please sign in instead.",
+                variant: "destructive",
+              });
+            } else {
+              toast({
+                title: "Error",
+                description: error.message,
+                variant: "destructive",
+              });
+            }
           }}
           view="sign_up"
           showLinks={true}
