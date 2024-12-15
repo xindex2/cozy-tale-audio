@@ -9,38 +9,37 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SubscriptionPlanDialog } from "@/components/admin/SubscriptionPlanDialog";
 import { SubscriptionPlansTable } from "@/components/admin/SubscriptionPlansTable";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
   const [showPlanDialog, setShowPlanDialog] = useState(false);
 
-  useEffect(() => {
-    const checkAdmin = async () => {
+  // Check if user is authenticated and admin
+  const { data: adminCheck, isLoading: isCheckingAdmin } = useQuery({
+    queryKey: ['admin-check'],
+    queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        navigate("/auth");
-        return;
+        throw new Error('Not authenticated');
       }
 
-      const { data, error } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('is_admin')
         .eq('id', session.user.id)
         .single();
 
-      if (error || !data?.is_admin) {
-        navigate("/dashboard");
-        return;
+      if (error || !profile?.is_admin) {
+        throw new Error('Not authorized');
       }
 
-      setIsAdmin(true);
-    };
+      return true;
+    },
+  });
 
-    checkAdmin();
-  }, [navigate]);
-
-  const { data: stats, isLoading } = useQuery({
+  // Fetch stats only if user is admin
+  const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
       const [usersResponse, storiesResponse] = await Promise.all([
@@ -53,10 +52,38 @@ export default function AdminDashboard() {
         stories: storiesResponse.count || 0,
       };
     },
-    enabled: isAdmin,
+    enabled: !!adminCheck,
   });
 
-  if (!isAdmin) return null;
+  // Show loading state
+  if (isCheckingAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
+        <Header />
+        <main className="container py-8 flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show error if not admin
+  if (!adminCheck) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
+        <Header />
+        <main className="container py-8">
+          <Alert variant="destructive">
+            <AlertDescription>
+              You don't have permission to access this page. Please contact an administrator if you believe this is an error.
+            </AlertDescription>
+          </Alert>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
@@ -67,7 +94,7 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         </div>
 
-        {isLoading ? (
+        {isLoadingStats ? (
           <div className="flex justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           </div>
