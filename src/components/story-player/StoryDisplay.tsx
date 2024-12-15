@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { debounce } from "lodash";
 
 interface StoryDisplayProps {
@@ -11,50 +11,40 @@ interface StoryDisplayProps {
 
 export function StoryDisplay({ text, audioUrl, isPlaying, currentTime, duration }: StoryDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<ResizeObserver | null>(null);
-  const sentences = text.split(". ").map(s => s.trim() + ".");
-  const sentencesPerSecond = duration > 0 ? sentences.length / duration : 0;
-  const currentSentenceIndex = Math.floor(currentTime * sentencesPerSecond);
+  const [height, setHeight] = useState<number | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const debouncedResize = debounce(() => {
-      // Only observe size changes when the element is in the viewport
-      if (container.offsetParent !== null) {
-        const { scrollHeight, clientHeight } = container;
-        if (scrollHeight > clientHeight) {
-          container.scrollTop = scrollHeight - clientHeight;
-        }
+    const updateHeight = () => {
+      if (container && container.offsetParent !== null) {
+        const viewportHeight = window.innerHeight;
+        const maxHeight = Math.floor(viewportHeight * 0.6); // 60vh
+        setHeight(maxHeight);
       }
-    }, 100);
+    };
 
-    try {
-      observerRef.current = new ResizeObserver((entries) => {
-        // Check if the element is still in the DOM before processing
-        if (container.isConnected) {
-          debouncedResize();
-        }
-      });
+    const debouncedResize = debounce(updateHeight, 100);
+    updateHeight(); // Initial height
 
-      observerRef.current.observe(container);
-    } catch (error) {
-      console.warn('ResizeObserver error handled:', error);
-    }
+    window.addEventListener('resize', debouncedResize);
 
     return () => {
+      window.removeEventListener('resize', debouncedResize);
       debouncedResize.cancel();
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
     };
   }, []);
   
+  const sentences = text.split(". ").map(s => s.trim() + ".");
+  const sentencesPerSecond = duration > 0 ? sentences.length / duration : 0;
+  const currentSentenceIndex = Math.floor(currentTime * sentencesPerSecond);
+
   return (
     <div 
       ref={containerRef}
-      className="prose prose-lg max-w-none space-y-4 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto max-h-[60vh]"
+      style={{ maxHeight: height ? `${height}px` : '60vh' }}
+      className="prose prose-lg max-w-none space-y-4 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto scroll-smooth"
     >
       {sentences.map((sentence, index) => (
         <p 

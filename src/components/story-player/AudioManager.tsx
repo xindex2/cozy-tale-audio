@@ -61,10 +61,21 @@ export function AudioManager({
         try {
           if (musicRef.current) {
             musicRef.current.pause();
+            musicRef.current = null;
           }
+
           const audio = new Audio(backgroundMusicUrl);
           audio.loop = true;
           audio.volume = isMuted ? 0 : volume * 0.15; // Set background music to 15% of main volume
+          
+          // Preload the audio
+          audio.preload = "auto";
+          
+          // Wait for the audio to be loaded before playing
+          await new Promise((resolve, reject) => {
+            audio.oncanplaythrough = resolve;
+            audio.onerror = reject;
+          });
           
           if (isPlaying) {
             await audio.play();
@@ -74,8 +85,8 @@ export function AudioManager({
         } catch (error) {
           console.error("Error playing background music:", error);
           toast({
-            title: "Audio Error",
-            description: "Failed to play background music. Please try again.",
+            title: "Music Error",
+            description: "Failed to play background music. Will continue without it.",
             variant: "destructive",
           });
         }
@@ -101,7 +112,7 @@ export function AudioManager({
       voiceRef.current.volume = isMuted ? 0 : volume;
     }
     if (musicRef.current) {
-      musicRef.current.volume = isMuted ? 0 : volume * 0.15; // Keep background music at 15%
+      musicRef.current.volume = isMuted ? 0 : volume * 0.15;
     }
   }, [volume, isMuted]);
 
