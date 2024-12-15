@@ -23,6 +23,16 @@ export default function AuthPage() {
         navigate("/dashboard");
       } else if (event === "SIGNED_OUT") {
         navigate("/");
+      } else if (event === "USER_UPDATED") {
+        toast({
+          title: "Success",
+          description: "Your profile has been updated.",
+        });
+      } else if (event === "PASSWORD_RECOVERY") {
+        toast({
+          title: "Check your email",
+          description: "We've sent you a password reset link.",
+        });
       }
     });
 
@@ -32,7 +42,7 @@ export default function AuthPage() {
   }, [navigate, toast]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-blue-500 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-white to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-6 space-y-6">
         <div className="flex items-center justify-center gap-2 text-blue-600">
           <Book className="h-8 w-8" />
@@ -49,6 +59,16 @@ export default function AuthPage() {
                   brandAccent: '#1d4ed8',
                 }
               }
+            },
+            style: {
+              button: {
+                borderRadius: '0.375rem',
+                height: '2.5rem',
+              },
+              input: {
+                borderRadius: '0.375rem',
+                height: '2.5rem',
+              },
             }
           }}
           providers={[]}
@@ -65,10 +85,28 @@ export default function AuthPage() {
                 link_text: 'Don\'t have an account? Sign up',
                 confirmation_text: 'Check your email for the confirmation link',
               },
+              sign_in: {
+                email_label: 'Email',
+                password_label: 'Password',
+                email_input_placeholder: 'Your email address',
+                password_input_placeholder: 'Your password',
+                button_label: 'Sign in',
+                loading_button_label: 'Signing in ...',
+                social_provider_text: 'Sign in with {{provider}}',
+                link_text: 'Already have an account? Sign in',
+              },
             },
           }}
           view="sign_in"
           showLinks={true}
+          onError={(error) => {
+            console.error('Auth error:', error);
+            toast({
+              title: "Authentication Error",
+              description: error.message || "Invalid login credentials. Please check your email and password.",
+              variant: "destructive",
+            });
+          }}
         />
       </Card>
     </div>
