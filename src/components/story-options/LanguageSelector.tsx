@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Globe } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface LanguageSelectorProps {
   selectedLanguage: string;
@@ -22,10 +23,7 @@ export function LanguageSelector({ selectedLanguage, onLanguageSelect }: Languag
     { code: "zh", name: "Chinese" },
     { code: "ru", name: "Russian" },
     { code: "ar", name: "Arabic" },
-    { code: "tr", name: "Turkish" },
-    { code: "vi", name: "Vietnamese" },
-    { code: "th", name: "Thai" },
-    { code: "id", name: "Indonesian" }
+    { code: "tr", name: "Turkish" }
   ];
 
   return (
@@ -34,17 +32,18 @@ export function LanguageSelector({ selectedLanguage, onLanguageSelect }: Languag
         <Globe className="h-8 w-8 text-blue-500" />
         <h2 className="text-2xl font-semibold text-blue-500">Language</h2>
       </div>
-      <select
-        value={selectedLanguage}
-        onChange={(e) => onLanguageSelect(e.target.value)}
-        className="w-full p-4 text-lg border rounded-2xl bg-white border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-      >
-        {languages.map((lang) => (
-          <option key={lang.code} value={lang.code}>
-            {lang.name}
-          </option>
-        ))}
-      </select>
+      <Select value={selectedLanguage} onValueChange={onLanguageSelect}>
+        <SelectTrigger className="w-full p-4 text-lg bg-white">
+          <SelectValue placeholder="Select a language" />
+        </SelectTrigger>
+        <SelectContent>
+          {languages.map((lang) => (
+            <SelectItem key={lang.code} value={lang.code}>
+              {lang.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </Card>
   );
 }

@@ -5,6 +5,7 @@ import { ThemeSelector } from "./story-options/ThemeSelector";
 import { DurationSelector } from "./story-options/DurationSelector";
 import { MusicSelector } from "./story-options/MusicSelector";
 import { VoiceSelector } from "./story-options/VoiceSelector";
+import { LanguageSelector } from "./story-options/LanguageSelector";
 import { Play, BookOpen, Sparkles, MessageCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
