@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Book } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -39,6 +39,16 @@ export default function AuthPage() {
         toast({
           title: "Check your email",
           description: "We've sent you a password reset link.",
+        });
+      } else if (event === "USER_DELETED") {
+        toast({
+          title: "Account deleted",
+          description: "Your account has been successfully deleted.",
+        });
+      } else if (event === "SIGNED_UP") {
+        toast({
+          title: "Welcome!",
+          description: "Your account has been created successfully.",
         });
       }
     });
@@ -76,6 +86,17 @@ export default function AuthPage() {
                 borderRadius: '0.375rem',
                 height: '2.5rem',
               },
+              anchor: {
+                color: '#2563eb',
+              },
+              message: {
+                borderRadius: '0.375rem',
+                backgroundColor: '#fee2e2',
+                borderColor: '#fecaca',
+                color: '#dc2626',
+                padding: '0.75rem',
+                marginBottom: '1rem',
+              }
             }
           }}
           localization={{
@@ -87,7 +108,8 @@ export default function AuthPage() {
                 password_input_placeholder: 'Your password',
                 button_label: 'Sign up',
                 loading_button_label: 'Signing up ...',
-                link_text: 'Don\'t have an account? Sign up',
+                social_provider_text: 'Sign in with {{provider}}',
+                link_text: "Don't have an account? Sign up",
                 confirmation_text: 'Check your email for the confirmation link',
               },
               sign_in: {
@@ -97,12 +119,20 @@ export default function AuthPage() {
                 password_input_placeholder: 'Your password',
                 button_label: 'Sign in',
                 loading_button_label: 'Signing in ...',
+                social_provider_text: 'Sign in with {{provider}}',
                 link_text: 'Already have an account? Sign in',
               },
             },
           }}
           view="sign_in"
           showLinks={true}
+          onError={(error) => {
+            toast({
+              variant: "destructive",
+              title: "Authentication Error",
+              description: error.message || "An error occurred during authentication.",
+            });
+          }}
         />
       </Card>
     </div>
