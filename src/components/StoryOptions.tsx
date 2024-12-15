@@ -25,8 +25,8 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
   const [settings, setSettings] = useState<StorySettings>({
     ageGroup: "6-8",
     duration: 5,
-    music: "no-music", // Default to no music
-    voice: "EXAVITQu4vr4xnSDxMaL", // Default to Sarah's voice
+    music: "no-music",
+    voice: "EXAVITQu4vr4xnSDxMaL",
     theme: "fantasy",
     language: "en"
   });
@@ -67,11 +67,19 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
                   />
                 </div>
               </div>
-              <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
-                <AgeGroupSelector
-                  selectedAge={settings.ageGroup}
-                  onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
-                />
+              <div className="space-y-6">
+                <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
+                  <AgeGroupSelector
+                    selectedAge={settings.ageGroup}
+                    onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
+                  />
+                </div>
+                <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
+                  <DurationSelector
+                    selectedDuration={settings.duration}
+                    onDurationSelect={(duration) => setSettings({ ...settings, duration })}
+                  />
+                </div>
               </div>
             </div>
 

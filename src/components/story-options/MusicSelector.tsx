@@ -14,16 +14,19 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
   const [useMusic, setUseMusic] = useState(selectedMusic !== "no-music");
 
   useEffect(() => {
-    // Initialize the music state based on the selectedMusic prop
     setUseMusic(selectedMusic !== "no-music");
   }, [selectedMusic]);
 
   const musicOptions = [
-    { id: "gentle-lullaby", name: "Gentle Lullaby", description: "Soft and calming melody perfect for bedtime" },
-    { id: "peaceful-dreams", name: "Peaceful Dreams", description: "Soothing instrumental background music" },
-    { id: "soft-piano", name: "Soft Piano", description: "Delicate piano melodies" },
-    { id: "nature-sounds", name: "Nature Sounds", description: "Calming nature ambiance" },
-    { id: "ocean-waves", name: "Ocean Waves", description: "Gentle ocean waves and soft music" },
+    { id: "gentle-lullaby", name: "Gentle Lullaby", description: "Soft and calming melody perfect for bedtime", url: "https://cdn.pixabay.com/download/audio/2023/09/05/audio_168a3e0caa.mp3" },
+    { id: "sleeping-lullaby", name: "Sleeping Lullaby", description: "Peaceful lullaby for sweet dreams", url: "https://cdn.pixabay.com/download/audio/2023/05/16/audio_166b9c7242.mp3" },
+    { id: "water-dreams", name: "Water Dreams", description: "Gentle water sounds with soft music", url: "https://cdn.pixabay.com/download/audio/2022/02/23/audio_ea70ad08e3.mp3" },
+    { id: "relaxing-piano", name: "Relaxing Piano", description: "Soothing piano melodies", url: "https://cdn.pixabay.com/download/audio/2024/11/04/audio_4956b4edd1.mp3" },
+    { id: "healing-fountain", name: "Healing Fountain", description: "Water fountain with healing music", url: "https://cdn.pixabay.com/download/audio/2024/09/10/audio_6e5d7d1912.mp3" },
+    { id: "ocean-piano", name: "Ocean Piano", description: "Piano with calming ocean waves", url: "https://cdn.pixabay.com/download/audio/2021/09/09/audio_478f62eb43.mp3" },
+    { id: "forest-birds", name: "Forest Birds", description: "Peaceful forest ambiance with birds", url: "https://cdn.pixabay.com/download/audio/2022/02/12/audio_8ca49a7f20.mp3" },
+    { id: "sleep-music", name: "Sleep Music", description: "Gentle music for peaceful sleep", url: "https://cdn.pixabay.com/download/audio/2023/10/30/audio_66f4e26e42.mp3" },
+    { id: "guided-sleep", name: "Guided Sleep", description: "Relaxing guided sleep music", url: "https://cdn.pixabay.com/download/audio/2024/03/11/audio_2412defc6f.mp3" },
   ];
 
   const handleMusicToggle = (checked: boolean) => {
@@ -31,7 +34,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
     if (!checked) {
       onMusicSelect("no-music");
     } else if (selectedMusic === "no-music") {
-      onMusicSelect(musicOptions[0].id); // Default to first option when enabling
+      onMusicSelect(musicOptions[0].id);
     }
   };
 

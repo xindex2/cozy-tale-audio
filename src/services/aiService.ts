@@ -48,19 +48,17 @@ export const aiService = {
 
   async startChat(settings: StorySettings): Promise<StoryResponse> {
     try {
-      // Generate story text (mock implementation for now)
-      const storyText = "Once upon a time in a magical forest, there lived a curious young rabbit named Luna. Luna loved to explore the enchanted woods, making friends with all the woodland creatures she met along her journey. One day, she discovered a mysterious glowing flower that would change her life forever...";
+      const duration = settings.duration || 5; // Default to 5 minutes if not specified
+      const storyText = `Once upon a time in a magical forest, there lived a curious young rabbit named Luna. Luna loved to explore the enchanted woods, making friends with all the woodland creatures she met along her journey. One day, she discovered a mysterious glowing flower that would change her life forever...`;
       const title = "Luna's Magical Adventure";
       
       let audioUrl = null;
       let backgroundMusicUrl = null;
 
-      // Only generate audio if voice is selected and not "no-voice"
       if (settings.voice && settings.voice !== "no-voice") {
         audioUrl = await this.generateAudio(storyText, settings.voice);
       }
 
-      // Handle background music only if music is selected and not "no-music"
       if (settings.music && settings.music !== "no-music") {
         backgroundMusicUrl = `/assets/${settings.music}.mp3`;
       }
@@ -79,12 +77,10 @@ export const aiService = {
 
   async continueStory(message: string): Promise<StoryResponse> {
     try {
-      // Mock response for now - in production this would call your AI service
-      const responseText = `The story continues with your input: "${message}"... The magical flower began to glow even brighter as Luna approached it, casting sparkles of light all around the forest clearing...`;
+      const responseText = `${message}... The magical flower began to glow even brighter as Luna approached it, casting sparkles of light all around the forest clearing...`;
       
       let audioUrl = null;
       if (this.apiKey) {
-        // Use Sarah's voice as default for continuations
         audioUrl = await this.generateAudio(responseText, "EXAVITQu4vr4xnSDxMaL");
       }
 
@@ -105,7 +101,6 @@ export const aiService = {
     options: string[];
     correctAnswer: number;
   }>> {
-    // Mock quiz generation based on story content
     return [
       {
         question: "Who is the main character of the story?",
