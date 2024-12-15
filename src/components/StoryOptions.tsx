@@ -134,12 +134,6 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
                     onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
                   />
                 </div>
-                <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
-                  <AgeGroupSelector
-                    selectedAge={settings.ageGroup}
-                    onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
-                  />
-                </div>
               </div>
               <div className="space-y-6">
                 <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
@@ -149,6 +143,14 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Age Group Section */}
+            <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
+              <AgeGroupSelector
+                selectedAge={settings.ageGroup}
+                onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
+              />
             </div>
 
             {/* Theme Section */}
