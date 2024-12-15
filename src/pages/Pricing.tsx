@@ -6,6 +6,17 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
+interface SubscriptionPlan {
+  id: string;
+  name: string;
+  description: string | null;
+  price_amount: number;
+  price_currency: string;
+  stripe_price_id: string;
+  features: string[] | null;
+  is_active: boolean;
+}
+
 export default function Pricing() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -20,7 +31,7 @@ export default function Pricing() {
         .order('price_amount', { ascending: true });
       
       if (error) throw error;
-      return data;
+      return data as SubscriptionPlan[];
     },
   });
 
