@@ -4,15 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Users, BookOpen, Loader2, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SubscriptionPlanDialog } from "@/components/admin/SubscriptionPlanDialog";
 import { SubscriptionPlansTable } from "@/components/admin/SubscriptionPlansTable";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [showPlanDialog, setShowPlanDialog] = useState(false);
 
   // Check if user is authenticated and admin
@@ -39,23 +41,36 @@ export default function AdminDashboard() {
   });
 
   // Fetch stats only if user is admin
-  const { data: stats, isLoading: isLoadingStats } = useQuery({
+  const { data: stats, isLoading: isLoadingStats, error: statsError } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
-      const [usersResponse, storiesResponse] = await Promise.all([
-        supabase.from('profiles').select('count'),
-        supabase.from('stories').select('count'),
-      ]);
+      try {
+        const [usersResponse, storiesResponse] = await Promise.all([
+          supabase.from('profiles').select('count'),
+          supabase.from('stories').select('count'),
+        ]);
 
-      return {
-        users: usersResponse.count || 0,
-        stories: storiesResponse.count || 0,
-      };
+        if (usersResponse.error) throw usersResponse.error;
+        if (storiesResponse.error) throw storiesResponse.error;
+
+        return {
+          users: usersResponse.count || 0,
+          stories: storiesResponse.count || 0,
+        };
+      } catch (error) {
+        toast({
+          title: "Error loading stats",
+          description: "Failed to load dashboard statistics. Please try refreshing the page.",
+          variant: "destructive",
+        });
+        throw error;
+      }
     },
     enabled: !!adminCheck,
+    retry: 1,
   });
 
-  // Show loading state
+  // Show loading state while checking admin status
   if (isCheckingAdmin) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
@@ -98,6 +113,12 @@ export default function AdminDashboard() {
           <div className="flex justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           </div>
+        ) : statsError ? (
+          <Alert variant="destructive" className="mb-8">
+            <AlertDescription>
+              Failed to load dashboard statistics. Please try refreshing the page.
+            </AlertDescription>
+          </Alert>
         ) : (
           <>
             <div className="grid gap-6 md:grid-cols-2 mb-8">
