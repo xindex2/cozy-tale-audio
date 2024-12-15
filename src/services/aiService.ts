@@ -15,15 +15,15 @@ const generateStoryText = async (settings: StorySettings) => {
     short: {
       en: {
         title: "Luna's Quick Adventure",
-        story: "Once upon a time, Luna the rabbit found a magical flower in the forest. Its glow made all the animals gather around in wonder. They danced and played until sunset, making new friends."
+        story: "Once upon a time, in a magical forest, there lived a curious rabbit named Luna. One special morning, she discovered a glowing flower that sparkled with rainbow colors. The forest animals gathered around in wonder, sharing stories and becoming friends under its magical light. That day, Luna learned that the best adventures are the ones shared with new friends."
       },
       es: {
         title: "La Breve Aventura de Luna",
-        story: "Había una vez, Luna la coneja encontró una flor mágica en el bosque. Su brillo hizo que todos los animales se reunieran maravillados. Bailaron y jugaron hasta el atardecer, haciendo nuevos amigos."
+        story: "Había una vez, en un bosque mágico, vivía una coneja curiosa llamada Luna. Una mañana especial, descubrió una flor brillante que destellaba con colores del arcoíris. Los animales del bosque se reunieron maravillados, compartiendo historias y haciéndose amigos bajo su luz mágica. Ese día, Luna aprendió que las mejores aventuras son las que se comparten con nuevos amigos."
       },
       ar: {
         title: "مغامرة لونا القصيرة",
-        story: "ذات مرة، وجدت الأرنبة لونا زهرة سحرية في الغابة. جعل توهجها جميع الحيوانات تتجمع في دهشة. رقصوا ولعبوا حتى غروب الشمس، مكونين صداقات جديدة."
+        story: "ذات مرة، في غابة سحرية، عاشت أرنبة فضولية تدعى لونا. في صباح مميز، اكتشفت زهرة متوهجة تتلألأ بألوان قوس قزح. تجمعت حيوانات الغابة في دهشة، يتشاركون القصص ويصبحون أصدقاء تحت ضوئها السحري. في ذلك اليوم، تعلمت لونا أن أفضل المغامرات هي التي نشاركها مع الأصدقاء الجدد."
       }
     },
     medium: {
