@@ -3,7 +3,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Music } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface MusicSelectorProps {
   selectedMusic: string;
@@ -12,6 +12,11 @@ interface MusicSelectorProps {
 
 export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorProps) {
   const [useMusic, setUseMusic] = useState(selectedMusic !== "no-music");
+
+  useEffect(() => {
+    // Initialize the music state based on the selectedMusic prop
+    setUseMusic(selectedMusic !== "no-music");
+  }, [selectedMusic]);
 
   const musicOptions = [
     { id: "gentle-lullaby", name: "Gentle Lullaby", description: "Soft and calming melody perfect for bedtime" },
@@ -25,7 +30,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
     setUseMusic(checked);
     if (!checked) {
       onMusicSelect("no-music");
-    } else {
+    } else if (selectedMusic === "no-music") {
       onMusicSelect(musicOptions[0].id); // Default to first option when enabling
     }
   };
@@ -43,8 +48,11 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
             id="use-music"
             checked={useMusic}
             onCheckedChange={handleMusicToggle}
+            className="data-[state=checked]:bg-blue-500"
           />
-          <Label htmlFor="use-music">Enable background music</Label>
+          <Label htmlFor="use-music" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Enable background music
+          </Label>
         </div>
 
         {useMusic && (

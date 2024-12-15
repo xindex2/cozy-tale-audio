@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Mic } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface VoiceSelectorProps {
   selectedVoice: string;
@@ -12,6 +12,11 @@ interface VoiceSelectorProps {
 
 export function VoiceSelector({ selectedVoice, onVoiceSelect }: VoiceSelectorProps) {
   const [useVoice, setUseVoice] = useState(selectedVoice !== "no-voice");
+
+  useEffect(() => {
+    // Initialize the voice state based on the selectedVoice prop
+    setUseVoice(selectedVoice !== "no-voice");
+  }, [selectedVoice]);
 
   const voices = [
     { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", description: "Warm and friendly female voice" },
@@ -30,7 +35,7 @@ export function VoiceSelector({ selectedVoice, onVoiceSelect }: VoiceSelectorPro
     setUseVoice(checked);
     if (!checked) {
       onVoiceSelect("no-voice");
-    } else {
+    } else if (selectedVoice === "no-voice") {
       onVoiceSelect(voices[0].id); // Default to first voice when enabling
     }
   };
@@ -48,8 +53,11 @@ export function VoiceSelector({ selectedVoice, onVoiceSelect }: VoiceSelectorPro
             id="use-voice"
             checked={useVoice}
             onCheckedChange={handleVoiceToggle}
+            className="data-[state=checked]:bg-blue-500"
           />
-          <Label htmlFor="use-voice">Enable voice narration</Label>
+          <Label htmlFor="use-voice" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Enable voice narration
+          </Label>
         </div>
 
         {useVoice && (
