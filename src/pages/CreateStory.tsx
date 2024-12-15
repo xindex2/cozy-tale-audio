@@ -28,7 +28,7 @@ export default function CreateStory() {
         content,
         audio_url: audioUrl,
         background_music_url: backgroundMusicUrl,
-        settings: storySettings
+        settings: JSON.stringify(storySettings)
       });
 
     if (error) {

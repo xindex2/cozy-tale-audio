@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Pause, Play, SkipBack, Loader, BookOpen, List } from "lucide-react";
+import { Pause, Play, SkipBack, Loader } from "lucide-react";
 import type { StorySettings } from "./StoryOptions";
 import { aiService } from "@/services/aiService";
 import { ChatPanel } from "./story-player/ChatPanel";
@@ -23,7 +23,13 @@ interface QuizQuestion {
   correctAnswer: number;
 }
 
-export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onBack: () => void }) {
+interface StoryPlayerProps {
+  settings: StorySettings;
+  onBack: () => void;
+  onSave?: (title: string, content: string, audioUrl: string, backgroundMusicUrl: string) => void;
+}
+
+export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
   const [isMuted, setIsMuted] = useState(false);
@@ -66,6 +72,11 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
         setCurrentMusicUrl(backgroundMusicUrl);
       }
       setIsPlaying(true);
+
+      // If onSave is provided, call it with the story details
+      if (onSave) {
+        onSave(title || "Your Bedtime Story", text, audioUrl || "", backgroundMusicUrl || "");
+      }
     } catch (error) {
       console.error("Error starting story:", error);
       toast({
@@ -174,7 +185,6 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
   return (
     <div className="w-full max-w-7xl mx-auto p-4 lg:p-6 animate-fade-in">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-        {/* Story Section - Takes up 2/3 of the space on desktop */}
         <div className="lg:col-span-2 space-y-4">
           <Card className="p-4 lg:p-8 space-y-6 bg-gradient-to-r from-blue-50 to-blue-100 backdrop-blur-sm border border-blue-200">
             <div className="flex justify-between items-center">
@@ -222,7 +232,6 @@ export function StoryPlayer({ settings, onBack }: { settings: StorySettings; onB
           </Card>
         </div>
 
-        {/* Chat/Quiz Section - Takes up 1/3 of the space on desktop */}
         <div className="h-[600px] lg:h-[800px]">
           <ChatPanel
             messages={messages}
