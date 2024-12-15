@@ -15,10 +15,21 @@ import { Edit2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { SubscriptionPlanDialog } from "./SubscriptionPlanDialog";
 
+interface SubscriptionPlan {
+  id: string;
+  name: string;
+  description: string | null;
+  price_amount: number;
+  price_currency: string;
+  stripe_price_id: string;
+  features: string[] | null;
+  is_active: boolean;
+}
+
 export function SubscriptionPlansTable() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [editingPlan, setEditingPlan] = useState<any>(null);
+  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
 
   const { data: plans, isLoading } = useQuery({
     queryKey: ['subscription-plans'],
@@ -29,7 +40,7 @@ export function SubscriptionPlansTable() {
         .order('price_amount', { ascending: true });
 
       if (error) throw error;
-      return data;
+      return data as SubscriptionPlan[];
     },
   });
 
@@ -86,7 +97,7 @@ export function SubscriptionPlansTable() {
                 </TableCell>
                 <TableCell>
                   <ul className="list-disc list-inside">
-                    {plan.features?.map((feature: string, index: number) => (
+                    {Array.isArray(plan.features) && plan.features?.map((feature: string, index: number) => (
                       <li key={index}>{feature}</li>
                     ))}
                   </ul>
@@ -114,7 +125,7 @@ export function SubscriptionPlansTable() {
       <SubscriptionPlanDialog
         open={!!editingPlan}
         onOpenChange={(open) => !open && setEditingPlan(null)}
-        planToEdit={editingPlan}
+        planToEdit={editingPlan || undefined}
       />
     </>
   );
