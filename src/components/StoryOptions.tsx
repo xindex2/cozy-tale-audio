@@ -6,7 +6,8 @@ import { DurationSelector } from "./story-options/DurationSelector";
 import { MusicSelector } from "./story-options/MusicSelector";
 import { VoiceSelector } from "./story-options/VoiceSelector";
 import { LanguageSelector } from "./story-options/LanguageSelector";
-import { Play } from "lucide-react";
+import { Play, BookOpen, Sparkles, MessageCircle } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface StoryOptionsProps {
   onStart: (options: StorySettings) => void;
@@ -97,6 +98,45 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
                 selectedMusic={settings.music}
                 onMusicSelect={(music) => setSettings({ ...settings, music })}
               />
+            </div>
+
+            {/* Features Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+              <Card className="p-6 hover:shadow-lg transition-shadow bg-gradient-to-br from-blue-50 to-blue-100">
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Interactive Reading</h3>
+                  <p className="text-sm text-gray-600">
+                    Follow along with highlighted text as the story is narrated
+                  </p>
+                </div>
+              </Card>
+
+              <Card className="p-6 hover:shadow-lg transition-shadow bg-gradient-to-br from-purple-50 to-purple-100">
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">AI-Powered Quiz</h3>
+                  <p className="text-sm text-gray-600">
+                    Test comprehension with auto-generated questions
+                  </p>
+                </div>
+              </Card>
+
+              <Card className="p-6 hover:shadow-lg transition-shadow bg-gradient-to-br from-green-50 to-green-100">
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                    <MessageCircle className="w-6 h-6 text-green-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Story Discussion</h3>
+                  <p className="text-sm text-gray-600">
+                    Chat about the story and ask questions
+                  </p>
+                </div>
+              </Card>
             </div>
 
             {/* Start Button */}
