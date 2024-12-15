@@ -1,10 +1,7 @@
 import { Card } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { Mic } from "lucide-react";
-
-interface Voice {
-  name: string;
-  id: string;
-}
 
 interface VoiceSelectorProps {
   selectedVoice: string;
@@ -12,47 +9,42 @@ interface VoiceSelectorProps {
 }
 
 export function VoiceSelector({ selectedVoice, onVoiceSelect }: VoiceSelectorProps) {
-  // Map of ElevenLabs voices with their IDs
-  const voices: Voice[] = [
-    { name: "Aria", id: "9BWtsMINqrJLrRacOk9x" },
-    { name: "Roger", id: "CwhRBWXzGAHq8TQ4Fs17" },
-    { name: "Sarah", id: "EXAVITQu4vr4xnSDxMaL" },
-    { name: "Laura", id: "FGY2WhTYpPnrIDTdsKH5" },
-    { name: "Charlie", id: "IKne3meq5aSn9XLyUdCD" },
-    { name: "George", id: "JBFqnCBsd6RMkjVDRZzb" },
-    { name: "Callum", id: "N2lVS1w4EtoT3dr4eOWO" },
-    { name: "River", id: "SAz9YHcvj6GT2YYXdXww" },
-    { name: "Liam", id: "TX3LPaxmHKxFdv7VOQHJ" },
-    { name: "Charlotte", id: "XB0fDUnXU5powFXDhCwa" },
-    { name: "Alice", id: "Xb7hH8MSUJpSbSDYk0k2" },
-    { name: "Matilda", id: "XrExE9yKIg1WjnnlVkGX" },
-    { name: "Will", id: "bIHbv24MWmeRgasZH58o" },
-    { name: "Jessica", id: "cgSgspJ2msm6clMCkdW9" },
-    { name: "Eric", id: "cjVigY5qzO86Huf0OWal" },
-    { name: "Chris", id: "iP95p4xoKVk53GoZ742B" },
-    { name: "Brian", id: "nPczCjzI2devNBz1zQrb" },
-    { name: "Daniel", id: "onwK4e9ZLuTAKqWW03F9" },
-    { name: "Lily", id: "pFZP5JQG7iQjIQuC4Bku" },
-    { name: "Bill", id: "pqHfZKP75CvOlQylNhV4" }
+  const voices = [
+    { id: "no-voice", name: "No Voice (Text Only)", description: "Read the story without narration" },
+    { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", description: "Warm and friendly female voice" },
+    { id: "TX3LPaxmHKxFdv7VOQHJ", name: "Liam", description: "Gentle male storyteller" },
+    { id: "XB0fDUnXU5powFXDhCwa", name: "Charlotte", description: "Soft and soothing female voice" },
   ];
 
   return (
     <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
       <div className="flex items-center space-x-3">
         <Mic className="h-8 w-8 text-blue-500" />
-        <h2 className="text-2xl font-semibold text-blue-500">Voice</h2>
+        <h2 className="text-2xl font-semibold text-blue-500">Narrator Voice</h2>
       </div>
-      <select
+
+      <RadioGroup
         value={selectedVoice}
-        onChange={(e) => onVoiceSelect(e.target.value)}
-        className="w-full p-4 text-lg border rounded-2xl bg-white border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+        onValueChange={onVoiceSelect}
+        className="grid grid-cols-1 md:grid-cols-2 gap-4"
       >
         {voices.map((voice) => (
-          <option key={voice.id} value={voice.id}>
-            {voice.name}
-          </option>
+          <div key={voice.id} className="relative">
+            <RadioGroupItem
+              value={voice.id}
+              id={voice.id}
+              className="peer sr-only"
+            />
+            <Label
+              htmlFor={voice.id}
+              className="flex flex-col p-4 border-2 rounded-xl cursor-pointer hover:bg-blue-50 peer-data-[state=checked]:border-blue-500 peer-data-[state=checked]:bg-blue-50"
+            >
+              <span className="font-semibold text-lg">{voice.name}</span>
+              <span className="text-sm text-gray-500">{voice.description}</span>
+            </Label>
+          </div>
         ))}
-      </select>
+      </RadioGroup>
     </Card>
   );
 }

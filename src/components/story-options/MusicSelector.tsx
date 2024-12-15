@@ -7,8 +7,8 @@ import { useRef, useState } from "react";
 interface MusicOption {
   id: string;
   name: string;
-  file: string;
-  category: "Lullaby" | "Nature" | "Classical";
+  file: string | null;
+  category: "None" | "Lullaby" | "Nature" | "Classical";
 }
 
 interface MusicSelectorProps {
@@ -22,6 +22,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const musicOptions: MusicOption[] = [
+    { id: "no-music", name: "No Background Music", file: null, category: "None" },
     { id: "gentle-lullaby", name: "Gentle Lullaby", file: "/assets/gentle-lullaby.mp3", category: "Lullaby" },
     { id: "peaceful-dreams", name: "Peaceful Dreams", file: "/assets/peaceful-dreams.mp3", category: "Lullaby" },
     { id: "nature-sounds", name: "Nature Sounds", file: "/assets/nature-sounds.mp3", category: "Nature" },
@@ -31,7 +32,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
 
   const togglePreview = async (musicId: string) => {
     const musicOption = musicOptions.find(opt => opt.id === musicId);
-    if (!musicOption) return;
+    if (!musicOption || !musicOption.file) return;
 
     if (!audioRef.current) {
       audioRef.current = new Audio(musicOption.file);
@@ -87,27 +88,29 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
                   >
                     {option.name}
                   </Button>
-                  <div className="flex items-center gap-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => togglePreview(option.id)}
-                      className="h-10 w-10 p-0 rounded-xl text-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                    >
-                      {isPlaying && selectedMusic === option.id ? (
-                        <Pause className="h-6 w-6" />
-                      ) : (
-                        <Play className="h-6 w-6" />
-                      )}
-                    </Button>
-                    <Slider
-                      value={[previewVolume]}
-                      max={1}
-                      step={0.1}
-                      onValueChange={handleVolumeChange}
-                      className="flex-1"
-                    />
-                  </div>
+                  {option.file && (
+                    <div className="flex items-center gap-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => togglePreview(option.id)}
+                        className="h-10 w-10 p-0 rounded-xl text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                      >
+                        {isPlaying && selectedMusic === option.id ? (
+                          <Pause className="h-6 w-6" />
+                        ) : (
+                          <Play className="h-6 w-6" />
+                        )}
+                      </Button>
+                      <Slider
+                        value={[previewVolume]}
+                        max={1}
+                        step={0.1}
+                        onValueChange={handleVolumeChange}
+                        className="flex-1"
+                      />
+                    </div>
+                  )}
                 </div>
             ))}
           </div>

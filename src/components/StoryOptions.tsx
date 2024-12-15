@@ -25,8 +25,8 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
   const [settings, setSettings] = useState<StorySettings>({
     ageGroup: "6-8",
     duration: 5,
-    music: "gentle-lullaby",
-    voice: "EXAVITQu4vr4xnSDxMaL",
+    music: "no-music", // Default to no music
+    voice: "EXAVITQu4vr4xnSDxMaL", // Default to Sarah's voice
     theme: "fantasy",
     language: "en"
   });
