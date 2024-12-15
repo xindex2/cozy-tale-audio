@@ -129,25 +129,19 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="space-y-6">
                 <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
-                  <LanguageSelector
-                    selectedLanguage={settings.language}
-                    onLanguageSelect={(language) => setSettings({ ...settings, language })}
-                  />
-                </div>
-                <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
                   <VoiceSelector
                     selectedVoice={settings.voice}
                     onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
                   />
                 </div>
-              </div>
-              <div className="space-y-6">
                 <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
                   <AgeGroupSelector
                     selectedAge={settings.ageGroup}
                     onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
                   />
                 </div>
+              </div>
+              <div className="space-y-6">
                 <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
                   <DurationSelector
                     selectedDuration={settings.duration}
@@ -162,6 +156,14 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
               <ThemeSelector
                 selectedTheme={settings.theme}
                 onThemeSelect={(theme) => setSettings({ ...settings, theme })}
+              />
+            </div>
+
+            {/* Language Section */}
+            <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
+              <LanguageSelector
+                selectedLanguage={settings.language}
+                onLanguageSelect={(language) => setSettings({ ...settings, language })}
               />
             </div>
 
