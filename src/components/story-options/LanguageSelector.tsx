@@ -46,11 +46,10 @@ export function LanguageSelector({ selectedLanguage, onLanguageSelect }: Languag
           </SelectContent>
         </Select>
       </Card>
-      <div className="bg-orange-50 p-6 rounded-xl shadow-sm">
+      <div className="bg-purple-50 p-4 rounded-xl shadow-sm">
         <p className="text-base text-gray-700 leading-relaxed">
-          <span className="font-bold text-story-orange">🌍 Language Selection:</span> When you choose a language, 
-          both the story text and available voice options will automatically adjust to match your selected language, 
-          creating a fully immersive experience in your preferred language.
+          <span className="font-bold text-story-purple">🌍 Language Selection:</span> When you choose a language, 
+          both the story text and available voice options will adjust to match your selected language.
         </p>
       </div>
     </div>
