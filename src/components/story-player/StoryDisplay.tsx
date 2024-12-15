@@ -17,27 +17,44 @@ export function StoryDisplay({ text, audioUrl, isPlaying, currentTime, duration 
   const currentSentenceIndex = Math.floor(currentTime * sentencesPerSecond);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
     const debouncedResize = debounce(() => {
-      // Handle resize if needed
+      // Only observe size changes when the element is in the viewport
+      if (container.offsetParent !== null) {
+        const { scrollHeight, clientHeight } = container;
+        if (scrollHeight > clientHeight) {
+          container.scrollTop = scrollHeight - clientHeight;
+        }
+      }
     }, 100);
 
-    observerRef.current = new ResizeObserver(debouncedResize);
-    observerRef.current.observe(containerRef.current);
+    try {
+      observerRef.current = new ResizeObserver((entries) => {
+        // Check if the element is still in the DOM before processing
+        if (container.isConnected) {
+          debouncedResize();
+        }
+      });
+
+      observerRef.current.observe(container);
+    } catch (error) {
+      console.warn('ResizeObserver error handled:', error);
+    }
 
     return () => {
+      debouncedResize.cancel();
       if (observerRef.current) {
         observerRef.current.disconnect();
       }
-      debouncedResize.cancel();
     };
   }, []);
   
   return (
     <div 
       ref={containerRef}
-      className="prose prose-lg max-w-none space-y-4 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto"
+      className="prose prose-lg max-w-none space-y-4 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto max-h-[60vh]"
     >
       {sentences.map((sentence, index) => (
         <p 
