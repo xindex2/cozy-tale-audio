@@ -21,29 +21,44 @@ export default function Profile() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          navigate("/auth");
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching profile:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load profile",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setProfile(data);
+      } catch (error) {
+        console.error('Error:', error);
+        toast({
+          title: "Error",
+          description: "An unexpected error occurred",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
       }
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return;
-      }
-
-      setProfile(data);
-      setLoading(false);
     };
 
     checkAuth();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -99,8 +114,11 @@ export default function Profile() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
         <Header />
-        <main className="container py-8 flex justify-center items-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <main className="container py-8 flex justify-center items-center min-h-[60vh]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <p className="text-gray-500">Loading profile...</p>
+          </div>
         </main>
         <Footer />
       </div>
@@ -111,7 +129,7 @@ export default function Profile() {
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
       <Header />
       <main className="container py-8">
-        <Card>
+        <Card className="max-w-2xl mx-auto">
           <CardHeader>
             <CardTitle>Profile</CardTitle>
           </CardHeader>
@@ -151,6 +169,15 @@ export default function Profile() {
               <div>
                 <label className="text-sm font-medium text-gray-500">Role</label>
                 <p className="mt-1">{profile?.is_admin ? 'Admin' : 'User'}</p>
+              </div>
+              <div className="pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate('/billing')}
+                  className="w-full"
+                >
+                  Manage Subscription
+                </Button>
               </div>
             </div>
           </CardContent>
