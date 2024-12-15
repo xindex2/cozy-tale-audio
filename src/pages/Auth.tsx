@@ -31,22 +31,6 @@ export default function AuthPage() {
     };
   }, [navigate, toast]);
 
-  const handleError = (error: Error) => {
-    if (error.message.includes('user_already_exists')) {
-      toast({
-        title: "Account exists",
-        description: "An account with this email already exists. Please sign in instead.",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-500 flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-6 space-y-6">
@@ -83,16 +67,8 @@ export default function AuthPage() {
               },
             },
           }}
-          view="sign_up"
+          view="sign_in"
           showLinks={true}
-          additionalData={{
-            full_name: {
-              label: 'Full Name',
-              placeholder: 'Enter your full name',
-              type: 'text',
-              required: true,
-            },
-          }}
         />
       </Card>
     </div>
