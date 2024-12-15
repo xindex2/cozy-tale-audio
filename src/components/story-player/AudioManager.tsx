@@ -7,6 +7,7 @@ interface AudioManagerProps {
   isPlaying: boolean;
   volume: number;
   isMuted: boolean;
+  onTimeUpdate?: (time: number) => void;
 }
 
 export function AudioManager({ 
@@ -14,7 +15,8 @@ export function AudioManager({
   backgroundMusicUrl, 
   isPlaying, 
   volume, 
-  isMuted 
+  isMuted,
+  onTimeUpdate 
 }: AudioManagerProps) {
   const voiceRef = useRef<HTMLAudioElement | null>(null);
   const musicRef = useRef<HTMLAudioElement | null>(null);
@@ -33,6 +35,10 @@ export function AudioManager({
           if (isPlaying) {
             await audio.play();
           }
+          
+          audio.ontimeupdate = () => {
+            onTimeUpdate?.(audio.currentTime);
+          };
           
           voiceRef.current = audio;
         } catch (error) {

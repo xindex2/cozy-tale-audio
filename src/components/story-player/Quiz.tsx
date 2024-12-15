@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trophy, Check, X } from "lucide-react";
+import { Trophy, Check, X, RefreshCw } from "lucide-react";
 
 interface Question {
   question: string;
@@ -11,9 +11,10 @@ interface Question {
 
 interface QuizProps {
   questions: Question[];
+  onRegenerateQuiz: () => void;
 }
 
-export function Quiz({ questions }: QuizProps) {
+export function Quiz({ questions, onRegenerateQuiz }: QuizProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
@@ -21,7 +22,7 @@ export function Quiz({ questions }: QuizProps) {
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
   const handleAnswerClick = (answerIndex: number) => {
-    if (selectedAnswer !== null) return; // Prevent multiple selections
+    if (selectedAnswer !== null) return;
     
     setSelectedAnswer(answerIndex);
     setShowCorrectAnswer(true);
@@ -30,7 +31,7 @@ export function Quiz({ questions }: QuizProps) {
       setScore(score + 1);
     }
 
-    // Move to next question after 2 seconds
+    // Move to next question after showing correct answer
     setTimeout(() => {
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
@@ -54,6 +55,13 @@ export function Quiz({ questions }: QuizProps) {
     return (
       <Card className="p-6 text-center bg-white/90">
         <p className="text-gray-600">No quiz available for this story yet.</p>
+        <Button
+          onClick={onRegenerateQuiz}
+          className="mt-4 bg-gradient-to-r from-blue-500 to-blue-600"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Generate Quiz
+        </Button>
       </Card>
     );
   }
@@ -63,15 +71,25 @@ export function Quiz({ questions }: QuizProps) {
       <Card className="p-6 text-center bg-white/90">
         <Trophy className="w-16 h-16 mx-auto text-yellow-500 mb-4" />
         <h2 className="text-2xl font-bold mb-4">Quiz Complete!</h2>
-        <p className="text-xl">
+        <p className="text-xl mb-4">
           Your score: {score} out of {questions.length}
         </p>
-        <Button
-          onClick={resetQuiz}
-          className="mt-4 bg-gradient-to-r from-blue-500 to-blue-600"
-        >
-          Try Again
-        </Button>
+        <div className="space-x-4">
+          <Button
+            onClick={resetQuiz}
+            className="bg-gradient-to-r from-blue-500 to-blue-600"
+          >
+            Try Again
+          </Button>
+          <Button
+            onClick={onRegenerateQuiz}
+            variant="outline"
+            className="border-blue-500 text-blue-600"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            New Quiz
+          </Button>
+        </div>
       </Card>
     );
   }
@@ -79,9 +97,20 @@ export function Quiz({ questions }: QuizProps) {
   return (
     <Card className="p-6 bg-white/90">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold mb-2">
-          Question {currentQuestion + 1} of {questions.length}
-        </h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">
+            Question {currentQuestion + 1} of {questions.length}
+          </h3>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRegenerateQuiz}
+            className="border-blue-500 text-blue-600"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            New Quiz
+          </Button>
+        </div>
         <p className="text-gray-700">{questions[currentQuestion].question}</p>
       </div>
       <div className="space-y-2">

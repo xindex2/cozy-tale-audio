@@ -42,6 +42,7 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
   const [storyContent, setStoryContent] = useState("");
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
   const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -73,7 +74,6 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
       }
       setIsPlaying(true);
 
-      // If onSave is provided, call it with the story details
       if (onSave) {
         onSave(title || "Your Bedtime Story", text, audioUrl || "", backgroundMusicUrl || "");
       }
@@ -182,15 +182,16 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
               isPlaying={isPlaying}
               volume={volume}
               isMuted={isMuted}
+              onTimeUpdate={setCurrentTime}
             />
 
-            <div className="prose prose-blue max-w-none">
-              {storyContent.split('\n').map((paragraph, index) => (
-                <p key={index} className="text-gray-800 leading-relaxed">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
+            <StoryDisplay
+              text={storyContent}
+              audioUrl={currentAudioUrl}
+              isPlaying={isPlaying}
+              currentTime={currentTime}
+              duration={settings.duration * 60} // Convert minutes to seconds
+            />
 
             <div className="flex justify-center">
               <Button
