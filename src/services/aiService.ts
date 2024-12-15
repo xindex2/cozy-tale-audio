@@ -9,20 +9,18 @@ export interface StoryResponse {
   title: string;
 }
 
-const generateStoryText = (duration: number) => {
-  // Approximate 150 words per minute for storytelling
-  const targetWordCount = Math.floor(duration * 150);
+const generateStoryText = async (settings: StorySettings) => {
+  // This is a placeholder - in a real app, you'd use an AI service that supports multiple languages
+  const baseStory = `Once upon a time in a magical forest, there lived a curious young rabbit named Luna. Luna loved to explore the enchanted woods, making friends with all the woodland creatures she met along her journey.`;
   
-  // This is a placeholder story - in a real app, you'd use an AI service
-  return `Once upon a time in a magical forest, there lived a curious young rabbit named Luna. Luna loved to explore the enchanted woods, making friends with all the woodland creatures she met along her journey. One day, she discovered a mysterious glowing flower that would change her life forever.
+  // Translate the story based on selected language (this is a placeholder)
+  const translations: { [key: string]: string } = {
+    en: baseStory,
+    es: "Había una vez en un bosque mágico, vivía una curiosa conejita llamada Luna. A Luna le encantaba explorar el bosque encantado, haciendo amigos con todas las criaturas del bosque que encontraba en su camino.",
+    fr: "Il était une fois dans une forêt magique, vivait une jeune lapine curieuse nommée Luna. Luna adorait explorer les bois enchantés, se liant d'amitié avec toutes les créatures de la forêt qu'elle rencontrait lors de son voyage."
+  };
 
-The flower's petals shimmered with all the colors of the rainbow, casting dancing lights across the forest floor. As Luna approached, she noticed that the other animals seemed drawn to its magical glow as well. A wise old owl named Oliver perched nearby, watching with interest.
-
-"Be careful, young one," Oliver hooted softly. "That's no ordinary flower. It's the Moonbloom, a rare magical plant that blooms only once every hundred years. Legend says it grants a special gift to those pure of heart."
-
-Luna's whiskers twitched with excitement as she carefully approached the flower. As she got closer, the glow intensified, and she felt a warm tingling sensation throughout her body. Suddenly, she realized she could understand the whispers of the trees and the songs of the wind.
-
-From that day forward, Luna became known as the Forest Whisperer, helping to bridge the gap between all the woodland creatures and bringing harmony to the enchanted forest. Her adventure had only just begun, but she knew in her heart that finding the Moonbloom was just the first step in a much greater journey.`;
+  return translations[settings.language] || translations.en;
 };
 
 export const aiService = {
@@ -64,9 +62,11 @@ export const aiService = {
 
   async startChat(settings: StorySettings): Promise<StoryResponse> {
     try {
-      const duration = settings.duration || 5; // Default to 5 minutes if not specified
-      const storyText = generateStoryText(duration);
-      const title = "Luna's Magical Adventure";
+      const storyText = await generateStoryText(settings);
+      const title = settings.language === 'en' ? "Luna's Magical Adventure" : 
+                    settings.language === 'es' ? "La Aventura Mágica de Luna" :
+                    settings.language === 'fr' ? "L'Aventure Magique de Luna" :
+                    "Luna's Magical Adventure";
       
       let audioUrl = null;
       let backgroundMusicUrl = null;
@@ -76,7 +76,6 @@ export const aiService = {
       }
 
       if (settings.music && settings.music !== "no-music") {
-        // Use the correct URL format for the music files
         backgroundMusicUrl = `/assets/${settings.music}.mp3`;
       }
 

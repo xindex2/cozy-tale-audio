@@ -99,7 +99,7 @@ export default function Auth() {
               input: "w-full",
             },
           }}
-          providers={["google"]}
+          providers={[]}
           redirectTo={`${window.location.origin}/auth/callback`}
           showLinks={true}
         />

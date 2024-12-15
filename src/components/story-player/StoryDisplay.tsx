@@ -12,9 +12,9 @@ interface StoryDisplayProps {
 export function StoryDisplay({ text, audioUrl, isPlaying, currentTime, duration }: StoryDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<ResizeObserver | null>(null);
-  const words = text.split(" ");
-  const wordsPerSecond = duration > 0 ? words.length / duration : 0;
-  const currentWordIndex = Math.floor(currentTime * wordsPerSecond);
+  const sentences = text.split(". ").map(s => s.trim() + ".");
+  const sentencesPerSecond = duration > 0 ? sentences.length / duration : 0;
+  const currentSentenceIndex = Math.floor(currentTime * sentencesPerSecond);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -33,42 +33,26 @@ export function StoryDisplay({ text, audioUrl, isPlaying, currentTime, duration 
       debouncedResize.cancel();
     };
   }, []);
-
-  let wordCount = 0;
   
   return (
     <div 
       ref={containerRef}
       className="prose prose-lg max-w-none space-y-4 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto"
     >
-      {text.split(". ").map((sentence, index) => {
-        const sentenceWords = sentence.split(" ");
-        const sentenceStartIndex = wordCount;
-        wordCount += sentenceWords.length;
-        
-        return (
-          <p key={index} className="text-gray-800 leading-relaxed">
-            {sentenceWords.map((word, wordIndex) => {
-              const globalWordIndex = sentenceStartIndex + wordIndex;
-              return (
-                <span
-                  key={wordIndex}
-                  className={`transition-colors duration-200 ${
-                    globalWordIndex === currentWordIndex 
-                      ? "bg-blue-200 font-semibold" 
-                      : globalWordIndex < currentWordIndex
-                      ? "text-gray-500"
-                      : ""
-                  }`}
-                >
-                  {word}{" "}
-                </span>
-              );
-            })}
-            {index < text.split(". ").length - 1 ? ". " : ""}
-          </p>
-        );
-      })}
+      {sentences.map((sentence, index) => (
+        <p 
+          key={index} 
+          className={`text-gray-800 leading-relaxed transition-all duration-300 ${
+            index === currentSentenceIndex 
+              ? "bg-blue-100 font-semibold" 
+              : index < currentSentenceIndex
+              ? "text-gray-500"
+              : ""
+          }`}
+        >
+          {sentence}
+        </p>
+      ))}
     </div>
   );
 }
