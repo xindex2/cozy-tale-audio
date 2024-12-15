@@ -17,31 +17,33 @@ export default function AdminDashboard() {
   const [showPlanDialog, setShowPlanDialog] = useState(false);
 
   // Check if user is authenticated and admin
-  const { data: adminCheck, isLoading: isCheckingAdmin, error: adminError } = useQuery({
-    queryKey: ['admin-check'],
+  const { data: session } = useQuery({
+    queryKey: ['session'],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('Not authenticated');
-      }
-
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', session.user.id)
-        .single();
-
-      if (error || !profile?.is_admin) {
-        throw new Error('Not authorized');
-      }
-
-      return true;
+      const { data } = await supabase.auth.getSession();
+      return data.session;
     },
   });
 
-  // Fetch stats
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ['admin-profile', session?.user?.id],
+    enabled: !!session?.user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', session!.user.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch stats only if user is admin
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ['admin-stats'],
+    enabled: !!profile?.is_admin,
     queryFn: async () => {
       const [usersResponse, storiesResponse] = await Promise.all([
         supabase.from('profiles').select('count'),
@@ -56,11 +58,10 @@ export default function AdminDashboard() {
         stories: storiesResponse.count || 0,
       };
     },
-    enabled: !!adminCheck,
   });
 
   // Show loading state while checking admin status
-  if (isCheckingAdmin) {
+  if (isLoadingProfile) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
         <Header />
@@ -73,7 +74,7 @@ export default function AdminDashboard() {
   }
 
   // Show error if not admin
-  if (adminError || !adminCheck) {
+  if (!profile?.is_admin) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
         <Header />
