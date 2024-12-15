@@ -127,16 +127,16 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
           {/* Language and Voice Column */}
           <div className="space-y-6 pb-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-6">
-                <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
+              <div>
+                <div className="group transition-transform duration-200 ease-in-out hover:scale-[1.01]">
                   <VoiceSelector
                     selectedVoice={settings.voice}
                     onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
                   />
                 </div>
               </div>
-              <div className="space-y-6">
-                <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
+              <div>
+                <div className="group transition-transform duration-200 ease-in-out hover:scale-[1.01]">
                   <LanguageSelector
                     selectedLanguage={settings.language}
                     onLanguageSelect={(language) => setSettings({ ...settings, language })}
@@ -146,7 +146,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
 
             {/* Age Group Section */}
-            <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
+            <div className="group transition-transform duration-200 ease-in-out hover:scale-[1.01]">
               <AgeGroupSelector
                 selectedAge={settings.ageGroup}
                 onAgeSelect={(age) => setSettings({ ...settings, ageGroup: age })}
@@ -154,7 +154,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
 
             {/* Theme Section */}
-            <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
+            <div className="group transition-transform duration-200 ease-in-out hover:scale-[1.01]">
               <ThemeSelector
                 selectedTheme={settings.theme}
                 onThemeSelect={(theme) => setSettings({ ...settings, theme })}
@@ -162,7 +162,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
 
             {/* Duration Section */}
-            <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
+            <div className="group transition-transform duration-200 ease-in-out hover:scale-[1.01]">
               <DurationSelector
                 selectedDuration={settings.duration}
                 onDurationSelect={(duration) => setSettings({ ...settings, duration })}
@@ -170,7 +170,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
 
             {/* Music Section */}
-            <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
+            <div className="group transition-transform duration-200 ease-in-out hover:scale-[1.01]">
               <MusicSelector
                 selectedMusic={settings.music}
                 onMusicSelect={(music) => setSettings({ ...settings, music })}
