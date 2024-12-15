@@ -8,24 +8,34 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SubscriptionPlanDialog } from "@/components/admin/SubscriptionPlanDialog";
 import { SubscriptionPlansTable } from "@/components/admin/SubscriptionPlansTable";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { ApiKeysTable } from "@/components/admin/ApiKeysTable";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function AdminDashboard() {
   const [showPlanDialog, setShowPlanDialog] = useState(false);
+  const { toast } = useToast();
 
-  // Check if user is authenticated and admin
-  const { data: session } = useQuery({
+  // Check if user is authenticated
+  const { data: session, isLoading: isLoadingSession, error: sessionError } = useQuery({
     queryKey: ['session'],
     queryFn: async () => {
-      const { data } = await supabase.auth.getSession();
-      return data.session;
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Session error:', error);
+        throw error;
+      }
+      if (!session) {
+        throw new Error('No session found');
+      }
+      return session;
     },
   });
 
-  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+  // Check if user is admin
+  const { data: profile, isLoading: isLoadingProfile, error: profileError } = useQuery({
     queryKey: ['admin-profile', session?.user?.id],
     enabled: !!session?.user?.id,
     queryFn: async () => {
@@ -35,13 +45,19 @@ export default function AdminDashboard() {
         .eq('id', session!.user.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Profile error:', error);
+        throw error;
+      }
+      if (!data) {
+        throw new Error('No profile found');
+      }
       return data;
     },
   });
 
   // Fetch stats only if user is admin
-  const { data: stats, isLoading: isLoadingStats } = useQuery({
+  const { data: stats, isLoading: isLoadingStats, error: statsError } = useQuery({
     queryKey: ['admin-stats'],
     enabled: !!profile?.is_admin,
     queryFn: async () => {
@@ -60,8 +76,8 @@ export default function AdminDashboard() {
     },
   });
 
-  // Show loading state while checking admin status
-  if (isLoadingProfile) {
+  // Show loading state while checking session and admin status
+  if (isLoadingSession || isLoadingProfile) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
         <Header />
@@ -73,13 +89,32 @@ export default function AdminDashboard() {
     );
   }
 
-  // Show error if not admin
-  if (!profile?.is_admin) {
+  // Handle authentication errors
+  if (sessionError || !session) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
         <Header />
         <main className="container py-8">
           <Alert variant="destructive">
+            <AlertTitle>Authentication Error</AlertTitle>
+            <AlertDescription>
+              Please sign in to access this page.
+            </AlertDescription>
+          </Alert>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Handle profile errors or non-admin users
+  if (profileError || !profile?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
+        <Header />
+        <main className="container py-8">
+          <Alert variant="destructive">
+            <AlertTitle>Access Denied</AlertTitle>
             <AlertDescription>
               You don't have permission to access this page. Please contact an administrator if you believe this is an error.
             </AlertDescription>
@@ -88,6 +123,15 @@ export default function AdminDashboard() {
         <Footer />
       </div>
     );
+  }
+
+  // Handle stats error
+  if (statsError) {
+    toast({
+      variant: "destructive",
+      title: "Error loading statistics",
+      description: "There was a problem loading the dashboard statistics.",
+    });
   }
 
   return (
