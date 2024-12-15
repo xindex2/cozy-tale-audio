@@ -40,16 +40,6 @@ export default function AuthPage() {
           title: "Check your email",
           description: "We've sent you a password reset link.",
         });
-      } else if (event === "USER_DELETED") {
-        toast({
-          title: "Account deleted",
-          description: "Your account has been successfully deleted.",
-        });
-      } else if (event === "SIGNED_UP") {
-        toast({
-          title: "Welcome!",
-          description: "Your account has been created successfully.",
-        });
       }
     });
 
@@ -126,13 +116,6 @@ export default function AuthPage() {
           }}
           view="sign_in"
           showLinks={true}
-          onError={(error) => {
-            toast({
-              variant: "destructive",
-              title: "Authentication Error",
-              description: error.message || "An error occurred during authentication.",
-            });
-          }}
         />
       </Card>
     </div>
