@@ -59,8 +59,8 @@ export default function Auth() {
     if (error === "invalid_credentials") {
       toast({
         variant: "destructive",
-        title: "Authentication Error",
-        description: "Invalid email or password. Please try again.",
+        title: "Invalid Credentials",
+        description: "The email or password you entered is incorrect. Please try again.",
       });
     } else if (error && error_description) {
       toast({
