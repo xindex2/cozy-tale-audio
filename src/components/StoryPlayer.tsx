@@ -9,6 +9,7 @@ import { AudioControls } from "./story-player/AudioControls";
 import { AudioManager } from "./story-player/AudioManager";
 import { StoryDisplay } from "./story-player/StoryDisplay";
 import { useToast } from "@/hooks/use-toast";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 interface Message {
   role: "user" | "assistant";
@@ -185,13 +186,15 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
               onTimeUpdate={setCurrentTime}
             />
 
-            <StoryDisplay
-              text={storyContent}
-              audioUrl={currentAudioUrl}
-              isPlaying={isPlaying}
-              currentTime={currentTime}
-              duration={settings.duration * 60} // Convert minutes to seconds
-            />
+            <ErrorBoundary>
+              <StoryDisplay
+                text={storyContent}
+                audioUrl={currentAudioUrl}
+                isPlaying={isPlaying}
+                currentTime={currentTime}
+                duration={settings.duration * 60} // Convert minutes to seconds
+              />
+            </ErrorBoundary>
 
             <div className="flex justify-center">
               <Button
