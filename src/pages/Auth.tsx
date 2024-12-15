@@ -41,7 +41,7 @@ export default function AuthPage() {
     };
   }, [navigate, toast]);
 
-  const handleError = (error: Error) => {
+  const handleError = (error: { message: string }) => {
     console.error('Auth error:', error);
     toast({
       title: "Authentication Error",
@@ -108,7 +108,7 @@ export default function AuthPage() {
           }}
           view="sign_in"
           showLinks={true}
-          onError={handleError}
+          onAuthError={handleError}
         />
       </Card>
     </div>
