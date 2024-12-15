@@ -27,23 +27,32 @@ export function LanguageSelector({ selectedLanguage, onLanguageSelect }: Languag
   ];
 
   return (
-    <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
-      <div className="flex items-center space-x-3">
-        <Globe className="h-8 w-8 text-blue-500" />
-        <h2 className="text-2xl font-semibold text-blue-500">Language</h2>
+    <div className="space-y-4">
+      <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
+        <div className="flex items-center space-x-3">
+          <Globe className="h-8 w-8 text-blue-500" />
+          <h2 className="text-2xl font-semibold text-blue-500">Language</h2>
+        </div>
+        <Select value={selectedLanguage} onValueChange={onLanguageSelect}>
+          <SelectTrigger className="w-full p-4 text-lg bg-white">
+            <SelectValue placeholder="Select a language" />
+          </SelectTrigger>
+          <SelectContent>
+            {languages.map((lang) => (
+              <SelectItem key={lang.code} value={lang.code}>
+                {lang.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Card>
+      <div className="bg-orange-50 p-6 rounded-xl shadow-sm">
+        <p className="text-base text-gray-700 leading-relaxed">
+          <span className="font-bold text-story-orange">🌍 Language Selection:</span> When you choose a language, 
+          both the story text and available voice options will automatically adjust to match your selected language, 
+          creating a fully immersive experience in your preferred language.
+        </p>
       </div>
-      <Select value={selectedLanguage} onValueChange={onLanguageSelect}>
-        <SelectTrigger className="w-full p-4 text-lg bg-white">
-          <SelectValue placeholder="Select a language" />
-        </SelectTrigger>
-        <SelectContent>
-          {languages.map((lang) => (
-            <SelectItem key={lang.code} value={lang.code}>
-              {lang.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </Card>
+    </div>
   );
 }
