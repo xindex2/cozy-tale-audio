@@ -12,9 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface Story {
   id: string;
@@ -51,54 +50,65 @@ export default function Dashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
+        return;
       }
     };
     
     checkAuth();
   }, [navigate]);
 
-  const { data: stories, isLoading: storiesLoading } = useQuery({
+  const { data: stories, isLoading: storiesLoading, error } = useQuery({
     queryKey: ['stories'],
     queryFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        throw new Error('Not authenticated');
+      }
+
       const { data, error } = await supabase
         .from('stories')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        toast({
-          variant: "destructive",
-          title: "Error fetching stories",
-          description: error.message,
-        });
-        return [];
+        console.error('Error fetching stories:', error);
+        throw error;
       }
 
       return data as Story[];
     },
+    retry: 1,
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error fetching stories",
+        description: error instanceof Error ? error.message : "An error occurred while fetching stories",
+      });
+    }
   });
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from('stories')
-      .delete()
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('stories')
+        .delete()
+        .eq('id', id);
 
-    if (error) {
+      if (error) throw error;
+
+      toast({
+        title: "Story deleted",
+        description: "Your story has been deleted successfully.",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['stories'] });
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Error deleting story",
-        description: error.message,
+        description: error instanceof Error ? error.message : "An error occurred while deleting the story",
       });
-      return;
     }
-
-    toast({
-      title: "Story deleted",
-      description: "Your story has been deleted successfully.",
-    });
-
-    queryClient.invalidateQueries({ queryKey: ['stories'] });
   };
 
   const handleCreateNew = () => {
@@ -130,6 +140,25 @@ export default function Dashboard() {
       setIsLoading(false);
     }
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
+        <Header />
+        <main className="container py-8">
+          <div className="text-center py-8 bg-white rounded-lg shadow">
+            <p className="text-red-600">Error loading stories. Please try again later.</p>
+            <Button 
+              onClick={() => queryClient.invalidateQueries({ queryKey: ['stories'] })}
+              className="mt-4"
+            >
+              Retry
+            </Button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
