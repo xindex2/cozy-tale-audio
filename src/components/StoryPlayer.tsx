@@ -6,6 +6,7 @@ import type { StorySettings } from "./StoryOptions";
 import { aiService } from "@/services/aiService";
 import { ChatPanel } from "./story-player/ChatPanel";
 import { AudioControls } from "./story-player/AudioControls";
+import { MusicControls } from "./story-player/MusicControls";
 import { AudioManager } from "./story-player/AudioManager";
 import { StoryDisplay } from "./story-player/StoryDisplay";
 import { useToast } from "@/hooks/use-toast";
@@ -33,7 +34,9 @@ interface StoryPlayerProps {
 export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
+  const [musicVolume, setMusicVolume] = useState(0.3);
   const [isMuted, setIsMuted] = useState(false);
+  const [isMusicMuted, setIsMusicMuted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
   const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
@@ -169,11 +172,22 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
                 <SkipBack className="h-4 w-4" />
               </Button>
               <h1 className="text-xl lg:text-2xl font-bold text-blue-800">{storyTitle}</h1>
-              <AudioControls
-                volume={volume}
-                isMuted={isMuted}
-                onVolumeChange={(newVolume) => setVolume(newVolume[0])}
-                onToggleMute={() => setIsMuted(!isMuted)}
+              <div className="flex items-center space-x-4">
+                <AudioControls
+                  volume={volume}
+                  isMuted={isMuted}
+                  onVolumeChange={(newVolume) => setVolume(newVolume[0])}
+                  onToggleMute={() => setIsMuted(!isMuted)}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end">
+              <MusicControls
+                volume={musicVolume}
+                isMuted={isMusicMuted}
+                onVolumeChange={(newVolume) => setMusicVolume(newVolume[0])}
+                onToggleMute={() => setIsMusicMuted(!isMusicMuted)}
               />
             </div>
 
@@ -183,6 +197,8 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
               isPlaying={isPlaying}
               volume={volume}
               isMuted={isMuted}
+              musicVolume={musicVolume}
+              isMusicMuted={isMusicMuted}
               onTimeUpdate={setCurrentTime}
             />
 
@@ -192,7 +208,7 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
                 audioUrl={currentAudioUrl}
                 isPlaying={isPlaying}
                 currentTime={currentTime}
-                duration={settings.duration * 60} // Convert minutes to seconds
+                duration={settings.duration * 60}
               />
             </ErrorBoundary>
 

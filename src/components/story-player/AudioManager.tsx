@@ -7,6 +7,8 @@ interface AudioManagerProps {
   isPlaying: boolean;
   volume: number;
   isMuted: boolean;
+  musicVolume: number;
+  isMusicMuted: boolean;
   onTimeUpdate?: (time: number) => void;
 }
 
@@ -14,8 +16,10 @@ export function AudioManager({
   voiceUrl, 
   backgroundMusicUrl, 
   isPlaying, 
-  volume, 
+  volume,
   isMuted,
+  musicVolume,
+  isMusicMuted,
   onTimeUpdate 
 }: AudioManagerProps) {
   const voiceRef = useRef<HTMLAudioElement | null>(null);
@@ -66,7 +70,7 @@ export function AudioManager({
 
           const audio = new Audio(backgroundMusicUrl);
           audio.loop = true;
-          audio.volume = isMuted ? 0 : volume * 0.15; // Set background music to 15% of main volume
+          audio.volume = isMusicMuted ? 0 : musicVolume;
           
           // Preload the audio
           audio.preload = "auto";
@@ -94,7 +98,7 @@ export function AudioManager({
     };
 
     setupMusic();
-  }, [backgroundMusicUrl, volume, isMuted, isPlaying]);
+  }, [backgroundMusicUrl, musicVolume, isMusicMuted, isPlaying]);
 
   useEffect(() => {
     return () => {
@@ -112,9 +116,9 @@ export function AudioManager({
       voiceRef.current.volume = isMuted ? 0 : volume;
     }
     if (musicRef.current) {
-      musicRef.current.volume = isMuted ? 0 : volume * 0.15;
+      musicRef.current.volume = isMusicMuted ? 0 : musicVolume;
     }
-  }, [volume, isMuted]);
+  }, [volume, isMuted, musicVolume, isMusicMuted]);
 
   useEffect(() => {
     const handleVoice = async () => {
