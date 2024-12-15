@@ -80,7 +80,7 @@ export function VoiceSelector({ selectedVoice, onVoiceSelect }: VoiceSelectorPro
                     value={voice.id}
                     className="py-3 px-4 hover:bg-blue-50 transition-colors cursor-pointer"
                   >
-                    <div className="flex flex-col">
+                    <div className="flex flex-col items-start">
                       <span className="font-medium text-gray-900">{voice.name}</span>
                       <span className="text-sm text-gray-500">{voice.description}</span>
                     </div>
