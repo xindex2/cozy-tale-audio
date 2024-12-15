@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
@@ -83,11 +83,7 @@ export default function Dashboard() {
   };
 
   const handleCreateNew = () => {
-    // This will be implemented in the next step
-    toast({
-      title: "Coming soon",
-      description: "Story creation will be implemented in the next step.",
-    });
+    navigate("/create-story");
   };
 
   return (
