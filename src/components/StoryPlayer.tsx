@@ -92,40 +92,14 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
   const generateQuiz = async () => {
     setIsGeneratingQuiz(true);
     try {
-      // Mock quiz generation - in real app, this would call an AI service
-      const questions: QuizQuestion[] = [
-        {
-          question: "What is the main character's goal in the story?",
-          options: ["To find treasure", "To make friends", "To save the kingdom", "To learn magic"],
-          correctAnswer: 2
-        },
-        {
-          question: "Where does the story take place?",
-          options: ["In a castle", "In a forest", "In a city", "In space"],
-          correctAnswer: 0
-        },
-        {
-          question: "What is the main challenge faced by the character?",
-          options: ["A dragon", "A storm", "A riddle", "A curse"],
-          correctAnswer: 3
-        },
-        {
-          question: "Who helps the main character?",
-          options: ["A wizard", "A fairy", "A talking animal", "A friendly ghost"],
-          correctAnswer: 1
-        },
-        {
-          question: "How does the story end?",
-          options: ["With a celebration", "With a lesson learned", "With a new beginning", "With a mystery solved"],
-          correctAnswer: 1
-        }
-      ];
+      const questions = await aiService.generateQuiz(storyContent);
       setQuiz(questions);
       toast({
         title: "Quiz Generated",
         description: "Test your knowledge about the story!",
       });
     } catch (error) {
+      console.error("Error generating quiz:", error);
       toast({
         title: "Error",
         description: "Failed to generate quiz. Please try again.",
@@ -137,27 +111,29 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
   };
 
   const handleSendMessage = async (text: string) => {
+    if (!text.trim()) return;
+    
     setIsSending(true);
     try {
       setMessages((prev) => [...prev, { role: "user", content: text }]);
       
-      const { text: responseText, audioUrl, backgroundMusicUrl } = await aiService.continueStory(text);
+      const response = await aiService.continueStory(text);
       
       setMessages((prev) => [
         ...prev,
         { 
           role: "assistant", 
-          content: responseText, 
-          audioUrl,
-          backgroundMusicUrl 
+          content: response.text, 
+          audioUrl: response.audioUrl,
+          backgroundMusicUrl: response.backgroundMusicUrl 
         },
       ]);
       
-      if (audioUrl) {
-        setCurrentAudioUrl(audioUrl);
+      if (response.audioUrl) {
+        setCurrentAudioUrl(response.audioUrl);
       }
-      if (backgroundMusicUrl) {
-        setCurrentMusicUrl(backgroundMusicUrl);
+      if (response.backgroundMusicUrl) {
+        setCurrentMusicUrl(response.backgroundMusicUrl);
       }
     } catch (error) {
       console.error("Error sending message:", error);

@@ -1,3 +1,7 @@
+import { StorySettings } from "@/components/StoryOptions";
+
+const ELEVEN_LABS_API_URL = "https://api.elevenlabs.io/v1/text-to-speech";
+
 export interface StoryResponse {
   text: string;
   audioUrl: string | null;
@@ -12,21 +16,52 @@ export const aiService = {
     this.apiKey = key;
   },
 
-  async startChat(settings: any): Promise<StoryResponse> {
+  async generateAudio(text: string, voiceId: string): Promise<string> {
+    try {
+      const response = await fetch(`${ELEVEN_LABS_API_URL}/${voiceId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "xi-api-key": this.apiKey,
+        },
+        body: JSON.stringify({
+          text,
+          model_id: "eleven_monolingual_v1",
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.5,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate audio");
+      }
+
+      const audioBlob = await response.blob();
+      return URL.createObjectURL(audioBlob);
+    } catch (error) {
+      console.error("Error generating audio:", error);
+      throw error;
+    }
+  },
+
+  async startChat(settings: StorySettings): Promise<StoryResponse> {
     try {
       // Generate story text (mock implementation for now)
       const storyText = "Once upon a time in a magical forest, there lived a curious young rabbit named Luna. Luna loved to explore the enchanted woods, making friends with all the woodland creatures she met along her journey. One day, she discovered a mysterious glowing flower that would change her life forever...";
+      const title = "Luna's Magical Adventure";
       
-      // Handle audio generation only if voice is selected
       let audioUrl = null;
-      if (settings.voice !== "no-voice") {
-        // Here you would normally call the ElevenLabs API
-        audioUrl = "/assets/gentle-lullaby.mp3"; // Mock for now
+      let backgroundMusicUrl = null;
+
+      // Only generate audio if voice is selected and not "no-voice"
+      if (settings.voice && settings.voice !== "no-voice") {
+        audioUrl = await this.generateAudio(storyText, settings.voice);
       }
 
-      // Handle background music only if music is selected
-      let backgroundMusicUrl = null;
-      if (settings.music !== "no-music") {
+      // Handle background music only if music is selected and not "no-music"
+      if (settings.music && settings.music !== "no-music") {
         backgroundMusicUrl = `/assets/${settings.music}.mp3`;
       }
 
@@ -34,7 +69,7 @@ export const aiService = {
         text: storyText,
         audioUrl,
         backgroundMusicUrl,
-        title: "Luna's Magical Adventure"
+        title
       };
     } catch (error) {
       console.error("Error in startChat:", error);
@@ -44,15 +79,49 @@ export const aiService = {
 
   async continueStory(message: string): Promise<StoryResponse> {
     try {
+      // Mock response for now - in production this would call your AI service
+      const responseText = `The story continues with your input: "${message}"... The magical flower began to glow even brighter as Luna approached it, casting sparkles of light all around the forest clearing...`;
+      
+      let audioUrl = null;
+      if (this.apiKey) {
+        // Use Sarah's voice as default for continuations
+        audioUrl = await this.generateAudio(responseText, "EXAVITQu4vr4xnSDxMaL");
+      }
+
       return {
-        text: "The story continues...",
-        audioUrl: null,
+        text: responseText,
+        audioUrl,
         backgroundMusicUrl: null,
-        title: "The Story Continues"
+        title: "Story Continuation"
       };
     } catch (error) {
       console.error("Error in continueStory:", error);
       throw error;
     }
+  },
+
+  async generateQuiz(storyContent: string): Promise<Array<{
+    question: string;
+    options: string[];
+    correctAnswer: number;
+  }>> {
+    // Mock quiz generation based on story content
+    return [
+      {
+        question: "Who is the main character of the story?",
+        options: ["Luna the rabbit", "Max the fox", "Oliver the owl", "Sophie the squirrel"],
+        correctAnswer: 0
+      },
+      {
+        question: "What did Luna discover in the forest?",
+        options: ["A treasure chest", "A magical flower", "A secret cave", "A lost map"],
+        correctAnswer: 1
+      },
+      {
+        question: "Where does the story take place?",
+        options: ["In a city", "In a desert", "In a magical forest", "On a mountain"],
+        correctAnswer: 2
+      }
+    ];
   }
 };
