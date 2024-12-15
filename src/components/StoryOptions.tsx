@@ -5,7 +5,6 @@ import { ThemeSelector } from "./story-options/ThemeSelector";
 import { DurationSelector } from "./story-options/DurationSelector";
 import { MusicSelector } from "./story-options/MusicSelector";
 import { VoiceSelector } from "./story-options/VoiceSelector";
-import { LanguageSelector } from "./story-options/LanguageSelector";
 import { Play, BookOpen, Sparkles, MessageCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -81,21 +80,51 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
               </Card>
             </div>
 
-            <div className="space-y-4">
-              <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-                Create personalized bedtime stories with AI-powered storytelling that adapts to your child's age and interests.
+            <div className="space-y-6">
+              <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-story-purple to-story-blue bg-clip-text text-transparent">
+                Welcome to the Future of Bedtime Stories! 🌟
               </p>
-              <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
-                Simply choose your preferences below - select the age group, story duration, preferred voice, and theme. Our AI will craft a unique, engaging story complete with professional narration and optional background music. Each story comes with interactive features to enhance comprehension and make bedtime reading both fun and educational.
-              </p>
-              <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
-                After the story, engage with our AI-powered quiz to check understanding, or use the chat feature to discuss the story's themes and characters. Every story can be saved to your library for future reading sessions.
-              </p>
+              
+              <div className="space-y-4">
+                <p className="text-lg sm:text-xl text-gray-800 max-w-3xl mx-auto leading-relaxed">
+                  Transform bedtime into an <span className="font-bold text-story-purple">magical adventure</span> with our 
+                  <span className="bg-gradient-to-r from-story-purple to-story-blue bg-clip-text text-transparent font-bold"> AI-powered storytelling</span> that adapts perfectly to your child's world!
+                </p>
+                
+                <div className="bg-blue-50 p-6 rounded-xl shadow-sm max-w-3xl mx-auto">
+                  <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
+                    <span className="font-bold text-story-blue">✨ How it works:</span> Simply choose your perfect story settings below - 
+                    <span className="font-semibold text-story-purple">age group</span>, 
+                    <span className="font-semibold text-story-orange">story duration</span>, 
+                    <span className="font-semibold text-story-blue">voice</span>, and 
+                    <span className="font-semibold text-story-purple">theme</span>. Our AI crafts a 
+                    <span className="italic font-medium"> unique, engaging narrative</span> complete with professional narration and optional atmospheric music.
+                  </p>
+                </div>
+
+                <div className="bg-purple-50 p-6 rounded-xl shadow-sm max-w-3xl mx-auto">
+                  <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
+                    <span className="font-bold text-story-purple">🎯 Interactive Features:</span> Each story comes with 
+                    <span className="font-medium"> highlighted text synchronization</span>, 
+                    <span className="text-story-blue font-medium">comprehension-boosting activities</span>, and 
+                    <span className="text-story-orange font-medium">educational elements</span> that make learning fun!
+                  </p>
+                </div>
+
+                <div className="bg-orange-50 p-6 rounded-xl shadow-sm max-w-3xl mx-auto">
+                  <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
+                    <span className="font-bold text-story-orange">🌈 After the Story:</span> Engage with our 
+                    <span className="font-medium text-story-purple">AI-powered quiz</span> to check understanding, or use our 
+                    <span className="font-medium text-story-blue">chat feature</span> to explore the story's themes and characters. 
+                    <span className="font-medium italic">Save your favorites</span> to your personal library for endless storytelling magic!
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
+          {/* Language and Voice Column */}
           <div className="space-y-6 pb-8">
-            {/* Language and Voice Column */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="space-y-6">
                 <div className="w-full transform hover:scale-[1.02] transition-transform duration-300">
