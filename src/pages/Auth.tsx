@@ -41,15 +41,6 @@ export default function AuthPage() {
     };
   }, [navigate, toast]);
 
-  const handleError = (error: { message: string }) => {
-    console.error('Auth error:', error);
-    toast({
-      title: "Authentication Error",
-      description: error.message || "Invalid login credentials. Please check your email and password.",
-      variant: "destructive",
-    });
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-6 space-y-6">
@@ -108,7 +99,6 @@ export default function AuthPage() {
           }}
           view="sign_in"
           showLinks={true}
-          onAuthError={handleError}
         />
       </Card>
     </div>
