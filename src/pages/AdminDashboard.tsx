@@ -3,31 +3,21 @@ import { Footer } from "@/components/layout/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Users, BookOpen, Loader2, Plus, Key } from "lucide-react";
+import { Shield, Users, BookOpen, Loader2, Plus } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SubscriptionPlanDialog } from "@/components/admin/SubscriptionPlanDialog";
 import { SubscriptionPlansTable } from "@/components/admin/SubscriptionPlansTable";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { UsersTable } from "@/components/admin/UsersTable";
+import { ApiKeysTable } from "@/components/admin/ApiKeysTable";
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const [showPlanDialog, setShowPlanDialog] = useState(false);
 
   // Check if user is authenticated and admin
-  const { data: adminCheck, isLoading: isCheckingAdmin } = useQuery({
+  const { data: adminCheck, isLoading: isCheckingAdmin, error: adminError } = useQuery({
     queryKey: ['admin-check'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -49,7 +39,7 @@ export default function AdminDashboard() {
     },
   });
 
-  // Fetch stats and users
+  // Fetch stats
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
@@ -69,36 +59,6 @@ export default function AdminDashboard() {
     enabled: !!adminCheck,
   });
 
-  // Fetch users
-  const { data: users, isLoading: isLoadingUsers } = useQuery({
-    queryKey: ['admin-users'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!adminCheck,
-  });
-
-  // Fetch API keys
-  const { data: apiKeys, isLoading: isLoadingApiKeys } = useQuery({
-    queryKey: ['admin-api-keys'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('api_keys')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!adminCheck,
-  });
-
   // Show loading state while checking admin status
   if (isCheckingAdmin) {
     return (
@@ -113,7 +73,7 @@ export default function AdminDashboard() {
   }
 
   // Show error if not admin
-  if (!adminCheck) {
+  if (adminError || !adminCheck) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
         <Header />
@@ -176,74 +136,12 @@ export default function AdminDashboard() {
             <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="users" className="space-y-4">
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Admin</TableHead>
-                    <TableHead>Created At</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isLoadingUsers ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center">
-                        <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    users?.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.is_admin ? "Yes" : "No"}</TableCell>
-                        <TableCell>
-                          {new Date(user.created_at).toLocaleDateString()}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+          <TabsContent value="users">
+            <UsersTable />
           </TabsContent>
 
-          <TabsContent value="api-keys" className="space-y-4">
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Value</TableHead>
-                    <TableHead>Created At</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isLoadingApiKeys ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center">
-                        <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    apiKeys?.map((key) => (
-                      <TableRow key={key.id}>
-                        <TableCell>{key.key_name}</TableCell>
-                        <TableCell>
-                          <code className="bg-gray-100 px-2 py-1 rounded">
-                            {key.key_value}
-                          </code>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(key.created_at).toLocaleDateString()}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+          <TabsContent value="api-keys">
+            <ApiKeysTable />
           </TabsContent>
 
           <TabsContent value="plans" className="space-y-4">
