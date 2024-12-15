@@ -93,7 +93,7 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
   const generateQuiz = async () => {
     setIsGeneratingQuiz(true);
     try {
-      const questions = await aiService.generateQuiz(storyContent);
+      const questions = await aiService.generateQuiz(storyContent, settings.language);
       setQuiz(questions);
       toast({
         title: "Quiz Generated",
@@ -118,7 +118,7 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
     try {
       setMessages((prev) => [...prev, { role: "user", content: text }]);
       
-      const response = await aiService.continueStory(text);
+      const response = await aiService.continueStory(text, settings.language);
       
       setMessages((prev) => [
         ...prev,
@@ -220,6 +220,7 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
             quiz={quiz}
             onGenerateQuiz={generateQuiz}
             isGeneratingQuiz={isGeneratingQuiz}
+            language={settings.language}
           />
         </div>
       </div>

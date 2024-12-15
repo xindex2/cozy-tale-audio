@@ -24,7 +24,35 @@ interface ChatPanelProps {
   quiz: QuizQuestion[];
   onGenerateQuiz: () => void;
   isGeneratingQuiz: boolean;
+  language: string;
 }
+
+const getPlaceholderText = (language: string) => {
+  const placeholders: { [key: string]: string } = {
+    en: "Ask about the story...",
+    es: "Pregunta sobre la historia...",
+    ar: "اسأل عن القصة..."
+  };
+  return placeholders[language] || placeholders['en'];
+};
+
+const getGenerateQuizText = (language: string) => {
+  const texts: { [key: string]: string } = {
+    en: "Generate Quiz",
+    es: "Generar Cuestionario",
+    ar: "إنشاء اختبار"
+  };
+  return texts[language] || texts['en'];
+};
+
+const getLoadingText = (language: string) => {
+  const texts: { [key: string]: string } = {
+    en: "Generating Quiz...",
+    es: "Generando Cuestionario...",
+    ar: "جاري إنشاء الاختبار..."
+  };
+  return texts[language] || texts['en'];
+};
 
 export function ChatPanel({ 
   messages, 
@@ -32,41 +60,16 @@ export function ChatPanel({
   isLoading,
   quiz,
   onGenerateQuiz,
-  isGeneratingQuiz
+  isGeneratingQuiz,
+  language
 }: ChatPanelProps) {
   const [input, setInput] = useState("");
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [completedQuestions, setCompletedQuestions] = useState<number[]>([]);
-  const [showFinalScore, setShowFinalScore] = useState(false);
 
   const handleSend = () => {
     if (input.trim()) {
       onSendMessage(input);
       setInput("");
     }
-  };
-
-  const handleAnswerSelect = (answerIndex: number) => {
-    setSelectedAnswer(answerIndex);
-    if (answerIndex === quiz[currentQuestionIndex].correctAnswer) {
-      setTimeout(() => {
-        setCompletedQuestions([...completedQuestions, currentQuestionIndex]);
-        if (currentQuestionIndex < quiz.length - 1) {
-          setCurrentQuestionIndex(currentQuestionIndex + 1);
-          setSelectedAnswer(null);
-        } else {
-          setShowFinalScore(true);
-        }
-      }, 1000);
-    }
-  };
-
-  const resetQuiz = () => {
-    setCurrentQuestionIndex(0);
-    setSelectedAnswer(null);
-    setCompletedQuestions([]);
-    setShowFinalScore(false);
   };
 
   return (
@@ -76,11 +79,11 @@ export function ChatPanel({
           <TabsList className="w-full bg-white/50">
             <TabsTrigger value="chat" className="flex-1">
               <MessageSquare className="w-4 h-4 mr-2" />
-              Chat
+              {language === 'es' ? 'Chat' : language === 'ar' ? 'محادثة' : 'Chat'}
             </TabsTrigger>
             <TabsTrigger value="quiz" className="flex-1">
               <List className="w-4 h-4 mr-2" />
-              Quiz
+              {language === 'es' ? 'Cuestionario' : language === 'ar' ? 'اختبار' : 'Quiz'}
             </TabsTrigger>
           </TabsList>
         </div>
@@ -99,6 +102,7 @@ export function ChatPanel({
                         ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
                         : "bg-white"
                     }`}
+                    style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}
                   >
                     {message.content}
                   </div>
@@ -111,11 +115,11 @@ export function ChatPanel({
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about the story..."
+              placeholder={getPlaceholderText(language)}
               onKeyPress={(e) => e.key === "Enter" && handleSend()}
               disabled={isLoading}
               className="bg-white/90"
-              aria-label="Chat with the story - ask questions or share your thoughts"
+              style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}
             />
             <Button 
               onClick={handleSend}
@@ -131,7 +135,11 @@ export function ChatPanel({
           <ScrollArea className="h-full">
             {quiz.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full space-y-4">
-                <p className="text-gray-600">No quiz available yet.</p>
+                <p className="text-gray-600" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
+                  {language === 'es' ? 'No hay cuestionario disponible.' : 
+                   language === 'ar' ? 'لا يوجد اختبار متاح.' : 
+                   'No quiz available yet.'}
+                </p>
                 <Button
                   onClick={onGenerateQuiz}
                   disabled={isGeneratingQuiz}
@@ -140,57 +148,38 @@ export function ChatPanel({
                   {isGeneratingQuiz ? (
                     <>
                       <Loader className="w-4 h-4 mr-2 animate-spin" />
-                      Generating Quiz...
+                      {getLoadingText(language)}
                     </>
                   ) : (
                     <>
                       <List className="w-4 h-4 mr-2" />
-                      Generate Quiz
+                      {getGenerateQuizText(language)}
                     </>
                   )}
                 </Button>
               </div>
-            ) : showFinalScore ? (
-              <div className="space-y-4">
-                <div className="text-center p-4 bg-white rounded-lg">
-                  <h3 className="text-xl font-bold text-blue-800">Quiz Complete!</h3>
-                  <p className="text-lg mt-2">
-                    You've completed all questions correctly!
-                  </p>
-                </div>
-                <Button
-                  onClick={resetQuiz}
-                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600"
-                >
-                  Try Again
-                </Button>
-              </div>
             ) : (
-              <div className="space-y-6">
-                <div key={currentQuestionIndex} className="space-y-3">
-                  <h3 className="font-medium text-gray-800">
-                    Question {currentQuestionIndex + 1}: {quiz[currentQuestionIndex].question}
-                  </h3>
-                  <div className="space-y-2">
-                    {quiz[currentQuestionIndex].options.map((option, oIndex) => (
-                      <Button
-                        key={oIndex}
-                        variant={selectedAnswer === oIndex ? "default" : "outline"}
-                        className={`w-full justify-start text-left ${
-                          selectedAnswer === oIndex
-                            ? selectedAnswer === quiz[currentQuestionIndex].correctAnswer
-                              ? "bg-green-500 hover:bg-green-600"
-                              : "bg-red-500 hover:bg-red-600"
-                            : "bg-gradient-to-r from-blue-500 to-blue-600"
-                        }`}
-                        onClick={() => handleAnswerSelect(oIndex)}
-                        disabled={selectedAnswer !== null}
-                      >
-                        {option}
-                      </Button>
-                    ))}
+              <div className="space-y-4">
+                {quiz.map((question, index) => (
+                  <div key={index} className="bg-white p-4 rounded-lg space-y-3">
+                    <h3 className="font-medium text-gray-800" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
+                      {question.question}
+                    </h3>
+                    <div className="space-y-2">
+                      {question.options.map((option, optionIndex) => (
+                        <Button
+                          key={optionIndex}
+                          variant="outline"
+                          className="w-full justify-start text-left"
+                          style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}
+                        >
+                          {option}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                ))}
+              
               </div>
             )}
           </ScrollArea>
