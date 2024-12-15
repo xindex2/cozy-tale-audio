@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -23,6 +23,16 @@ export default function Auth() {
         toast({
           title: "Check your email",
           description: "We've sent you a password reset link.",
+        });
+      } else if (event === "USER_UPDATED") {
+        toast({
+          title: "Profile updated",
+          description: "Your profile has been updated successfully.",
+        });
+      } else if (event === "SIGNED_OUT") {
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
         });
       }
     });
@@ -46,7 +56,13 @@ export default function Auth() {
     const error = searchParams.get("error");
     const error_description = searchParams.get("error_description");
 
-    if (error && error_description) {
+    if (error === "invalid_credentials") {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "Invalid email or password. Please try again.",
+      });
+    } else if (error && error_description) {
       toast({
         variant: "destructive",
         title: "Authentication Error",
@@ -84,7 +100,7 @@ export default function Auth() {
             },
           }}
           providers={["google"]}
-          view="sign_in"
+          redirectTo={`${window.location.origin}/auth/callback`}
           showLinks={true}
         />
       </Card>
