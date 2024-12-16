@@ -30,13 +30,12 @@ export function AudioManager({
   useEffect(() => {
     if (!voiceUrl) return;
 
-    const audio = new Audio(voiceUrl);
-    audio.volume = isMuted ? 0 : volume;
+    const audio = new Audio();
     
-    audio.addEventListener('timeupdate', () => {
-      onTimeUpdate?.(audio.currentTime);
-    });
-
+    // Set CORS headers for ElevenLabs audio
+    audio.crossOrigin = "anonymous";
+    
+    // Add event listeners before setting the source
     audio.addEventListener('error', (e) => {
       console.error("Voice audio error:", e);
       toast({
@@ -46,12 +45,35 @@ export function AudioManager({
       });
     });
 
+    audio.addEventListener('timeupdate', () => {
+      onTimeUpdate?.(audio.currentTime);
+    });
+
+    audio.addEventListener('canplaythrough', () => {
+      console.log("Voice audio loaded and ready to play");
+      if (isPlaying) {
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.error("Error playing voice audio:", error);
+          });
+        }
+      }
+    });
+
+    // Set audio properties
+    audio.volume = isMuted ? 0 : volume;
+    audio.src = voiceUrl;
+    audio.load(); // Explicitly load the audio
+    
     voiceRef.current = audio;
 
     return () => {
       audio.pause();
+      audio.src = ""; // Clear the source
       audio.removeEventListener('timeupdate', () => {});
       audio.removeEventListener('error', () => {});
+      audio.removeEventListener('canplaythrough', () => {});
     };
   }, [voiceUrl]);
 
@@ -59,43 +81,43 @@ export function AudioManager({
   useEffect(() => {
     if (!backgroundMusicUrl) return;
 
-    try {
-      const audio = new Audio(backgroundMusicUrl);
-      audio.loop = true;
-      audio.volume = isMusicMuted ? 0 : musicVolume;
+    const audio = new Audio();
+    audio.loop = true;
+    audio.volume = isMusicMuted ? 0 : musicVolume;
+    audio.crossOrigin = "anonymous";
 
-      audio.addEventListener('error', (e) => {
-        console.error("Music error:", e);
-        toast({
-          title: "Music Error",
-          description: "Failed to play background music. Please try again.",
-          variant: "destructive",
-        });
-      });
-
-      audio.addEventListener('canplaythrough', () => {
-        console.log("Music loaded and ready to play");
-      });
-
-      // Preload the audio
-      audio.preload = "auto";
-      audio.load();
-
-      musicRef.current = audio;
-
-      return () => {
-        audio.pause();
-        audio.removeEventListener('error', () => {});
-        audio.removeEventListener('canplaythrough', () => {});
-      };
-    } catch (error) {
-      console.error("Error setting up background music:", error);
+    audio.addEventListener('error', (e) => {
+      console.error("Music error:", e);
       toast({
-        title: "Music Setup Error",
-        description: "Failed to setup background music. Please try again.",
+        title: "Music Error",
+        description: "Failed to play background music. Please try again.",
         variant: "destructive",
       });
-    }
+    });
+
+    audio.addEventListener('canplaythrough', () => {
+      console.log("Music loaded and ready to play");
+      if (isPlaying) {
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.error("Error playing background music:", error);
+          });
+        }
+      }
+    });
+
+    audio.src = backgroundMusicUrl;
+    audio.load(); // Explicitly load the audio
+    
+    musicRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audio.src = ""; // Clear the source
+      audio.removeEventListener('error', () => {});
+      audio.removeEventListener('canplaythrough', () => {});
+    };
   }, [backgroundMusicUrl]);
 
   // Handle volume changes
