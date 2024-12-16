@@ -11,22 +11,31 @@ export type Database = {
     Tables: {
       api_keys: {
         Row: {
+          api_type: string
           created_at: string
+          description: string | null
           id: string
+          is_active: boolean
           key_name: string
           key_value: string
           updated_at: string
         }
         Insert: {
+          api_type?: string
           created_at?: string
+          description?: string | null
           id?: string
+          is_active?: boolean
           key_name: string
           key_value: string
           updated_at?: string
         }
         Update: {
+          api_type?: string
           created_at?: string
+          description?: string | null
           id?: string
+          is_active?: boolean
           key_name?: string
           key_value?: string
           updated_at?: string

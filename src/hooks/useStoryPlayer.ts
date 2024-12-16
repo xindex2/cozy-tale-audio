@@ -1,13 +1,10 @@
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { aiService } from "@/services/aiService";
+import { useEffect } from "react";
 import type { StorySettings } from "@/components/StoryOptions";
-import type { Message, QuizQuestion } from "@/types/story";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useStoryState } from "./story/useStoryState";
+import { useStoryActions } from "./story/useStoryActions";
 
 export function useStoryPlayer(
-  settings: StorySettings, 
+  settings: StorySettings,
   onSave?: (title: string, content: string, audioUrl: string, backgroundMusicUrl: string) => void,
   initialStoryData?: {
     title: string;
@@ -16,186 +13,57 @@ export function useStoryPlayer(
     backgroundMusicUrl?: string;
   }
 ) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.5);
-  const [musicVolume, setMusicVolume] = useState(0.3);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isMusicMuted, setIsMusicMuted] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
-  const [currentMusicUrl, setCurrentMusicUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const [storyTitle, setStoryTitle] = useState("");
-  const [storyContent, setStoryContent] = useState("");
-  const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
-  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const { toast } = useToast();
+  const state = useStoryState();
+  const actions = useStoryActions(state, onSave);
 
-  // Fetch and initialize Gemini API key with improved error handling
-  useQuery({
-    queryKey: ['gemini-api-key'],
-    queryFn: async () => {
-      try {
-        console.log("Fetching Gemini API key...");
-        const { data, error } = await supabase
-          .from('api_keys')
-          .select('key_value')
-          .eq('key_name', 'GEMINI_API_KEY')
-          .single();
-
-        if (error) {
-          console.error('Error fetching Gemini API key:', error);
-          throw new Error(`Failed to fetch Gemini API key: ${error.message}`);
-        }
-
-        if (!data?.key_value) {
-          console.error('No Gemini API key found in database');
-          throw new Error('Gemini API key not found in database. Please add it in the admin dashboard.');
-        }
-
-        console.log("Initializing Gemini API...");
-        await aiService.setGeminiApiKey(data.key_value);
-        console.log("Gemini API initialized successfully");
-        
-        return data.key_value;
-      } catch (error) {
-        console.error('Failed to initialize Gemini API:', error);
-        throw error;
+  useEffect(() => {
+    if (initialStoryData) {
+      state.story.setTitle(initialStoryData.title);
+      state.story.setContent(initialStoryData.content);
+      if (initialStoryData.audioUrl) {
+        state.audio.setCurrentAudioUrl(initialStoryData.audioUrl);
       }
-    },
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
-    staleTime: Infinity,
-    meta: {
-      onError: (error: Error) => {
-        toast({
-          title: "API Key Error",
-          description: error.message || "Failed to initialize story generation. Please check API key in admin dashboard.",
-          variant: "destructive",
-        });
+      if (initialStoryData.backgroundMusicUrl) {
+        state.audio.setCurrentMusicUrl(initialStoryData.backgroundMusicUrl);
       }
     }
-  });
-
-  const startStory = async () => {
-    setIsLoading(true);
-    try {
-      console.log("Starting story generation...");
-      const { text, audioUrl, backgroundMusicUrl, title } = await aiService.startChat(settings);
-      console.log("Story generated successfully");
-      
-      setStoryTitle(title || "Your Bedtime Story");
-      setStoryContent(text);
-      
-      if (audioUrl) {
-        setCurrentAudioUrl(audioUrl);
-      }
-      if (backgroundMusicUrl) {
-        setCurrentMusicUrl(backgroundMusicUrl);
-      }
-      
-      // Start playing automatically after generation
-      setIsPlaying(true);
-
-      if (onSave) {
-        onSave(title || "Your Bedtime Story", text, audioUrl || "", backgroundMusicUrl || "");
-      }
-    } catch (error) {
-      console.error("Error starting story:", error);
-      toast({
-        title: "Story Generation Error",
-        description: error instanceof Error ? error.message : "Failed to generate story. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const generateQuiz = async () => {
-    setIsGeneratingQuiz(true);
-    try {
-      const questions = await aiService.generateQuiz(storyContent, settings.language);
-      setQuiz(questions);
-      toast({
-        title: "Quiz Generated",
-        description: "Test your knowledge about the story!",
-      });
-    } catch (error) {
-      console.error("Error generating quiz:", error);
-      toast({
-        title: "Error",
-        description: "Failed to generate quiz. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGeneratingQuiz(false);
-    }
-  };
-
-  const handleSendMessage = async (text: string) => {
-    if (!text.trim()) return;
-    
-    setIsSending(true);
-    try {
-      setMessages((prev) => [...prev, { role: "user", content: text }]);
-      
-      const response = await aiService.continueStory(text, settings.language);
-      
-      setMessages((prev) => [
-        ...prev,
-        { 
-          role: "assistant", 
-          content: response.text, 
-          audioUrl: response.audioUrl,
-          backgroundMusicUrl: response.backgroundMusicUrl 
-        },
-      ]);
-      
-      if (response.audioUrl) {
-        setCurrentAudioUrl(response.audioUrl);
-      }
-      if (response.backgroundMusicUrl) {
-        setCurrentMusicUrl(response.backgroundMusicUrl);
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      toast({
-        title: "Error",
-        description: "Failed to process your message. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSending(false);
-    }
-  };
+  }, [initialStoryData]);
 
   return {
-    isPlaying,
-    setIsPlaying,
-    volume,
-    setVolume,
-    musicVolume,
-    setMusicVolume,
-    isMuted,
-    setIsMuted,
-    isMusicMuted,
-    setIsMusicMuted,
-    messages,
-    currentAudioUrl,
-    currentMusicUrl,
-    isLoading,
-    isSending,
-    storyTitle,
-    storyContent,
-    quiz,
-    isGeneratingQuiz,
-    currentTime,
-    setCurrentTime,
-    startStory,
-    generateQuiz,
-    handleSendMessage,
+    // Playback controls
+    isPlaying: state.playback.isPlaying,
+    setIsPlaying: state.playback.setIsPlaying,
+    currentTime: state.playback.currentTime,
+    setCurrentTime: state.playback.setCurrentTime,
+
+    // Audio controls
+    volume: state.audio.volume,
+    setVolume: state.audio.setVolume,
+    musicVolume: state.audio.musicVolume,
+    setMusicVolume: state.audio.setMusicVolume,
+    isMuted: state.audio.isMuted,
+    setIsMuted: state.audio.setIsMuted,
+    isMusicMuted: state.audio.isMusicMuted,
+    setIsMusicMuted: state.audio.setIsMusicMuted,
+    currentAudioUrl: state.audio.currentAudioUrl,
+    currentMusicUrl: state.audio.currentMusicUrl,
+
+    // Story content
+    messages: state.story.messages,
+    storyTitle: state.story.title,
+    storyContent: state.story.content,
+
+    // Loading states
+    isLoading: state.loading.isLoading,
+    isSending: state.loading.isSending,
+    isGeneratingQuiz: state.loading.isGeneratingQuiz,
+
+    // Quiz
+    quiz: state.quiz.questions,
+
+    // Actions
+    startStory: actions.startStory,
+    generateQuiz: actions.generateQuiz,
+    handleSendMessage: actions.handleSendMessage,
   };
 }
