@@ -40,7 +40,7 @@ export function AudioManager({
     audio.addEventListener('error', (e) => {
       console.error("Voice audio error:", e);
       toast({
-        title: "Voice Audio Error",
+        title: "Audio Error",
         description: "Failed to play voice audio. Please try again.",
         variant: "destructive",
       });
@@ -71,6 +71,10 @@ export function AudioManager({
         variant: "destructive",
       });
     });
+
+    // Preload the audio
+    audio.preload = "auto";
+    audio.load();
 
     musicRef.current = audio;
 

@@ -4,33 +4,19 @@ export function useContainerHeight(containerRef: RefObject<HTMLDivElement>) {
   const [height, setHeight] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
     const updateHeight = () => {
-      if (containerRef.current && containerRef.current.offsetParent !== null) {
-        const viewportHeight = window.innerHeight;
-        const maxHeight = Math.floor(viewportHeight * 0.6);
-        setHeight(maxHeight);
-      }
+      const viewportHeight = window.innerHeight;
+      const headerHeight = 80; // Approximate header height
+      const padding = 32; // 2rem padding
+      const maxHeight = viewportHeight - headerHeight - padding;
+      setHeight(maxHeight);
     };
 
-    // Initial height
     updateHeight();
+    window.addEventListener('resize', updateHeight);
 
-    // Use RAF to avoid ResizeObserver loop limit exceeded
-    let rafId: number;
-    const debouncedResize = () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(updateHeight);
-    };
-
-    window.addEventListener('resize', debouncedResize, { passive: true });
-
-    return () => {
-      window.removeEventListener('resize', debouncedResize);
-      cancelAnimationFrame(rafId);
-    };
-  }, [containerRef]);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
 
   return height;
 }
