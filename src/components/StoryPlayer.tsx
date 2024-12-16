@@ -15,9 +15,15 @@ interface StoryPlayerProps {
   settings: StorySettings;
   onBack: () => void;
   onSave?: (title: string, content: string, audioUrl: string, backgroundMusicUrl: string) => void;
+  initialStoryData?: {
+    title: string;
+    content: string;
+    audioUrl?: string;
+    backgroundMusicUrl?: string;
+  };
 }
 
-export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
+export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: StoryPlayerProps) {
   const {
     isPlaying,
     setIsPlaying,
@@ -43,10 +49,12 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
     startStory,
     generateQuiz,
     handleSendMessage,
-  } = useStoryPlayer(settings, onSave);
+  } = useStoryPlayer(settings, onSave, initialStoryData);
 
   useEffect(() => {
-    startStory();
+    if (!initialStoryData) {
+      startStory();
+    }
   }, []);
 
   if (isLoading) {
@@ -60,7 +68,7 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
           <Card className="p-4 lg:p-8 space-y-6 bg-gradient-to-r from-blue-50 to-blue-100 backdrop-blur-sm border border-blue-200">
             <StoryHeader
               onBack={onBack}
-              title={storyTitle}
+              title={storyTitle || initialStoryData?.title}
               volume={volume}
               isMuted={isMuted}
               onVolumeChange={(newVolume) => setVolume(newVolume[0])}
@@ -77,8 +85,8 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
             </div>
 
             <AudioManager
-              voiceUrl={currentAudioUrl}
-              backgroundMusicUrl={currentMusicUrl}
+              voiceUrl={currentAudioUrl || initialStoryData?.audioUrl}
+              backgroundMusicUrl={currentMusicUrl || initialStoryData?.backgroundMusicUrl}
               isPlaying={isPlaying}
               volume={volume}
               isMuted={isMuted}
@@ -89,8 +97,8 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
 
             <ErrorBoundary>
               <StoryDisplay
-                text={storyContent}
-                audioUrl={currentAudioUrl}
+                text={storyContent || initialStoryData?.content}
+                audioUrl={currentAudioUrl || initialStoryData?.audioUrl}
                 isPlaying={isPlaying}
                 currentTime={currentTime}
                 duration={settings.duration * 60}
