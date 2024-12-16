@@ -4,6 +4,7 @@ export interface StoryGenerationSettings {
   theme: string;
   language: string;
   music?: string;
+  voice?: string;  // Added voice property
 }
 
 export interface StoryResponse {

@@ -12,8 +12,9 @@ export function useStoryActions(
 
   const startStory = async (settings: StorySettings) => {
     state.loading.setIsLoading(true);
+    state.loading.setStage('text');
     try {
-      console.log("Starting story generation...");
+      console.log("Starting story generation with settings:", settings);
       const { title, content } = await openaiService.generateStory(settings);
       
       state.story.setTitle(title);
@@ -21,6 +22,7 @@ export function useStoryActions(
       
       // Set background music if selected
       if (settings.music !== 'no-music') {
+        state.loading.setStage('music');
         const musicUrl = audioService.getBackgroundMusicUrl(settings.music);
         if (musicUrl) {
           state.audio.setCurrentMusicUrl(musicUrl);
@@ -50,7 +52,7 @@ export function useStoryActions(
     }
   };
 
-  const generateQuiz = async (language: string = 'en') => {
+  const generateQuiz = async () => {
     state.loading.setIsGeneratingQuiz(true);
     try {
       const prompt = `Generate a quiz about this story: ${state.story.content}
@@ -60,7 +62,7 @@ export function useStoryActions(
       - correct: index of the correct answer (0-3)
       Make questions appropriate for children and focus on reading comprehension.`;
 
-      const response = await openaiService.generateContent(prompt, language);
+      const response = await openaiService.generateContent(prompt);
       try {
         const questions = JSON.parse(response);
         state.quiz.setQuestions(questions);
@@ -84,7 +86,7 @@ export function useStoryActions(
     }
   };
 
-  const handleSendMessage = async (text: string, language: string = 'en') => {
+  const handleSendMessage = async (text: string) => {
     if (!text.trim()) return;
     
     state.loading.setIsSending(true);
@@ -92,7 +94,7 @@ export function useStoryActions(
       const newMessage: Message = { role: "user", content: text };
       state.story.setMessages(prev => [...prev, newMessage]);
       
-      const response = await openaiService.generateContent(text, language);
+      const response = await openaiService.generateContent(text);
       
       state.story.setMessages(prev => [
         ...prev,

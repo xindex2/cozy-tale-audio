@@ -8,7 +8,6 @@ export const openaiService = {
     try {
       console.log("Starting story generation...");
       
-      // First generate the story content
       const prompt = `Create a unique and engaging ${settings.duration} minute bedtime story for children aged ${settings.ageGroup} with the theme: ${settings.theme}.
       The story should be in ${settings.language} language.
       Include elements that are:
