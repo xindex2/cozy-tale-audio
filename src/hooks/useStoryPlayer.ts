@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useToast, toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { aiService } from "@/services/aiService";
 import type { StorySettings } from "@/components/StoryOptions";
 import type { Message, QuizQuestion } from "@/types/story";
@@ -22,45 +22,46 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
   const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const { toast } = useToast();
 
   // Fetch API keys when the hook initializes
-  const { data: apiKeys } = useQuery({
+  const { data: apiKeys, isLoading: isLoadingKeys, error: apiKeysError } = useQuery({
     queryKey: ['story-api-keys'],
     queryFn: async () => {
       console.log("Fetching API keys from database...");
       const { data, error } = await supabase
         .from('api_keys')
         .select('key_name, key_value')
-        .in('key_name', ['GEMINI_API_KEY']);
+        .eq('key_name', 'GEMINI_API_KEY')
+        .single();
 
       if (error) {
         console.error('Error fetching API keys:', error);
         throw error;
       }
 
-      if (!data || data.length === 0) {
+      if (!data) {
         console.error('No API keys found in database');
         throw new Error('Required API keys not found in database');
       }
 
-      const keys = data.reduce((acc: Record<string, string>, curr) => {
-        acc[curr.key_name] = curr.key_value;
-        return acc;
-      }, {});
-
       console.log("API keys fetched successfully:", {
-        hasGeminiKey: !!keys.GEMINI_API_KEY
+        hasGeminiKey: !!data.key_value
       });
 
       // Initialize the Gemini API immediately after fetching the key
-      if (keys.GEMINI_API_KEY) {
-        aiService.setGeminiApiKey(keys.GEMINI_API_KEY);
+      if (data.key_value) {
+        console.log("Initializing Gemini API with key...");
+        aiService.setGeminiApiKey(data.key_value);
+        console.log("Gemini API initialized successfully");
       }
 
-      return keys;
+      return {
+        GEMINI_API_KEY: data.key_value
+      };
     },
-    staleTime: Infinity, // Cache the API keys for the session
     retry: 1,
+    staleTime: Infinity // Cache the API keys for the session
   });
 
   const startStory = async () => {
