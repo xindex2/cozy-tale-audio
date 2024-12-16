@@ -28,21 +28,38 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
   const { data: apiKeys, isLoading: isLoadingKeys } = useQuery({
     queryKey: ['story-api-keys'],
     queryFn: async () => {
+      console.log('Fetching API keys...');
       const { data, error } = await supabase
         .from('api_keys')
         .select('key_name, key_value')
         .in('key_name', ['ELEVEN_LABS_API_KEY', 'GEMINI_API_KEY']);
 
-      if (error) throw error;
-      return data.reduce((acc: Record<string, string>, curr) => {
+      if (error) {
+        console.error('Error fetching API keys:', error);
+        throw error;
+      }
+      
+      console.log('API keys data:', data); // Debug log
+      
+      const keys = data.reduce((acc: Record<string, string>, curr) => {
         acc[curr.key_name] = curr.key_value;
         return acc;
       }, {});
+      
+      console.log('Processed API keys:', keys); // Debug log
+      return keys;
     },
   });
 
   const startStory = async () => {
+    console.log('Starting story with API keys:', apiKeys); // Debug log
+    
     if (!apiKeys?.ELEVEN_LABS_API_KEY || !apiKeys?.GEMINI_API_KEY) {
+      console.error('Missing API keys:', {
+        elevenlabs: !!apiKeys?.ELEVEN_LABS_API_KEY,
+        gemini: !!apiKeys?.GEMINI_API_KEY
+      });
+      
       toast({
         title: "API Keys Required",
         description: "Please add both ElevenLabs and Gemini API keys in the Admin Dashboard.",
@@ -53,8 +70,11 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
 
     setIsLoading(true);
     try {
+      console.log('Setting API keys in services...'); // Debug log
       aiService.setApiKey(apiKeys.ELEVEN_LABS_API_KEY);
       aiService.setGeminiApiKey(apiKeys.GEMINI_API_KEY);
+      
+      console.log('Generating story...'); // Debug log
       const { text, audioUrl, backgroundMusicUrl, title } = await aiService.startChat(settings);
       setStoryTitle(title || "Your Bedtime Story");
       setStoryContent(text);
