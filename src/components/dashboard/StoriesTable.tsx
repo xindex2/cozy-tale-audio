@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye, Settings2, Trash2 } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 import { Story } from "@/types/story";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";

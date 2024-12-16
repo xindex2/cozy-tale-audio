@@ -76,30 +76,6 @@ export default function Dashboard() {
     }
   });
 
-  const handleDelete = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('stories')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Story deleted",
-        description: "Your story has been deleted successfully.",
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['stories'] });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error deleting story",
-        description: error instanceof Error ? error.message : "An error occurred while deleting the story",
-      });
-    }
-  };
-
   const handleCreateNew = () => {
     navigate("/create-story");
   };
@@ -128,6 +104,10 @@ export default function Dashboard() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['stories'] });
   };
 
   if (error) {
@@ -163,7 +143,7 @@ export default function Dashboard() {
           {storiesLoading ? (
             <div className="text-center py-8">Loading stories...</div>
           ) : stories && stories.length > 0 ? (
-            <StoriesTable stories={stories} onDelete={handleDelete} />
+            <StoriesTable stories={stories} onRefresh={handleRefresh} />
           ) : (
             <div className="text-center py-8 bg-white rounded-lg shadow">
               <p className="text-gray-500">No stories yet. Create your first story!</p>
