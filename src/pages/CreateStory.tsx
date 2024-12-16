@@ -1,47 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { StoryOptions, type StorySettings } from "@/components/StoryOptions";
 import { StoryPlayer } from "@/components/StoryPlayer";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuthCheck } from "@/hooks/useAuthCheck";
+import { LoadingScreen } from "@/components/ui/loading-screen";
+import { saveStory } from "@/services/storyService";
 
 export default function CreateStory() {
   const [storySettings, setStorySettings] = useState<StorySettings | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { userId, isLoading } = useAuthCheck();
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          toast({
-            title: "Authentication required",
-            description: "Please log in to create stories",
-            variant: "destructive",
-          });
-          navigate("/auth");
-          return;
-        }
-        setUserId(session.user.id);
-      } catch (error) {
-        console.error("Auth check error:", error);
-        toast({
-          title: "Authentication error",
-          description: "Please try again later",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [navigate, toast]);
 
   const handleStart = (settings: StorySettings) => {
     if (!userId) {
@@ -60,8 +32,13 @@ export default function CreateStory() {
     setStorySettings(null);
   };
 
-  const handleSaveStory = async (title: string, content: string, audioUrl: string, backgroundMusicUrl: string) => {
-    if (!userId) {
+  const handleSaveStory = async (
+    title: string, 
+    content: string, 
+    audioUrl: string, 
+    backgroundMusicUrl: string
+  ) => {
+    if (!userId || !storySettings) {
       toast({
         title: "Authentication required",
         description: "Please log in to save stories",
@@ -71,18 +48,14 @@ export default function CreateStory() {
     }
 
     try {
-      const { error } = await supabase
-        .from('stories')
-        .insert({
-          title,
-          content,
-          audio_url: audioUrl,
-          background_music_url: backgroundMusicUrl,
-          settings: JSON.stringify(storySettings),
-          user_id: userId
-        });
-
-      if (error) throw error;
+      await saveStory({
+        userId,
+        title,
+        content,
+        audioUrl,
+        backgroundMusicUrl,
+        settings: storySettings
+      });
 
       toast({
         title: "Story saved",
@@ -101,18 +74,7 @@ export default function CreateStory() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-50">
-        <Header />
-        <main className="flex-1 container py-8 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading...</p>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
