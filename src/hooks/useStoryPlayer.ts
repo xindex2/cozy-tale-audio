@@ -24,7 +24,7 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
   const [currentTime, setCurrentTime] = useState(0);
   const { toast } = useToast();
 
-  // Fetch and initialize Gemini API key
+  // Fetch and initialize Gemini API key with improved error handling
   useQuery({
     queryKey: ['gemini-api-key'],
     queryFn: async () => {
@@ -38,16 +38,16 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
 
         if (error) {
           console.error('Error fetching Gemini API key:', error);
-          throw new Error('Failed to fetch Gemini API key');
+          throw new Error(`Failed to fetch Gemini API key: ${error.message}`);
         }
 
         if (!data?.key_value) {
-          console.error('No Gemini API key found');
-          throw new Error('Gemini API key not found');
+          console.error('No Gemini API key found in database');
+          throw new Error('Gemini API key not found in database. Please add it in the admin dashboard.');
         }
 
         console.log("Initializing Gemini API...");
-        aiService.setGeminiApiKey(data.key_value);
+        await aiService.setGeminiApiKey(data.key_value);
         console.log("Gemini API initialized successfully");
         
         return data.key_value;
@@ -56,13 +56,14 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
         throw error;
       }
     },
-    retry: 2,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     staleTime: Infinity,
     meta: {
-      onError: () => {
+      onError: (error: Error) => {
         toast({
-          title: "Error",
-          description: "Failed to initialize story generation. Please check API key in admin dashboard.",
+          title: "API Key Error",
+          description: error.message || "Failed to initialize story generation. Please check API key in admin dashboard.",
           variant: "destructive",
         });
       }
@@ -93,8 +94,8 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
     } catch (error) {
       console.error("Error starting story:", error);
       toast({
-        title: "Error",
-        description: "Failed to generate story. Please try again.",
+        title: "Story Generation Error",
+        description: error instanceof Error ? error.message : "Failed to generate story. Please try again.",
         variant: "destructive",
       });
     } finally {
