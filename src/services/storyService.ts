@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { StorySettings } from "@/components/StoryOptions";
+import type { Json } from "@/integrations/supabase/types";
 
 interface SaveStoryParams {
   userId: string;
@@ -8,6 +9,11 @@ interface SaveStoryParams {
   audioUrl: string;
   backgroundMusicUrl: string;
   settings: StorySettings;
+}
+
+// Helper function to convert StorySettings to Json type
+function convertSettingsToJson(settings: StorySettings): Json {
+  return settings as unknown as Json;
 }
 
 export async function saveStory({
@@ -23,16 +29,14 @@ export async function saveStory({
   try {
     const { data, error } = await supabase
       .from("stories")
-      .insert([
-        {
-          user_id: userId,
-          title,
-          content,
-          audio_url: audioUrl,
-          background_music_url: backgroundMusicUrl,
-          settings,
-        },
-      ])
+      .insert({
+        user_id: userId,
+        title,
+        content,
+        audio_url: audioUrl,
+        background_music_url: backgroundMusicUrl,
+        settings: convertSettingsToJson(settings),
+      })
       .select()
       .single();
 
