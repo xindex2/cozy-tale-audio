@@ -30,95 +30,61 @@ export function AudioManager({
   useEffect(() => {
     if (!voiceUrl) return;
 
-    const audio = new Audio();
-    
-    // Set CORS headers for ElevenLabs audio
+    const audio = new Audio(voiceUrl);
+    audio.preload = "auto";
     audio.crossOrigin = "anonymous";
     
-    // Add event listeners before setting the source
-    audio.addEventListener('error', (e) => {
+    const handleError = (e: Event) => {
       console.error("Voice audio error:", e);
       toast({
         title: "Audio Error",
         description: "Failed to play voice audio. Please try again.",
         variant: "destructive",
       });
-    });
+    };
 
-    audio.addEventListener('timeupdate', () => {
+    const handleTimeUpdate = () => {
       onTimeUpdate?.(audio.currentTime);
-    });
+    };
 
-    audio.addEventListener('canplaythrough', () => {
-      console.log("Voice audio loaded and ready to play");
-      if (isPlaying) {
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.error("Error playing voice audio:", error);
-          });
-        }
-      }
-    });
-
-    // Set audio properties
-    audio.volume = isMuted ? 0 : volume;
-    audio.src = voiceUrl;
-    audio.load(); // Explicitly load the audio
+    audio.addEventListener('error', handleError);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
     
     voiceRef.current = audio;
 
     return () => {
       audio.pause();
-      audio.src = ""; // Clear the source
-      audio.removeEventListener('timeupdate', () => {});
-      audio.removeEventListener('error', () => {});
-      audio.removeEventListener('canplaythrough', () => {});
+      audio.removeEventListener('error', handleError);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
     };
-  }, [voiceUrl]);
+  }, [voiceUrl, toast, onTimeUpdate]);
 
   // Handle background music
   useEffect(() => {
     if (!backgroundMusicUrl) return;
 
-    const audio = new Audio();
+    const audio = new Audio(backgroundMusicUrl);
+    audio.preload = "auto";
     audio.loop = true;
-    audio.volume = isMusicMuted ? 0 : musicVolume;
     audio.crossOrigin = "anonymous";
 
-    audio.addEventListener('error', (e) => {
+    const handleError = (e: Event) => {
       console.error("Music error:", e);
       toast({
         title: "Music Error",
         description: "Failed to play background music. Please try again.",
         variant: "destructive",
       });
-    });
+    };
 
-    audio.addEventListener('canplaythrough', () => {
-      console.log("Music loaded and ready to play");
-      if (isPlaying) {
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.error("Error playing background music:", error);
-          });
-        }
-      }
-    });
-
-    audio.src = backgroundMusicUrl;
-    audio.load(); // Explicitly load the audio
-    
+    audio.addEventListener('error', handleError);
     musicRef.current = audio;
 
     return () => {
       audio.pause();
-      audio.src = ""; // Clear the source
-      audio.removeEventListener('error', () => {});
-      audio.removeEventListener('canplaythrough', () => {});
+      audio.removeEventListener('error', handleError);
     };
-  }, [backgroundMusicUrl]);
+  }, [backgroundMusicUrl, toast]);
 
   // Handle volume changes
   useEffect(() => {
@@ -137,10 +103,7 @@ export function AudioManager({
       
       try {
         if (isPlaying) {
-          const playPromise = audio.play();
-          if (playPromise !== undefined) {
-            await playPromise;
-          }
+          await audio.play();
         } else {
           audio.pause();
         }
@@ -156,7 +119,7 @@ export function AudioManager({
 
     playAudio(voiceRef.current);
     playAudio(musicRef.current);
-  }, [isPlaying]);
+  }, [isPlaying, toast]);
 
   return null;
 }
