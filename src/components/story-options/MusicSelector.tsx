@@ -15,7 +15,7 @@ interface MusicSelectorProps {
 export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorProps) {
   const [useMusic, setUseMusic] = useState(selectedMusic !== "no-music");
   const [playingId, setPlayingId] = useState<string | null>(null);
-  const [previewVolume, setPreviewVolume] = useState(0.15); // Default volume at 15%
+  const [previewVolume, setPreviewVolume] = useState(0.15);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -27,11 +27,11 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
     { id: "sleeping-lullaby", name: "Sleeping Lullaby", description: "Peaceful lullaby for sweet dreams", url: "/assets/peaceful-dreams.mp3" },
     { id: "water-dreams", name: "Water Dreams", description: "Gentle water sounds with soft music", url: "/assets/ocean-waves.mp3" },
     { id: "relaxing-piano", name: "Relaxing Piano", description: "Soothing piano melodies", url: "/assets/soft-piano.mp3" },
-    { id: "healing-fountain", name: "Healing Fountain", description: "Water fountain with healing music", url: "https://cdn.pixabay.com/download/audio/2024/09/10/audio_6e5d7d1912.mp3" },
-    { id: "ocean-piano", name: "Ocean Piano", description: "Piano with calming ocean waves", url: "https://cdn.pixabay.com/download/audio/2021/09/09/audio_478f62eb43.mp3" },
+    { id: "healing-fountain", name: "Healing Fountain", description: "Water fountain with healing music", url: "/assets/healing-fountain.mp3" },
+    { id: "ocean-piano", name: "Ocean Piano", description: "Piano with calming ocean waves", url: "/assets/ocean-piano.mp3" },
     { id: "forest-birds", name: "Forest Birds", description: "Peaceful forest ambiance with birds", url: "/assets/nature-sounds.mp3" },
-    { id: "sleep-music", name: "Sleep Music", description: "Gentle music for peaceful sleep", url: "https://cdn.pixabay.com/download/audio/2023/10/30/audio_66f4e26e42.mp3" },
-    { id: "guided-sleep", name: "Guided Sleep", description: "Relaxing guided sleep music", url: "https://cdn.pixabay.com/download/audio/2024/03/11/audio_2412defc6f.mp3" },
+    { id: "sleep-music", name: "Sleep Music", description: "Gentle music for peaceful sleep", url: "/assets/sleep-music.mp3" },
+    { id: "guided-sleep", name: "Guided Sleep", description: "Relaxing guided sleep music", url: "/assets/guided-sleep.mp3" },
   ];
 
   const handleMusicToggle = (checked: boolean) => {
@@ -44,23 +44,35 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
     }
   };
 
-  const togglePreview = (musicId: string, url: string) => {
-    if (playingId === musicId) {
-      stopPreview();
-    } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      const audio = new Audio(url);
-      audio.volume = previewVolume;
-      audio.play();
-      audioRef.current = audio;
-      setPlayingId(musicId);
+  const togglePreview = async (musicId: string, url: string) => {
+    try {
+      if (playingId === musicId) {
+        stopPreview();
+      } else {
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
+        const audio = new Audio(url);
+        audio.volume = previewVolume;
+        await audio.play();
+        audioRef.current = audio;
+        setPlayingId(musicId);
 
-      audio.addEventListener('ended', () => {
-        setPlayingId(null);
-        audioRef.current = null;
-      });
+        audio.addEventListener('ended', () => {
+          setPlayingId(null);
+          audioRef.current = null;
+        });
+
+        audio.addEventListener('error', (e) => {
+          console.error('Audio preview error:', e);
+          setPlayingId(null);
+          audioRef.current = null;
+        });
+      }
+    } catch (error) {
+      console.error('Error playing preview:', error);
+      setPlayingId(null);
+      audioRef.current = null;
     }
   };
 

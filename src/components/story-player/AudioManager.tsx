@@ -59,29 +59,43 @@ export function AudioManager({
   useEffect(() => {
     if (!backgroundMusicUrl) return;
 
-    const audio = new Audio(backgroundMusicUrl);
-    audio.loop = true;
-    audio.volume = isMusicMuted ? 0 : musicVolume;
+    try {
+      const audio = new Audio(backgroundMusicUrl);
+      audio.loop = true;
+      audio.volume = isMusicMuted ? 0 : musicVolume;
 
-    audio.addEventListener('error', (e) => {
-      console.error("Music error:", e);
+      audio.addEventListener('error', (e) => {
+        console.error("Music error:", e);
+        toast({
+          title: "Music Error",
+          description: "Failed to play background music. Please try again.",
+          variant: "destructive",
+        });
+      });
+
+      audio.addEventListener('canplaythrough', () => {
+        console.log("Music loaded and ready to play");
+      });
+
+      // Preload the audio
+      audio.preload = "auto";
+      audio.load();
+
+      musicRef.current = audio;
+
+      return () => {
+        audio.pause();
+        audio.removeEventListener('error', () => {});
+        audio.removeEventListener('canplaythrough', () => {});
+      };
+    } catch (error) {
+      console.error("Error setting up background music:", error);
       toast({
-        title: "Music Error",
-        description: "Failed to play background music. Please try again.",
+        title: "Music Setup Error",
+        description: "Failed to setup background music. Please try again.",
         variant: "destructive",
       });
-    });
-
-    // Preload the audio
-    audio.preload = "auto";
-    audio.load();
-
-    musicRef.current = audio;
-
-    return () => {
-      audio.pause();
-      audio.removeEventListener('error', () => {});
-    };
+    }
   }, [backgroundMusicUrl]);
 
   // Handle volume changes
@@ -101,12 +115,20 @@ export function AudioManager({
       
       try {
         if (isPlaying) {
-          await audio.play();
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            await playPromise;
+          }
         } else {
           audio.pause();
         }
       } catch (error) {
         console.error("Playback error:", error);
+        toast({
+          title: "Playback Error",
+          description: "Failed to play audio. Please try again.",
+          variant: "destructive",
+        });
       }
     };
 
