@@ -36,12 +36,12 @@ export function LoadingState({ stage = 'text', retryCount = 0 }: LoadingStatePro
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6 animate-fade-in">
-      <Card className="p-8 flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-r from-blue-50 to-blue-100">
+    <div className="w-full max-w-7xl mx-auto p-6">
+      <Card className="p-8 flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-r from-blue-50 to-blue-100 transition-all duration-500">
         <Loader className="h-8 w-8 animate-spin text-blue-500 mb-4" />
-        <p className="text-blue-600 mb-4">{getStageText()}</p>
+        <p className="text-blue-600 mb-4 transition-opacity duration-300">{getStageText()}</p>
         <div className="w-full max-w-md">
-          <Progress value={getProgress()} className="h-2" />
+          <Progress value={getProgress()} className="h-2 transition-all duration-300" />
         </div>
       </Card>
     </div>
