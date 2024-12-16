@@ -82,7 +82,7 @@ class OpenAIClient {
     throw lastError;
   }
 
-  async generateContent(prompt: string) {
+  async generateContent(prompt: string, systemPrompt?: string) {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -93,6 +93,14 @@ class OpenAIClient {
       console.log("Generating content with prompt:", prompt);
       
       const result = await this.retryWithBackoff(async () => {
+        const messages = [
+          { 
+            role: 'system', 
+            content: systemPrompt || 'You are a helpful assistant that generates children\'s stories. Format your responses exactly as requested in the prompt.' 
+          },
+          { role: 'user', content: prompt }
+        ];
+
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -101,13 +109,7 @@ class OpenAIClient {
           },
           body: JSON.stringify({
             model: 'gpt-4',
-            messages: [
-              { 
-                role: 'system', 
-                content: 'You are a helpful assistant that generates children\'s stories. Format your responses exactly as requested in the prompt.' 
-              },
-              { role: 'user', content: prompt }
-            ],
+            messages,
             temperature: 0.7,
           }),
         });
