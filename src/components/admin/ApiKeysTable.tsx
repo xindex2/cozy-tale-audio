@@ -16,7 +16,7 @@ import type { ApiKey } from "./api-keys/types";
 import { AddKeyDialog } from "./api-keys/AddKeyDialog";
 import { EditKeyDialog } from "./api-keys/EditKeyDialog";
 
-const REQUIRED_KEYS = ["GEMINI_API_KEY"];
+const REQUIRED_KEYS = ["OPENAI_API_KEY", "ELEVEN_LABS_API_KEY"];
 
 export function ApiKeysTable() {
   const [editingKey, setEditingKey] = useState<ApiKey | null>(null);
