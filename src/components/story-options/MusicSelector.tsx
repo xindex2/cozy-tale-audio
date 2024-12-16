@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { useToast } from "@/hooks/use-toast";
 
 interface MusicSelectorProps {
   selectedMusic: string;
@@ -17,6 +18,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [previewVolume, setPreviewVolume] = useState(0.15);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     setUseMusic(selectedMusic !== "no-music");
@@ -44,55 +46,67 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
     }
   };
 
+  const stopPreview = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    setPlayingId(null);
+  };
+
   const togglePreview = async (musicId: string, url: string) => {
     try {
       if (playingId === musicId) {
         stopPreview();
-      } else {
-        if (audioRef.current) {
-          audioRef.current.pause();
-        }
-        const audio = new Audio(url);
-        audio.volume = previewVolume;
-        
-        // Add event listeners before playing
-        audio.addEventListener('canplaythrough', async () => {
-          try {
-            await audio.play();
-            setPlayingId(musicId);
-            audioRef.current = audio;
-          } catch (error) {
-            console.error('Error playing preview:', error);
-          }
-        });
-
-        audio.addEventListener('ended', () => {
-          setPlayingId(null);
-          audioRef.current = null;
-        });
-
-        audio.addEventListener('error', (e) => {
-          console.error('Audio preview error:', e);
-          setPlayingId(null);
-          audioRef.current = null;
-        });
-
-        // Start loading the audio
-        audio.load();
+        return;
       }
-    } catch (error) {
-      console.error('Error setting up preview:', error);
-      setPlayingId(null);
-      audioRef.current = null;
-    }
-  };
 
-  const stopPreview = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
+      // Stop any currently playing audio
+      stopPreview();
+
+      // Create and configure new audio instance
+      const audio = new Audio();
+      audio.src = url;
+      audio.volume = previewVolume;
+
+      // Set up event listeners
+      audio.addEventListener('error', (e) => {
+        console.error('Audio preview error:', e);
+        toast({
+          title: "Error",
+          description: "Failed to play audio preview. Please try again.",
+          variant: "destructive",
+        });
+        stopPreview();
+      });
+
+      // Start playing
+      try {
+        await audio.play();
+        audioRef.current = audio;
+        setPlayingId(musicId);
+      } catch (error) {
+        console.error('Error playing audio:', error);
+        toast({
+          title: "Error",
+          description: "Failed to play audio. Please try again.",
+          variant: "destructive",
+        });
+        stopPreview();
+      }
+
+      // Handle audio ending
+      audio.addEventListener('ended', stopPreview);
+    } catch (error) {
+      console.error('Error in togglePreview:', error);
+      toast({
+        title: "Error",
+        description: "An error occurred while trying to play the preview.",
+        variant: "destructive",
+      });
+      stopPreview();
     }
-    setPlayingId(null);
   };
 
   useEffect(() => {
