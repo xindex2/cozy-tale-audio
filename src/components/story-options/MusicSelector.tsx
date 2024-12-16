@@ -1,12 +1,12 @@
 import { Card } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RadioGroup } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Music, Play, Pause, Volume2 } from "lucide-react";
+import { Music } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
+import { MusicOption } from "./music/MusicOption";
+import { VolumeControl } from "./music/VolumeControl";
+import { useAudioPreview } from "./music/useAudioPreview";
 
 interface MusicSelectorProps {
   selectedMusic: string;
@@ -15,10 +15,9 @@ interface MusicSelectorProps {
 
 export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorProps) {
   const [useMusic, setUseMusic] = useState(selectedMusic !== "no-music");
-  const [playingId, setPlayingId] = useState<string | null>(null);
   const [previewVolume, setPreviewVolume] = useState(0.15);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { toast } = useToast();
+  
+  const { playingId, togglePreview } = useAudioPreview(previewVolume);
 
   useEffect(() => {
     setUseMusic(selectedMusic !== "no-music");
@@ -40,86 +39,10 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
     setUseMusic(checked);
     if (!checked) {
       onMusicSelect("no-music");
-      stopPreview();
     } else if (selectedMusic === "no-music") {
       onMusicSelect(musicOptions[0].id);
     }
   };
-
-  const stopPreview = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-    }
-    setPlayingId(null);
-  };
-
-  const togglePreview = async (musicId: string, url: string) => {
-    try {
-      if (playingId === musicId) {
-        stopPreview();
-        return;
-      }
-
-      // Stop any currently playing audio
-      stopPreview();
-
-      // Create and configure new audio instance
-      const audio = new Audio();
-      audio.src = url;
-      audio.volume = previewVolume;
-
-      // Set up event listeners
-      audio.addEventListener('error', (e) => {
-        console.error('Audio preview error:', e);
-        toast({
-          title: "Error",
-          description: "Failed to play audio preview. Please try again.",
-          variant: "destructive",
-        });
-        stopPreview();
-      });
-
-      // Start playing
-      try {
-        await audio.play();
-        audioRef.current = audio;
-        setPlayingId(musicId);
-      } catch (error) {
-        console.error('Error playing audio:', error);
-        toast({
-          title: "Error",
-          description: "Failed to play audio. Please try again.",
-          variant: "destructive",
-        });
-        stopPreview();
-      }
-
-      // Handle audio ending
-      audio.addEventListener('ended', stopPreview);
-    } catch (error) {
-      console.error('Error in togglePreview:', error);
-      toast({
-        title: "Error",
-        description: "An error occurred while trying to play the preview.",
-        variant: "destructive",
-      });
-      stopPreview();
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      stopPreview();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = previewVolume;
-    }
-  }, [previewVolume]);
 
   return (
     <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
@@ -136,21 +59,18 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
             onCheckedChange={handleMusicToggle}
             className="data-[state=checked]:bg-blue-500"
           />
-          <Label htmlFor="use-music" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <Label 
+            htmlFor="use-music" 
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
             Enable background music
           </Label>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <Volume2 className="h-4 w-4 text-gray-500" />
-          <Slider
-            value={[previewVolume]}
-            max={1}
-            step={0.01}
-            onValueChange={(value) => setPreviewVolume(value[0])}
-            className="w-32"
-          />
-        </div>
+        <VolumeControl 
+          volume={previewVolume}
+          onVolumeChange={(value) => setPreviewVolume(value[0])}
+        />
 
         {useMusic && (
           <RadioGroup
@@ -160,40 +80,14 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
             disabled={!useMusic}
           >
             {musicOptions.map((option) => (
-              <div key={option.id} className="relative">
-                <RadioGroupItem
-                  value={option.id}
-                  id={option.id}
-                  className="peer sr-only"
-                />
-                <Label
-                  htmlFor={option.id}
-                  className="flex flex-col p-4 border-2 rounded-xl cursor-pointer hover:bg-blue-50 peer-data-[state=checked]:border-blue-500 peer-data-[state=checked]:bg-blue-50"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <span className="font-semibold text-lg">{option.name}</span>
-                      <p className="text-sm text-gray-500">{option.description}</p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        togglePreview(option.id, option.url);
-                      }}
-                      className="ml-2"
-                    >
-                      {playingId === option.id ? (
-                        <Pause className="h-4 w-4" />
-                      ) : (
-                        <Play className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </Label>
-              </div>
+              <MusicOption
+                key={option.id}
+                id={option.id}
+                name={option.name}
+                description={option.description}
+                isPlaying={playingId === option.id}
+                onPreviewToggle={() => togglePreview(option.id, option.url)}
+              />
             ))}
           </RadioGroup>
         )}
