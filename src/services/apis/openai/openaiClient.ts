@@ -109,11 +109,12 @@ class OpenAIClient {
           throw new Error(error.error?.message || 'Failed to generate content');
         }
 
-        return response.json();
+        const data = await response.json();
+        return data.choices[0].message.content;
       });
 
       console.log("Content generated successfully");
-      return result.choices[0].message.content;
+      return result;
     } catch (error: any) {
       console.error("Error generating content:", error);
       toast({

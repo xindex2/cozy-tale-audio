@@ -1,5 +1,5 @@
 import { useToast } from "@/hooks/use-toast";
-import { geminiService } from "@/services/apis/geminiService";
+import { openaiService } from "@/services/apis/openai/storyGenerator";
 import { audioService } from "@/services/apis/audioService";
 import type { StorySettings } from "@/components/StoryOptions";
 import type { Message } from "@/types/story";
@@ -14,7 +14,7 @@ export function useStoryActions(
     state.loading.setIsLoading(true);
     try {
       console.log("Starting story generation...");
-      const { title, content } = await geminiService.generateStory(settings);
+      const { title, content } = await openaiService.generateStory(settings);
       
       state.story.setTitle(title);
       state.story.setContent(content);
@@ -60,7 +60,7 @@ export function useStoryActions(
       - correct: index of the correct answer (0-3)
       Make questions appropriate for children and focus on reading comprehension.`;
 
-      const response = await geminiService.generateResponse(prompt, language);
+      const response = await openaiService.generateContent(prompt, language);
       try {
         const questions = JSON.parse(response);
         state.quiz.setQuestions(questions);
@@ -92,7 +92,7 @@ export function useStoryActions(
       const newMessage: Message = { role: "user", content: text };
       state.story.setMessages(prev => [...prev, newMessage]);
       
-      const response = await geminiService.generateResponse(text, language);
+      const response = await openaiService.generateContent(text, language);
       
       state.story.setMessages(prev => [
         ...prev,
