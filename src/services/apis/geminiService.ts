@@ -1,6 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 class GeminiService {
   private genAI: GoogleGenerativeAI | null = null;
@@ -74,29 +73,22 @@ class GeminiService {
       
       Make sure this story is unique and different from previous ones.
       
-      Format the response as a JSON object with 'title' and 'content' fields.`;
+      Write the story in plain text format. Start with the title, then add two empty lines, and then write the story content.
+      Do not use any special formatting, markdown, or code blocks.`;
 
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
       
-      try {
-        const parsed = JSON.parse(text);
-        return {
-          title: parsed.title || "Bedtime Story",
-          content: parsed.content || text
-        };
-      } catch {
-        // If JSON parsing fails, create a structured response from the raw text
-        const lines = text.split('\n');
-        const title = lines[0].replace(/^(Title:|#|\*)/gi, '').trim();
-        const content = lines.slice(1).join('\n').trim();
-        
-        return {
-          title: title || "Bedtime Story",
-          content: content || text
-        };
-      }
+      // Extract title and content from the generated text
+      const lines = text.split('\n');
+      const title = lines[0].replace(/^(Title:|\#|\*)/gi, '').trim();
+      const content = lines.slice(2).join('\n').trim();
+      
+      return {
+        title: title || "Bedtime Story",
+        content: content || text
+      };
     } catch (error) {
       console.error("Error generating story with Gemini:", error);
       throw new Error(
