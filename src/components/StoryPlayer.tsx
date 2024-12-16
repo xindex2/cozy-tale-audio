@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Pause, Play, SkipBack, Loader } from "lucide-react";
 import type { StorySettings } from "./StoryOptions";
 import { aiService } from "@/services/aiService";
 import { ChatPanel } from "./story-player/ChatPanel";
-import { AudioControls } from "./story-player/AudioControls";
 import { MusicControls } from "./story-player/MusicControls";
 import { AudioManager } from "./story-player/AudioManager";
 import { StoryDisplay } from "./story-player/StoryDisplay";
@@ -13,6 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { LoadingState } from "./story-player/LoadingState";
+import { StoryHeader } from "./story-player/StoryHeader";
+import { PlayButton } from "./story-player/PlayButton";
 
 interface Message {
   role: "user" | "assistant";
@@ -167,14 +167,7 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
   };
 
   if (isLoading) {
-    return (
-      <div className="w-full max-w-7xl mx-auto p-6 animate-fade-in">
-        <Card className="p-8 flex flex-col items-center justify-center min-h-[400px] bg-gradient-to-r from-blue-50 to-blue-100">
-          <Loader className="h-8 w-8 animate-spin text-blue-500 mb-4" />
-          <p className="text-blue-600">Creating your story...</p>
-        </Card>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   return (
@@ -182,20 +175,14 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         <div className="lg:col-span-2 space-y-4">
           <Card className="p-4 lg:p-8 space-y-6 bg-gradient-to-r from-blue-50 to-blue-100 backdrop-blur-sm border border-blue-200">
-            <div className="flex justify-between items-center">
-              <Button variant="outline" size="icon" onClick={onBack}>
-                <SkipBack className="h-4 w-4" />
-              </Button>
-              <h1 className="text-xl lg:text-2xl font-bold text-blue-800">{storyTitle}</h1>
-              <div className="flex items-center space-x-4">
-                <AudioControls
-                  volume={volume}
-                  isMuted={isMuted}
-                  onVolumeChange={(newVolume) => setVolume(newVolume[0])}
-                  onToggleMute={() => setIsMuted(!isMuted)}
-                />
-              </div>
-            </div>
+            <StoryHeader
+              onBack={onBack}
+              title={storyTitle}
+              volume={volume}
+              isMuted={isMuted}
+              onVolumeChange={(newVolume) => setVolume(newVolume[0])}
+              onToggleMute={() => setIsMuted(!isMuted)}
+            />
 
             <div className="flex items-center justify-end">
               <MusicControls
@@ -227,19 +214,10 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
               />
             </ErrorBoundary>
 
-            <div className="flex justify-center">
-              <Button
-                size="icon"
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="rounded-full w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-              >
-                {isPlaying ? (
-                  <Pause className="h-6 w-6" />
-                ) : (
-                  <Play className="h-6 w-6 ml-1" />
-                )}
-              </Button>
-            </div>
+            <PlayButton
+              isPlaying={isPlaying}
+              onTogglePlay={() => setIsPlaying(!isPlaying)}
+            />
           </Card>
         </div>
 
@@ -257,3 +235,4 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
       </div>
     </div>
   );
+}
