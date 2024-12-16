@@ -31,7 +31,7 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
       const { data, error } = await supabase
         .from('api_keys')
         .select('key_name, key_value')
-        .in('key_name', ['ELEVEN_LABS_API_KEY', 'OPENAI_API_KEY']);
+        .in('key_name', ['ELEVEN_LABS_API_KEY', 'GEMINI_API_KEY']);
 
       if (error) throw error;
       return data.reduce((acc: Record<string, string>, curr) => {
@@ -42,10 +42,10 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
   });
 
   const startStory = async () => {
-    if (!apiKeys?.ELEVEN_LABS_API_KEY || !apiKeys?.OPENAI_API_KEY) {
+    if (!apiKeys?.ELEVEN_LABS_API_KEY || !apiKeys?.GEMINI_API_KEY) {
       toast({
         title: "API Keys Required",
-        description: "Please add both ElevenLabs and OpenAI API keys in the Admin Dashboard.",
+        description: "Please add both ElevenLabs and Gemini API keys in the Admin Dashboard.",
         variant: "destructive",
       });
       return;
@@ -54,6 +54,7 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
     setIsLoading(true);
     try {
       aiService.setApiKey(apiKeys.ELEVEN_LABS_API_KEY);
+      aiService.setGeminiApiKey(apiKeys.GEMINI_API_KEY);
       const { text, audioUrl, backgroundMusicUrl, title } = await aiService.startChat(settings);
       setStoryTitle(title || "Your Bedtime Story");
       setStoryContent(text);

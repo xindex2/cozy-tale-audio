@@ -23,7 +23,7 @@ interface ApiKey {
   created_at: string;
 }
 
-const REQUIRED_KEYS = ["ELEVEN_LABS_API_KEY"];
+const REQUIRED_KEYS = ["ELEVEN_LABS_API_KEY", "GEMINI_API_KEY"];
 
 export function ApiKeysTable() {
   const [editingKey, setEditingKey] = useState<ApiKey | null>(null);
