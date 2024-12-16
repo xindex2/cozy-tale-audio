@@ -21,24 +21,27 @@ export const openaiService = {
       
       Make sure this story is unique and different from previous ones.
       
-      Format the response exactly like this:
+      Format the response exactly like this, including the exact strings "TITLE:" and "CONTENT:" (no extra spaces or characters):
       TITLE: Your Story Title Here
-      
+
       CONTENT: Your story content here...`;
 
-      const response = await openaiClient.generateContent(prompt, settings.language);
-      console.log("Content generated successfully");
+      const response = await openaiClient.generateContent(prompt);
+      console.log("Raw OpenAI response:", response);
       
       // Parse the response to extract title and content
-      const titleMatch = response.match(/TITLE:\s*(.*?)(?=\n\n)/s);
-      const contentMatch = response.match(/CONTENT:\s*([\s\S]*$)/);
+      const titleMatch = response.match(/TITLE:\s*(.*?)(?=\s*\n\s*CONTENT:)/s);
+      const contentMatch = response.match(/CONTENT:\s*([\s\S]*$)/s);
       
       if (!titleMatch || !contentMatch) {
+        console.error("Failed to parse story format. Response:", response);
         throw new Error("Failed to parse story format");
       }
 
       const title = titleMatch[1].trim();
       const content = contentMatch[1].trim();
+
+      console.log("Parsed story:", { title, content });
 
       // Get the ElevenLabs API key
       const { data: apiKeyData, error: apiKeyError } = await supabase
@@ -54,7 +57,7 @@ export const openaiService = {
       }
 
       // Generate audio using ElevenLabs
-      const voiceId = "21m00Tcm4TlvDq8ikWAM"; // Default voice ID
+      const voiceId = settings.voice || "21m00Tcm4TlvDq8ikWAM"; // Default voice ID
       const audioResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
         method: 'POST',
         headers: {
@@ -97,9 +100,9 @@ export const openaiService = {
     }
   },
 
-  async generateContent(prompt: string, language: string = 'en'): Promise<string> {
+  async generateContent(prompt: string): Promise<string> {
     try {
-      const response = await openaiClient.generateContent(prompt, language);
+      const response = await openaiClient.generateContent(prompt);
       return response;
     } catch (error) {
       console.error("Error generating content:", error);

@@ -82,7 +82,7 @@ class OpenAIClient {
     throw lastError;
   }
 
-  async generateContent(prompt: string, language: string = 'en') {
+  async generateContent(prompt: string) {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -104,7 +104,7 @@ class OpenAIClient {
             messages: [
               { 
                 role: 'system', 
-                content: `You are a helpful assistant that generates children's stories. Please respond in ${language} language.` 
+                content: 'You are a helpful assistant that generates children\'s stories. Format your responses exactly as requested in the prompt.' 
               },
               { role: 'user', content: prompt }
             ],
@@ -114,10 +114,12 @@ class OpenAIClient {
 
         if (!response.ok) {
           const error = await response.json();
+          console.error("OpenAI API error:", error);
           throw new Error(error.error?.message || 'Failed to generate content');
         }
 
         const data = await response.json();
+        console.log("OpenAI API response:", data);
         return data.choices[0].message.content;
       });
 
