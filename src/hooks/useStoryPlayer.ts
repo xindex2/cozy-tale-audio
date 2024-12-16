@@ -6,7 +6,16 @@ import type { Message, QuizQuestion } from "@/types/story";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
-export function useStoryPlayer(settings: StorySettings, onSave?: (title: string, content: string, audioUrl: string, backgroundMusicUrl: string) => void) {
+export function useStoryPlayer(
+  settings: StorySettings, 
+  onSave?: (title: string, content: string, audioUrl: string, backgroundMusicUrl: string) => void,
+  initialStoryData?: {
+    title: string;
+    content: string;
+    audioUrl?: string;
+    backgroundMusicUrl?: string;
+  }
+) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5);
   const [musicVolume, setMusicVolume] = useState(0.3);
