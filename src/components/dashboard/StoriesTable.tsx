@@ -7,8 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Trash2 } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 import { Story } from "@/types/story";
+import { useNavigate } from "react-router-dom";
 
 interface StoriesTableProps {
   stories: Story[];
@@ -16,6 +17,12 @@ interface StoriesTableProps {
 }
 
 export function StoriesTable({ stories, onDelete }: StoriesTableProps) {
+  const navigate = useNavigate();
+
+  const handleView = (story: Story) => {
+    navigate(`/stories/${story.id}`, { state: { story } });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow">
       <Table>
@@ -23,7 +30,7 @@ export function StoriesTable({ stories, onDelete }: StoriesTableProps) {
           <TableRow>
             <TableHead>Title</TableHead>
             <TableHead>Created</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
+            <TableHead className="w-[150px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -33,7 +40,15 @@ export function StoriesTable({ stories, onDelete }: StoriesTableProps) {
               <TableCell>
                 {new Date(story.created_at).toLocaleDateString()}
               </TableCell>
-              <TableCell>
+              <TableCell className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleView(story)}
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"

@@ -1,6 +1,6 @@
 import { getBackgroundMusicUrl } from './audioService';
 import { generateQuiz } from './quizService';
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { StorySettings } from "@/components/StoryOptions";
 
 export interface StoryResponse {
@@ -23,7 +23,6 @@ const generationConfig = {
   topP: 0.95,
   topK: 40,
   maxOutputTokens: 8192,
-  responseMimeType: "text/plain",
 };
 
 export const aiService = {
@@ -55,19 +54,10 @@ export const aiService = {
   },
 
   async startChat(settings: StorySettings): Promise<StoryResponse> {
-    console.log("Starting chat with settings:", { 
-      ageGroup: settings.ageGroup,
-      duration: settings.duration,
-      theme: settings.theme,
-      language: settings.language,
-      hasGeminiAPI: !!this.genAI
-    });
+    console.log("Starting chat with settings:", settings);
     
     if (!this.genAI) {
-      console.error("Gemini API not initialized. Current state:", {
-        hasGeminiKey: !!this.geminiApiKey,
-        hasGenAI: !!this.genAI
-      });
+      console.error("Gemini API not initialized");
       throw new Error("Gemini API not properly initialized");
     }
 
@@ -97,38 +87,27 @@ export const aiService = {
       
       Make sure this story is unique and different from previous ones.
       
-      Format the response as a JSON object with 'title' and 'content' fields.`;
+      Return ONLY the story content without any JSON formatting or code blocks. Start with the title on the first line, followed by the story content.`;
 
       console.log("Sending prompt to Gemini...");
       const result = await this.chatSession.sendMessage(prompt);
-      const text = result.response.text();
+      const response = result.response.text();
       console.log("Received response from Gemini");
       
-      try {
-        const parsed = JSON.parse(text);
-        console.log("Successfully parsed Gemini response as JSON");
-        const backgroundMusicUrl = AUDIO_URLS[settings.music as keyof typeof AUDIO_URLS] || null;
-
-        return {
-          title: parsed.title || "Bedtime Story",
-          text: parsed.content || text,
-          audioUrl: null,
-          backgroundMusicUrl
-        };
-      } catch (parseError) {
-        console.error("Error parsing Gemini response:", parseError);
-        // If JSON parsing fails, create a structured response from the raw text
-        const lines = text.split('\n');
-        const title = lines[0].replace(/^(Title:|#|\*)/gi, '').trim();
-        const content = lines.slice(1).join('\n').trim();
-        
-        return {
-          title: title || "Bedtime Story",
-          text: content || text,
-          audioUrl: null,
-          backgroundMusicUrl: AUDIO_URLS[settings.music as keyof typeof AUDIO_URLS] || null
-        };
-      }
+      // Split the response into title and content
+      const lines = response.split('\n');
+      const title = lines[0].replace(/^(Title:|#|\*)/gi, '').trim();
+      const content = lines.slice(1).join('\n')
+        .replace(/```json/g, '')
+        .replace(/```/g, '')
+        .trim();
+      
+      return {
+        title,
+        text: content,
+        audioUrl: null,
+        backgroundMusicUrl: AUDIO_URLS[settings.music as keyof typeof AUDIO_URLS] || null
+      };
     } catch (error) {
       console.error("Error generating story with Gemini:", error);
       throw error;

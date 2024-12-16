@@ -58,12 +58,14 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
     },
     retry: 2,
     staleTime: Infinity,
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to initialize story generation. Please check API key in admin dashboard.",
-        variant: "destructive",
-      });
+    meta: {
+      onError: () => {
+        toast({
+          title: "Error",
+          description: "Failed to initialize story generation. Please check API key in admin dashboard.",
+          variant: "destructive",
+        });
+      }
     }
   });
 
