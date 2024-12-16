@@ -86,6 +86,8 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
       if (backgroundMusicUrl) {
         setCurrentMusicUrl(backgroundMusicUrl);
       }
+      
+      // Start playing automatically after generation
       setIsPlaying(true);
 
       if (onSave) {

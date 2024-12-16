@@ -7,23 +7,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye, Play, Trash2 } from "lucide-react";
+import { Eye, Settings2, Trash2 } from "lucide-react";
 import { Story } from "@/types/story";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StoriesTableProps {
   stories: Story[];
-  onDelete: (id: string) => void;
+  onRefresh: () => void;
 }
 
-export function StoriesTable({ stories, onDelete }: StoriesTableProps) {
+export function StoriesTable({ stories, onRefresh }: StoriesTableProps) {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleView = (story: Story) => {
-    navigate(`/stories/${story.id}`, { state: { story } });
-  };
-
-  const handlePlay = (story: Story) => {
     navigate(`/create-story`, {
       state: {
         settings: story.settings,
@@ -35,6 +34,31 @@ export function StoriesTable({ stories, onDelete }: StoriesTableProps) {
         },
       },
     });
+  };
+
+  const handleDelete = async (story: Story) => {
+    try {
+      const { error } = await supabase
+        .from('stories')
+        .delete()
+        .eq('id', story.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Story deleted",
+        description: "Your story has been deleted successfully.",
+      });
+      
+      onRefresh();
+    } catch (error) {
+      console.error("Error deleting story:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete story. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -66,15 +90,7 @@ export function StoriesTable({ stories, onDelete }: StoriesTableProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handlePlay(story)}
-                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                >
-                  <Play className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDelete(story.id)}
+                  onClick={() => handleDelete(story)}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4" />
