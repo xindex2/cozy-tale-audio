@@ -1,6 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { StorySettings } from "@/components/StoryOptions";
-import { useToast } from "@/hooks/use-toast";
+
+interface SaveStoryParams {
+  userId: string;
+  title: string;
+  content: string;
+  audioUrl: string;
+  backgroundMusicUrl: string;
+  settings: StorySettings;
+}
 
 export async function saveStory({
   userId,
@@ -8,32 +16,58 @@ export async function saveStory({
   content,
   audioUrl,
   backgroundMusicUrl,
-  settings
-}: {
-  userId: string;
-  title: string;
-  content: string;
-  audioUrl: string;
-  backgroundMusicUrl: string;
-  settings: StorySettings;
-}) {
+  settings,
+}: SaveStoryParams) {
   console.log("Saving story for user:", userId);
   
-  const { error } = await supabase
-    .from('stories')
-    .insert({
-      title,
-      content,
-      audio_url: audioUrl,
-      background_music_url: backgroundMusicUrl,
-      settings: JSON.stringify(settings),
-      user_id: userId
-    });
+  try {
+    const { data, error } = await supabase
+      .from("stories")
+      .insert([
+        {
+          user_id: userId,
+          title,
+          content,
+          audio_url: audioUrl,
+          background_music_url: backgroundMusicUrl,
+          settings,
+        },
+      ])
+      .select()
+      .single();
 
-  if (error) {
-    console.error("Error saving story:", error);
+    if (error) {
+      console.error("Error saving story:", error);
+      throw new Error(`Failed to save story: ${error.message}`);
+    }
+
+    console.log("Story saved successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("Error in saveStory:", error);
     throw error;
   }
+}
 
-  console.log("Story saved successfully");
+export async function getUserStories(userId: string) {
+  console.log("Fetching stories for user:", userId);
+  
+  try {
+    const { data, error } = await supabase
+      .from("stories")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching stories:", error);
+      throw new Error(`Failed to fetch stories: ${error.message}`);
+    }
+
+    console.log("Stories fetched successfully:", data);
+    return data;
+  } catch (error) {
+    console.error("Error in getUserStories:", error);
+    throw error;
+  }
 }

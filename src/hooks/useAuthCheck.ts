@@ -1,52 +1,65 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export function useAuthCheck() {
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         console.log("Checking authentication status...");
-        const { data: { session }, error } = await supabase.auth.getSession();
+        setIsLoading(true);
         
-        if (error) {
-          throw error;
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          throw sessionError;
         }
 
         if (!session) {
           console.log("No active session found");
-          toast({
-            title: "Authentication required",
-            description: "Please log in to continue",
-            variant: "destructive",
-          });
-          navigate("/auth");
+          setUserId(null);
           return;
         }
 
         console.log("Active session found for user:", session.user.id);
         setUserId(session.user.id);
-      } catch (error) {
-        console.error("Auth check error:", error);
+      } catch (err) {
+        console.error("Auth check error:", err);
+        setError(err instanceof Error ? err : new Error("Authentication failed"));
         toast({
           title: "Authentication error",
-          description: "Please try again later",
+          description: "Please try logging in again",
           variant: "destructive",
         });
-        navigate("/auth");
       } finally {
         setIsLoading(false);
       }
     };
 
-    checkAuth();
-  }, [navigate, toast]);
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", _event);
+      if (session) {
+        setUserId(session.user.id);
+      } else {
+        setUserId(null);
+      }
+      setIsLoading(false);
+    });
 
-  return { userId, isLoading };
+    checkAuth();
+
+    // Cleanup subscription
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [toast]);
+
+  return { userId, isLoading, error };
 }

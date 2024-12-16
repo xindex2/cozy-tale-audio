@@ -11,21 +11,46 @@ import { saveStory } from "@/services/storyService";
 
 export default function CreateStory() {
   const [storySettings, setStorySettings] = useState<StorySettings | null>(null);
-  const { userId, isLoading } = useAuthCheck();
+  const { userId, isLoading, error } = useAuthCheck();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleStart = (settings: StorySettings) => {
-    if (!userId) {
+  // If there's an auth error, show it and redirect
+  if (error) {
+    console.error("Authentication error:", error);
+    toast({
+      title: "Authentication Error",
+      description: "Please log in to continue",
+      variant: "destructive",
+    });
+    navigate("/auth");
+    return null;
+  }
+
+  // Show loading screen while checking auth
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  // If no userId after loading, redirect to auth
+  if (!userId && !isLoading) {
+    console.log("No user ID found, redirecting to auth");
+    navigate("/auth");
+    return null;
+  }
+
+  const handleStart = async (settings: StorySettings) => {
+    try {
+      console.log("Starting story creation with settings:", settings);
+      setStorySettings(settings);
+    } catch (error) {
+      console.error("Error starting story:", error);
       toast({
-        title: "Authentication required",
-        description: "Please log in to create stories",
+        title: "Error",
+        description: "Failed to start story creation. Please try again.",
         variant: "destructive",
       });
-      navigate("/auth");
-      return;
     }
-    setStorySettings(settings);
   };
 
   const handleBack = () => {
@@ -39,15 +64,17 @@ export default function CreateStory() {
     backgroundMusicUrl: string
   ) => {
     if (!userId || !storySettings) {
+      console.error("Missing userId or storySettings");
       toast({
-        title: "Authentication required",
-        description: "Please log in to save stories",
+        title: "Error",
+        description: "Unable to save story. Please try again.",
         variant: "destructive",
       });
       return;
     }
 
     try {
+      console.log("Saving story...");
       await saveStory({
         userId,
         title,
@@ -58,7 +85,7 @@ export default function CreateStory() {
       });
 
       toast({
-        title: "Story saved",
+        title: "Success",
         description: "Your story has been saved successfully."
       });
 
@@ -67,15 +94,11 @@ export default function CreateStory() {
       console.error("Error saving story:", error);
       toast({
         variant: "destructive",
-        title: "Error saving story",
+        title: "Error",
         description: "Failed to save your story. Please try again."
       });
     }
   };
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-50">
