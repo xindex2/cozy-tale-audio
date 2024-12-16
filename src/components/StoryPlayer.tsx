@@ -53,7 +53,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
 
   useEffect(() => {
     if (!initialStoryData) {
-      startStory();
+      startStory(settings);
     }
   }, []);
 
@@ -97,7 +97,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
 
             <ErrorBoundary>
               <StoryDisplay
-                text={storyContent || initialStoryData?.content}
+                text={storyContent || initialStoryData?.content || ""}
                 audioUrl={currentAudioUrl || initialStoryData?.audioUrl}
                 isPlaying={isPlaying}
                 currentTime={currentTime}
