@@ -1,5 +1,5 @@
 import { openaiClient } from "./openaiClient";
-import type { StoryGenerationSettings, StoryResponse } from "../gemini/types";
+import type { StoryGenerationSettings, StoryResponse } from "./types";
 import { toast } from "@/hooks/use-toast";
 
 export const openaiService = {
@@ -15,18 +15,30 @@ export const openaiService = {
       5. Have a positive message or moral
       6. Be approximately ${settings.duration} minutes when read aloud
       
-      Format the response with a clear title on the first line, followed by two blank lines, and then the story content.`;
+      Make sure this story is unique and different from previous ones.
+      
+      Format the response exactly like this:
+      TITLE: Your Story Title Here
+      
+      CONTENT: Your story content here...`;
 
       const response = await openaiClient.generateContent(prompt);
       
-      // Extract title from first line and content from rest
-      const lines = response.split('\n');
-      const title = lines[0].replace(/^(Title:|\#|\*)/gi, '').trim();
-      const content = lines.slice(2).join('\n').trim();
+      // Parse the response to extract title and content
+      const titleMatch = response.match(/TITLE:\s*(.*?)(?=\n\n)/s);
+      const contentMatch = response.match(/CONTENT:\s*([\s\S]*$)/);
+      
+      if (!titleMatch || !contentMatch) {
+        throw new Error("Failed to parse story format");
+      }
+
+      const title = titleMatch[1].trim();
+      const content = contentMatch[1].trim();
       
       return {
         title,
-        content
+        content,
+        backgroundMusicUrl: settings.music ? `/assets/${settings.music}.mp3` : null
       };
     } catch (error) {
       console.error("Error generating story:", error);
