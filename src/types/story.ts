@@ -3,6 +3,9 @@ export interface Story {
   title: string;
   content: string;
   created_at: string;
+  settings?: any;
+  audio_url?: string | null;
+  background_music_url?: string | null;
 }
 
 export interface Message {
