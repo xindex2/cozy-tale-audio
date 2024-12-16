@@ -22,9 +22,8 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
   const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const { toast } = useToast();
 
-  // Fetch API keys from database with better error handling
+  // Fetch API keys when the hook initializes
   const { data: apiKeys } = useQuery({
     queryKey: ['story-api-keys'],
     queryFn: async () => {
@@ -32,15 +31,15 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
       const { data, error } = await supabase
         .from('api_keys')
         .select('key_name, key_value')
-        .in('key_name', ['ELEVEN_LABS_API_KEY', 'GEMINI_API_KEY']);
+        .in('key_name', ['GEMINI_API_KEY']);
 
       if (error) {
         console.error('Error fetching API keys:', error);
         throw error;
       }
 
-      if (!data || data.length < 2) {
-        console.error('Missing required API keys in database');
+      if (!data || data.length === 0) {
+        console.error('No API keys found in database');
         throw new Error('Required API keys not found in database');
       }
 
@@ -50,14 +49,10 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
       }, {});
 
       console.log("API keys fetched successfully:", {
-        hasElevenLabs: !!keys.ELEVEN_LABS_API_KEY,
-        hasGemini: !!keys.GEMINI_API_KEY
+        hasGeminiKey: !!keys.GEMINI_API_KEY
       });
 
-      // Initialize services with API keys immediately after fetching
-      if (keys.ELEVEN_LABS_API_KEY) {
-        aiService.setApiKey(keys.ELEVEN_LABS_API_KEY);
-      }
+      // Initialize the Gemini API immediately after fetching the key
       if (keys.GEMINI_API_KEY) {
         aiService.setGeminiApiKey(keys.GEMINI_API_KEY);
       }
@@ -73,7 +68,7 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
       console.error("Missing Gemini API key");
       toast({
         title: "Error",
-        description: "Gemini API key not found. Please check the admin dashboard.",
+        description: "Missing required API key. Please check the admin dashboard.",
         variant: "destructive",
       });
       return;
@@ -103,7 +98,7 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
       console.error("Error starting story:", error);
       toast({
         title: "Error",
-        description: "Failed to generate story. Please check console for details.",
+        description: "Failed to generate story. Please try again.",
         variant: "destructive",
       });
     } finally {
