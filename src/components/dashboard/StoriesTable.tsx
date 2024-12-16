@@ -12,9 +12,10 @@ import type { Story } from "@/types/story";
 
 interface StoriesTableProps {
   stories: Story[];
+  onRefresh?: () => void;
 }
 
-export function StoriesTable({ stories }: StoriesTableProps) {
+export function StoriesTable({ stories, onRefresh }: StoriesTableProps) {
   const navigate = useNavigate();
 
   const handleView = (story: Story) => {
