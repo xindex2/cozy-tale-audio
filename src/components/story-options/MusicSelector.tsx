@@ -24,12 +24,12 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
 
   const musicOptions = [
     { id: "gentle-lullaby", name: "Gentle Lullaby", description: "Soft and calming melody perfect for bedtime", url: "/assets/gentle-lullaby.mp3" },
-    { id: "sleeping-lullaby", name: "Sleeping Lullaby", description: "Peaceful lullaby for sweet dreams", url: "/assets/peaceful-dreams.mp3" },
-    { id: "water-dreams", name: "Water Dreams", description: "Gentle water sounds with soft music", url: "/assets/ocean-waves.mp3" },
-    { id: "relaxing-piano", name: "Relaxing Piano", description: "Soothing piano melodies", url: "/assets/soft-piano.mp3" },
+    { id: "peaceful-dreams", name: "Peaceful Dreams", description: "Soothing lullaby for sweet dreams", url: "/assets/peaceful-dreams.mp3" },
+    { id: "ocean-waves", name: "Ocean Waves", description: "Gentle water sounds with soft music", url: "/assets/ocean-waves.mp3" },
+    { id: "soft-piano", name: "Relaxing Piano", description: "Soothing piano melodies", url: "/assets/soft-piano.mp3" },
     { id: "healing-fountain", name: "Healing Fountain", description: "Water fountain with healing music", url: "/assets/healing-fountain.mp3" },
     { id: "ocean-piano", name: "Ocean Piano", description: "Piano with calming ocean waves", url: "/assets/ocean-piano.mp3" },
-    { id: "forest-birds", name: "Forest Birds", description: "Peaceful forest ambiance with birds", url: "/assets/nature-sounds.mp3" },
+    { id: "nature-sounds", name: "Forest Birds", description: "Peaceful forest ambiance with birds", url: "/assets/nature-sounds.mp3" },
     { id: "sleep-music", name: "Sleep Music", description: "Gentle music for peaceful sleep", url: "/assets/sleep-music.mp3" },
     { id: "guided-sleep", name: "Guided Sleep", description: "Relaxing guided sleep music", url: "/assets/guided-sleep.mp3" },
   ];
@@ -54,9 +54,17 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
         }
         const audio = new Audio(url);
         audio.volume = previewVolume;
-        await audio.play();
-        audioRef.current = audio;
-        setPlayingId(musicId);
+        
+        // Add event listeners before playing
+        audio.addEventListener('canplaythrough', async () => {
+          try {
+            await audio.play();
+            setPlayingId(musicId);
+            audioRef.current = audio;
+          } catch (error) {
+            console.error('Error playing preview:', error);
+          }
+        });
 
         audio.addEventListener('ended', () => {
           setPlayingId(null);
@@ -68,9 +76,12 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
           setPlayingId(null);
           audioRef.current = null;
         });
+
+        // Start loading the audio
+        audio.load();
       }
     } catch (error) {
-      console.error('Error playing preview:', error);
+      console.error('Error setting up preview:', error);
       setPlayingId(null);
       audioRef.current = null;
     }

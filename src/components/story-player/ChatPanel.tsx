@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Send, MessageSquare, List, Loader } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Quiz } from "./Quiz";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Message {
   role: "user" | "assistant";
@@ -92,8 +94,11 @@ export function ChatPanel({
           <ScrollArea className="flex-1">
             <div className="space-y-4">
               {messages.map((message, index) => (
-                <div
+                <motion.div
                   key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
                   className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
@@ -106,8 +111,61 @@ export function ChatPanel({
                   >
                     {message.content}
                   </div>
-                </div>
+                </motion.div>
               ))}
+              {isLoading && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex justify-start"
+                >
+                  <div className="max-w-[80%] p-3 rounded-lg bg-white">
+                    <div className="flex space-x-2">
+                      <motion.span
+                        animate={{
+                          scale: [1, 1.2, 1],
+                          opacity: [1, 0.5, 1]
+                        }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          repeatType: "loop",
+                          times: [0, 0.5, 1]
+                        }}
+                        className="w-2 h-2 bg-blue-500 rounded-full"
+                      />
+                      <motion.span
+                        animate={{
+                          scale: [1, 1.2, 1],
+                          opacity: [1, 0.5, 1]
+                        }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          repeatType: "loop",
+                          delay: 0.2,
+                          times: [0, 0.5, 1]
+                        }}
+                        className="w-2 h-2 bg-blue-500 rounded-full"
+                      />
+                      <motion.span
+                        animate={{
+                          scale: [1, 1.2, 1],
+                          opacity: [1, 0.5, 1]
+                        }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          repeatType: "loop",
+                          delay: 0.4,
+                          times: [0, 0.5, 1]
+                        }}
+                        className="w-2 h-2 bg-blue-500 rounded-full"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </div>
           </ScrollArea>
 
@@ -133,55 +191,10 @@ export function ChatPanel({
 
         <TabsContent value="quiz" className="flex-1 p-4">
           <ScrollArea className="h-full">
-            {quiz.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full space-y-4">
-                <p className="text-gray-600" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
-                  {language === 'es' ? 'No hay cuestionario disponible.' : 
-                   language === 'ar' ? 'لا يوجد اختبار متاح.' : 
-                   'No quiz available yet.'}
-                </p>
-                <Button
-                  onClick={onGenerateQuiz}
-                  disabled={isGeneratingQuiz}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600"
-                >
-                  {isGeneratingQuiz ? (
-                    <>
-                      <Loader className="w-4 h-4 mr-2 animate-spin" />
-                      {getLoadingText(language)}
-                    </>
-                  ) : (
-                    <>
-                      <List className="w-4 h-4 mr-2" />
-                      {getGenerateQuizText(language)}
-                    </>
-                  )}
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {quiz.map((question, index) => (
-                  <div key={index} className="bg-white p-4 rounded-lg space-y-3">
-                    <h3 className="font-medium text-gray-800" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
-                      {question.question}
-                    </h3>
-                    <div className="space-y-2">
-                      {question.options.map((option, optionIndex) => (
-                        <Button
-                          key={optionIndex}
-                          variant="outline"
-                          className="w-full justify-start text-left"
-                          style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}
-                        >
-                          {option}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              
-              </div>
-            )}
+            <Quiz 
+              questions={quiz} 
+              onRegenerateQuiz={onGenerateQuiz} 
+            />
           </ScrollArea>
         </TabsContent>
       </Tabs>

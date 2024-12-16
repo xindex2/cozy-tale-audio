@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { motion } from 'framer-motion';
 
 interface StoryTextProps {
   sentences: string[];
@@ -12,23 +13,28 @@ export const StoryText = memo(function StoryText({
   return (
     <>
       {sentences.map((sentence, index) => {
-        // Only highlight if we have a valid current sentence index
         const isHighlighted = currentSentenceIndex >= 0 && index === currentSentenceIndex;
         const isPast = currentSentenceIndex >= 0 && index < currentSentenceIndex;
         
         return (
-          <p 
-            key={index} 
-            className={`text-gray-800 leading-relaxed transition-all duration-300 ${
+          <motion.p 
+            key={index}
+            initial={{ opacity: 0.8 }}
+            animate={{ 
+              opacity: 1,
+              backgroundColor: isHighlighted ? "rgba(59, 130, 246, 0.1)" : "transparent",
+            }}
+            transition={{ duration: 0.3 }}
+            className={`text-gray-800 leading-relaxed p-2 rounded-md transition-all duration-300 ${
               isHighlighted 
-                ? "bg-blue-100 font-semibold" 
+                ? "font-semibold text-blue-800" 
                 : isPast
                 ? "text-gray-500"
                 : ""
             }`}
           >
             {sentence}
-          </p>
+          </motion.p>
         );
       })}
     </>
