@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function AdminApiKeys() {
   const [showDialog, setShowDialog] = useState(false);
@@ -20,6 +21,11 @@ export default function AdminApiKeys() {
     key_name: "",
     key_value: "",
   });
+
+  const requiredKeys = [
+    { name: "ELEVEN_LABS_API_KEY", label: "ElevenLabs API Key", description: "Required for text-to-speech functionality" },
+    { name: "OPENAI_API_KEY", label: "OpenAI API Key", description: "Required for AI story generation" },
+  ];
 
   const { data: session, isLoading: isLoadingSession } = useQuery({
     queryKey: ['session'],
@@ -119,6 +125,22 @@ export default function AdminApiKeys() {
           </Button>
         </div>
 
+        <div className="mb-6">
+          <Alert>
+            <AlertTitle>Required API Keys</AlertTitle>
+            <AlertDescription>
+              The following API keys are required for the application to function properly:
+              <ul className="list-disc ml-6 mt-2">
+                {requiredKeys.map((key) => (
+                  <li key={key.name} className="text-sm">
+                    <span className="font-medium">{key.label}</span> - {key.description}
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        </div>
+
         <ApiKeysTable />
 
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
@@ -129,13 +151,22 @@ export default function AdminApiKeys() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="key_name">Key Name</Label>
-                <Input
-                  id="key_name"
+                <Select
                   value={formData.key_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, key_name: e.target.value }))}
-                  placeholder="e.g., Stripe Secret Key"
-                  required
-                />
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, key_name: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a key type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {requiredKeys.map((key) => (
+                      <SelectItem key={key.name} value={key.name}>
+                        {key.label}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="custom">Custom Key</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="key_value">Key Value</Label>
