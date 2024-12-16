@@ -5,6 +5,9 @@ import Dashboard from "@/pages/Dashboard";
 import Stories from "@/pages/Stories";
 import StoryView from "@/pages/StoryView";
 import CreateStory from "@/pages/CreateStory";
+import AdminDashboard from "@/pages/admin/Dashboard";
+import AdminApiKeys from "@/pages/admin/ApiKeys";
+import AdminPlans from "@/pages/admin/Plans";
 
 const router = createBrowserRouter([
   {
@@ -30,6 +33,18 @@ const router = createBrowserRouter([
   {
     path: "/create-story",
     element: <CreateStory />,
+  },
+  {
+    path: "/admin",
+    element: <AdminDashboard />,
+  },
+  {
+    path: "/admin/api-keys",
+    element: <AdminApiKeys />,
+  },
+  {
+    path: "/admin/plans",
+    element: <AdminPlans />,
   },
 ]);
 
