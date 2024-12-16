@@ -8,27 +8,31 @@ export const openaiService = {
     try {
       console.log("Starting story generation with settings:", settings);
       
-      // Create a language-specific system prompt
-      const systemPrompt = `You are a storyteller who writes ONLY in ${settings.language}. 
-      DO NOT include ANY text in other languages. 
-      All numbers, measurements, and descriptions MUST be in ${settings.language}.`;
+      // Enhanced language-specific system prompt
+      const systemPrompt = `You are a professional storyteller who writes ONLY in ${settings.language}. 
+      Important rules:
+      1. Write EVERYTHING in ${settings.language} only, including numbers and measurements
+      2. Use proper grammar, punctuation, and formatting for ${settings.language}
+      3. Never mix languages or include any English text
+      4. Ensure the story flows naturally with appropriate sentence structure
+      5. Include proper punctuation marks according to ${settings.language} rules`;
       
-      const userPrompt = `Write a complete story with these characteristics (remember to write EVERYTHING in ${settings.language} ONLY):
-      - Duration: ${settings.duration}
+      const userPrompt = `Create an engaging story with these specifications:
+      - Duration: ${settings.duration} minutes
       - Age group: ${settings.ageGroup}
       - Theme: ${settings.theme}
       
-      The story should:
-      1. Be engaging and age-appropriate
-      2. Have a clear beginning, middle, and end
-      3. Include descriptive language and dialogue
-      4. Have a positive message or moral
-      5. Be unique and different from previous stories
+      Requirements:
+      1. Write a complete, coherent story
+      2. Use age-appropriate language and themes
+      3. Include proper dialogue and descriptions
+      4. Maintain consistent narrative flow
+      5. Use appropriate punctuation and grammar
       
-      Format the response exactly like this:
-      TITLE: Your Story Title Here
+      Format:
+      TITLE: [Story Title]
 
-      CONTENT: Your story content here...`;
+      CONTENT: [Story Content]`;
 
       const response = await openaiClient.generateContent(userPrompt, systemPrompt);
       console.log("Raw OpenAI response:", response);
@@ -60,7 +64,7 @@ export const openaiService = {
       }
 
       // Generate audio using ElevenLabs with the correct language model
-      const voiceId = settings.voice || "21m00Tcm4TlvDq8ikWAM"; // Default voice ID
+      const voiceId = settings.voice || "21m00Tcm4TlvDq8ikWAM";
       const audioResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
         method: 'POST',
         headers: {
@@ -86,7 +90,6 @@ export const openaiService = {
       const audioUrl = URL.createObjectURL(audioBlob);
       console.log("Audio generated successfully:", audioUrl);
 
-      // Get background music URL and ensure it's a full URL
       const backgroundMusicUrl = settings.music ? `/assets/${settings.music}.mp3` : null;
       
       return {
@@ -102,6 +105,32 @@ export const openaiService = {
         description: error instanceof Error ? error.message : "Failed to generate story",
         variant: "destructive",
       });
+      throw error;
+    }
+  },
+
+  async generateQuiz(storyContent: string, language: string = 'en'): Promise<string> {
+    try {
+      const systemPrompt = `You are a quiz creator who works ONLY in ${language}. 
+      Create engaging, age-appropriate questions about the story.
+      All questions, answers, and explanations MUST be in ${language} only.`;
+
+      const prompt = `Create a quiz about this story: ${storyContent}
+      Rules:
+      1. Write everything in ${language} only
+      2. Create 5-7 multiple choice questions
+      3. Make questions clear and age-appropriate
+      4. Focus on reading comprehension
+      5. Include proper grammar and punctuation
+      
+      Format the response as a JSON array with:
+      - question: the question text
+      - options: array of 4 possible answers
+      - correctAnswer: index of correct answer (0-3)`;
+
+      return await openaiClient.generateContent(prompt, systemPrompt);
+    } catch (error) {
+      console.error("Error generating quiz:", error);
       throw error;
     }
   },

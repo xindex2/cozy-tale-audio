@@ -13,9 +13,28 @@ interface Question {
 interface QuizProps {
   questions: Question[];
   onRegenerateQuiz: () => void;
+  language: string;
 }
 
-export function Quiz({ questions, onRegenerateQuiz }: QuizProps) {
+const getNoQuizText = (language: string) => ({
+  en: "No quiz available for this story yet.",
+  es: "Aún no hay cuestionario disponible para esta historia.",
+  ar: "لا يوجد اختبار متاح لهذه القصة بعد."
+}[language] || "No quiz available for this story yet.");
+
+const getGenerateQuizText = (language: string) => ({
+  en: "Generate Quiz",
+  es: "Generar Cuestionario",
+  ar: "إنشاء اختبار"
+}[language] || "Generate Quiz");
+
+const getScoreText = (language: string, score: number, total: number) => ({
+  en: `Your score: ${score} out of ${total}`,
+  es: `Tu puntuación: ${score} de ${total}`,
+  ar: `نتيجتك: ${score} من ${total}`
+}[language] || `Your score: ${score} out of ${total}`);
+
+export function Quiz({ questions, onRegenerateQuiz, language }: QuizProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
@@ -32,7 +51,6 @@ export function Quiz({ questions, onRegenerateQuiz }: QuizProps) {
       setScore(score + 1);
     }
 
-    // Move to next question after a delay
     setTimeout(() => {
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
@@ -55,10 +73,12 @@ export function Quiz({ questions, onRegenerateQuiz }: QuizProps) {
   if (!questions.length) {
     return (
       <Card className="p-6 text-center">
-        <p className="text-gray-600">No quiz available for this story yet.</p>
+        <p className="text-gray-600" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
+          {getNoQuizText(language)}
+        </p>
         <Button onClick={onRegenerateQuiz} className="mt-4">
           <RefreshCw className="w-4 h-4 mr-2" />
-          Generate Quiz
+          {getGenerateQuizText(language)}
         </Button>
       </Card>
     );
@@ -70,20 +90,23 @@ export function Quiz({ questions, onRegenerateQuiz }: QuizProps) {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
+        style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}
       >
         <Card className="p-6 text-center">
           <Trophy className="w-16 h-16 mx-auto text-yellow-500 mb-4" />
-          <h2 className="text-2xl font-bold mb-4">Quiz Complete!</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            {language === 'ar' ? 'اكتمل الاختبار!' : language === 'es' ? '¡Cuestionario completado!' : 'Quiz Complete!'}
+          </h2>
           <p className="text-xl mb-4">
-            Your score: {score} out of {questions.length}
+            {getScoreText(language, score, questions.length)}
           </p>
           <div className="space-x-4">
             <Button onClick={resetQuiz}>
-              Try Again
+              {language === 'ar' ? 'حاول مرة أخرى' : language === 'es' ? 'Intentar de nuevo' : 'Try Again'}
             </Button>
             <Button onClick={onRegenerateQuiz} variant="outline">
               <RefreshCw className="w-4 h-4 mr-2" />
-              New Quiz
+              {getGenerateQuizText(language)}
             </Button>
           </div>
         </Card>
@@ -101,12 +124,17 @@ export function Quiz({ questions, onRegenerateQuiz }: QuizProps) {
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
         transition={{ duration: 0.3 }}
+        style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}
       >
         <Card className="p-6">
           <div className="mb-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">
-                Question {currentQuestion + 1} of {questions.length}
+                {language === 'ar' 
+                  ? `السؤال ${currentQuestion + 1} من ${questions.length}`
+                  : language === 'es'
+                    ? `Pregunta ${currentQuestion + 1} de ${questions.length}`
+                    : `Question ${currentQuestion + 1} of ${questions.length}`}
               </h3>
             </div>
             <p className="text-gray-700 mb-4">{question.question}</p>
@@ -152,8 +180,16 @@ export function Quiz({ questions, onRegenerateQuiz }: QuizProps) {
               className="mt-4 text-center text-gray-600"
             >
               {selectedAnswer === question.correctAnswer 
-                ? "Correct! Moving to next question..." 
-                : `Incorrect. The correct answer was: ${question.options[question.correctAnswer]}`}
+                ? language === 'ar'
+                  ? "صحيح! الانتقال إلى السؤال التالي..."
+                  : language === 'es'
+                    ? "¡Correcto! Pasando a la siguiente pregunta..."
+                    : "Correct! Moving to next question..."
+                : language === 'ar'
+                  ? `غير صحيح. الإجابة الصحيحة هي: ${question.options[question.correctAnswer]}`
+                  : language === 'es'
+                    ? `Incorrecto. La respuesta correcta era: ${question.options[question.correctAnswer]}`
+                    : `Incorrect. The correct answer was: ${question.options[question.correctAnswer]}`}
             </motion.p>
           )}
         </Card>

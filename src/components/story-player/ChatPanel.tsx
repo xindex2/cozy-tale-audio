@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Quiz } from "./Quiz";
 import { motion, AnimatePresence } from "framer-motion";
+import { openaiService } from "@/services/apis/openai/storyGenerator";
 
 interface Message {
   role: "user" | "assistant";
@@ -193,7 +194,8 @@ export function ChatPanel({
           <ScrollArea className="h-full">
             <Quiz 
               questions={quiz} 
-              onRegenerateQuiz={onGenerateQuiz} 
+              onRegenerateQuiz={onGenerateQuiz}
+              language={language}
             />
           </ScrollArea>
         </TabsContent>
