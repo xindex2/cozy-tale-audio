@@ -1,9 +1,9 @@
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Music } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState, useEffect } from "react";
+import { Music } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface MusicSelectorProps {
@@ -20,11 +20,36 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
   }, [selectedMusic]);
 
   const musicOptions = [
-    { id: "gentle-lullaby", name: "Gentle Lullaby", description: "Soft and calming melody perfect for bedtime", url: "/assets/gentle-lullaby.mp3" },
-    { id: "peaceful-dreams", name: "Peaceful Dreams", description: "Soothing lullaby for sweet dreams", url: "/assets/peaceful-dreams.mp3" },
-    { id: "ocean-waves", name: "Ocean Waves", description: "Gentle water sounds with soft music", url: "/assets/ocean-waves.mp3" },
-    { id: "soft-piano", name: "Relaxing Piano", description: "Soothing piano melodies", url: "/assets/soft-piano.mp3" },
-    { id: "nature-sounds", name: "Forest Birds", description: "Peaceful forest ambiance with birds", url: "/assets/nature-sounds.mp3" },
+    { 
+      id: "gentle-lullaby", 
+      name: "Gentle Lullaby", 
+      description: "Soft and calming melody perfect for bedtime", 
+      url: "/assets/gentle-lullaby.mp3" 
+    },
+    { 
+      id: "peaceful-dreams", 
+      name: "Peaceful Dreams", 
+      description: "Soothing lullaby for sweet dreams", 
+      url: "/assets/peaceful-dreams.mp3" 
+    },
+    { 
+      id: "ocean-waves", 
+      name: "Ocean Waves", 
+      description: "Gentle water sounds with soft music", 
+      url: "/assets/ocean-waves.mp3" 
+    },
+    { 
+      id: "soft-piano", 
+      name: "Relaxing Piano", 
+      description: "Soothing piano melodies", 
+      url: "/assets/soft-piano.mp3" 
+    },
+    { 
+      id: "nature-sounds", 
+      name: "Forest Birds", 
+      description: "Peaceful forest ambiance with birds", 
+      url: "/assets/nature-sounds.mp3" 
+    },
   ];
 
   const handleMusicToggle = (checked: boolean) => {
@@ -34,6 +59,14 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
     } else if (selectedMusic === "no-music") {
       onMusicSelect(musicOptions[0].id);
     }
+  };
+
+  const handleAudioError = (optionName: string) => {
+    toast({
+      title: "Audio Load Error",
+      description: `Failed to load ${optionName}. Please check if the audio file exists.`,
+      variant: "destructive",
+    });
   };
 
   return (
@@ -84,13 +117,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
                       src={option.url} 
                       controls 
                       className="w-full mt-2"
-                      onError={() => {
-                        toast({
-                          title: "Audio Error",
-                          description: `Failed to load ${option.name}. Please try another option.`,
-                          variant: "destructive",
-                        });
-                      }}
+                      onError={() => handleAudioError(option.name)}
                     />
                   </div>
                 </Label>
