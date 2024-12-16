@@ -25,45 +25,56 @@ const generationConfig = {
   maxOutputTokens: 8192,
 };
 
-export const aiService = {
-  apiKey: "",
-  geminiApiKey: "",
-  genAI: null as GoogleGenerativeAI | null,
-  chatSession: null as any,
+class AIService {
+  private apiKey: string = "";
+  private geminiApiKey: string = "";
+  private genAI: GoogleGenerativeAI | null = null;
+  private chatSession: any = null;
+  private isInitialized: boolean = false;
 
   setApiKey(key: string) {
     this.apiKey = key;
     console.log("ElevenLabs API key set successfully");
-  },
+  }
 
-  setGeminiApiKey(key: string) {
+  async initializeGemini(key: string) {
     if (!key) {
       console.error("Empty Gemini API key provided");
-      return;
+      throw new Error("Invalid Gemini API key");
     }
-    
+
     try {
       console.log("Initializing Gemini API with key...");
       this.geminiApiKey = key;
       this.genAI = new GoogleGenerativeAI(key);
+      this.isInitialized = true;
       console.log("Gemini API initialized successfully");
     } catch (error) {
       console.error("Error initializing Gemini API:", error);
+      this.isInitialized = false;
       throw new Error("Failed to initialize Gemini API");
     }
-  },
+  }
+
+  setGeminiApiKey(key: string) {
+    return this.initializeGemini(key);
+  }
+
+  private ensureInitialized() {
+    if (!this.isInitialized || !this.genAI) {
+      console.error("Gemini API not initialized");
+      throw new Error("Story generation service not properly initialized. Please try again in a few moments.");
+    }
+  }
 
   async startChat(settings: StorySettings): Promise<StoryResponse> {
     console.log("Starting chat with settings:", settings);
     
-    if (!this.genAI) {
-      console.error("Gemini API not initialized");
-      throw new Error("Story generation service not properly initialized. Please try again in a few moments.");
-    }
+    this.ensureInitialized();
 
     try {
       console.log("Creating Gemini model...");
-      const model = this.genAI.getGenerativeModel({ 
+      const model = this.genAI!.getGenerativeModel({ 
         model: "gemini-pro",
         generationConfig: {
           ...generationConfig,
@@ -125,16 +136,18 @@ export const aiService = {
       console.error("Error generating story with Gemini:", error);
       throw new Error("Failed to generate story. Please try again.");
     }
-  },
+  }
 
   async continueStory(message: string, language: string = 'en'): Promise<StoryResponse> {
+    this.ensureInitialized();
+
     if (!this.chatSession) {
       throw new Error("Chat session not initialized");
     }
 
     try {
       const result = await this.chatSession.sendMessage(message);
-      const responseText = result.response.text();
+      const responseText = await result.response.text();
       
       return {
         text: responseText,
@@ -146,9 +159,11 @@ export const aiService = {
       console.error("Error in continueStory:", error);
       throw error;
     }
-  },
+  }
 
   generateQuiz(storyContent: string, language: string = 'en') {
     return generateQuiz(storyContent, language);
   }
-};
+}
+
+export const aiService = new AIService();
