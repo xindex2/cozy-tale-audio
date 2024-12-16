@@ -57,6 +57,7 @@ export function useStoryPlayer(
     isLoading: state.loading.isLoading,
     isSending: state.loading.isSending,
     isGeneratingQuiz: state.loading.isGeneratingQuiz,
+    loadingStage: state.loading.stage,
 
     // Quiz
     quiz: state.quiz.questions,

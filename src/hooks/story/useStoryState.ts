@@ -17,6 +17,7 @@ export function useStoryState() {
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
   const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [loadingStage, setLoadingStage] = useState<'text' | 'audio' | 'music'>('text');
 
   return {
     playback: {
@@ -53,7 +54,9 @@ export function useStoryState() {
       isSending,
       setIsSending,
       isGeneratingQuiz,
-      setIsGeneratingQuiz
+      setIsGeneratingQuiz,
+      stage: loadingStage,
+      setStage: setLoadingStage
     },
     quiz: {
       questions: quiz,

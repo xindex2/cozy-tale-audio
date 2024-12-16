@@ -49,6 +49,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     startStory,
     generateQuiz,
     handleSendMessage,
+    loadingStage
   } = useStoryPlayer(settings, onSave, initialStoryData);
 
   useEffect(() => {
@@ -58,7 +59,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
   }, [settings, initialStoryData, startStory]);
 
   if (isLoading) {
-    return <LoadingState />;
+    return <LoadingState stage={loadingStage} />;
   }
 
   // Parse the content if it's a JSON string

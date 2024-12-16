@@ -82,7 +82,10 @@ class GeminiService {
       
       // Extract title and content from the generated text
       const lines = text.split('\n');
-      const title = lines[0].replace(/^(Title:|\#|\*)/gi, '').trim();
+      const title = lines[0]
+        .replace(/^(Title:|\#|\*)/gi, '') // Remove title prefix
+        .replace(/\*\*/g, '') // Remove asterisks
+        .trim();
       const content = lines.slice(2).join('\n').trim();
       
       return {
