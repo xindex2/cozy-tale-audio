@@ -2,14 +2,20 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { StoryPlayer } from "@/components/StoryPlayer";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { useEffect } from "react";
 
 export default function StoryView() {
   const location = useLocation();
   const navigate = useNavigate();
   const { settings, storyData } = location.state || {};
 
-  if (!settings || !storyData) {
-    navigate("/stories");
+  useEffect(() => {
+    if (!settings) {
+      navigate("/stories");
+    }
+  }, [settings, navigate]);
+
+  if (!settings) {
     return null;
   }
 
