@@ -24,10 +24,11 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
   const [currentTime, setCurrentTime] = useState(0);
   const { toast } = useToast();
 
-  // Fetch API keys from database
+  // Fetch API keys from database with better error handling
   const { data: apiKeys } = useQuery({
     queryKey: ['story-api-keys'],
     queryFn: async () => {
+      console.log("Fetching API keys from database...");
       const { data, error } = await supabase
         .from('api_keys')
         .select('key_name, key_value')
@@ -38,14 +39,26 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
         throw error;
       }
 
+      if (!data || data.length < 2) {
+        console.error('Missing required API keys in database');
+        throw new Error('Required API keys not found in database');
+      }
+
       const keys = data.reduce((acc: Record<string, string>, curr) => {
         acc[curr.key_name] = curr.key_value;
         return acc;
       }, {});
 
+      console.log("API keys fetched successfully:", {
+        hasElevenLabs: !!keys.ELEVEN_LABS_API_KEY,
+        hasGemini: !!keys.GEMINI_API_KEY
+      });
+
       // Initialize services with API keys immediately after fetching
-      if (keys.ELEVEN_LABS_API_KEY && keys.GEMINI_API_KEY) {
+      if (keys.ELEVEN_LABS_API_KEY) {
         aiService.setApiKey(keys.ELEVEN_LABS_API_KEY);
+      }
+      if (keys.GEMINI_API_KEY) {
         aiService.setGeminiApiKey(keys.GEMINI_API_KEY);
       }
 
@@ -56,9 +69,22 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
   });
 
   const startStory = async () => {
+    if (!apiKeys?.GEMINI_API_KEY) {
+      console.error("Missing Gemini API key");
+      toast({
+        title: "Error",
+        description: "Gemini API key not found. Please check the admin dashboard.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
+      console.log("Starting story generation...");
       const { text, audioUrl, backgroundMusicUrl, title } = await aiService.startChat(settings);
+      console.log("Story generated successfully");
+      
       setStoryTitle(title || "Your Bedtime Story");
       setStoryContent(text);
       
