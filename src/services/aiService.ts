@@ -29,8 +29,13 @@ export const aiService = {
   },
 
   setGeminiApiKey(key: string) {
-    console.log("Setting Gemini API key...");
+    if (!key) {
+      console.error("Empty Gemini API key provided");
+      return;
+    }
+    
     try {
+      console.log("Initializing Gemini API with key...");
       this.geminiApiKey = key;
       this.genAI = new GoogleGenerativeAI(key);
       console.log("Gemini API initialized successfully");
@@ -41,7 +46,13 @@ export const aiService = {
   },
 
   async startChat(settings: StorySettings): Promise<StoryResponse> {
-    console.log("Starting chat with settings:", { ...settings, apiKey: "REDACTED" });
+    console.log("Starting chat with settings:", { 
+      ageGroup: settings.ageGroup,
+      duration: settings.duration,
+      theme: settings.theme,
+      language: settings.language,
+      hasGeminiAPI: !!this.genAI
+    });
     
     if (!this.genAI) {
       console.error("Gemini API not initialized. Current state:", {
@@ -52,6 +63,7 @@ export const aiService = {
     }
 
     try {
+      console.log("Creating Gemini model...");
       const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
       console.log("Gemini model created successfully");
 
@@ -83,7 +95,7 @@ export const aiService = {
         return {
           title: parsed.title || "Bedtime Story",
           text: parsed.content || text,
-          audioUrl: null, // We'll implement audio generation later
+          audioUrl: null,
           backgroundMusicUrl
         };
       } catch (parseError) {
