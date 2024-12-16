@@ -24,25 +24,28 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
   const [currentTime, setCurrentTime] = useState(0);
   const { toast } = useToast();
 
-  const { data: apiKey } = useQuery({
-    queryKey: ['eleven-labs-api-key'],
+  // Fetch both required API keys
+  const { data: apiKeys, isLoading: isLoadingKeys } = useQuery({
+    queryKey: ['story-api-keys'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('api_keys')
-        .select('key_value')
-        .eq('key_name', 'ELEVEN_LABS_API_KEY')
-        .single();
+        .select('key_name, key_value')
+        .in('key_name', ['ELEVEN_LABS_API_KEY', 'OPENAI_API_KEY']);
 
       if (error) throw error;
-      return data.key_value;
+      return data.reduce((acc: Record<string, string>, curr) => {
+        acc[curr.key_name] = curr.key_value;
+        return acc;
+      }, {});
     },
   });
 
   const startStory = async () => {
-    if (!apiKey) {
+    if (!apiKeys?.ELEVEN_LABS_API_KEY || !apiKeys?.OPENAI_API_KEY) {
       toast({
-        title: "API Key Required",
-        description: "Please add your ElevenLabs API key in the Admin Dashboard.",
+        title: "API Keys Required",
+        description: "Please add both ElevenLabs and OpenAI API keys in the Admin Dashboard.",
         variant: "destructive",
       });
       return;
@@ -50,7 +53,7 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
 
     setIsLoading(true);
     try {
-      aiService.setApiKey(apiKey);
+      aiService.setApiKey(apiKeys.ELEVEN_LABS_API_KEY);
       const { text, audioUrl, backgroundMusicUrl, title } = await aiService.startChat(settings);
       setStoryTitle(title || "Your Bedtime Story");
       setStoryContent(text);
@@ -150,7 +153,7 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
     messages,
     currentAudioUrl,
     currentMusicUrl,
-    isLoading,
+    isLoading: isLoading || isLoadingKeys,
     isSending,
     storyTitle,
     storyContent,
