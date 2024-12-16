@@ -15,12 +15,17 @@ class OpenAIClient {
       console.log("Fetching OpenAI API key...");
       const { data, error } = await supabase
         .from('api_keys')
-        .select('key_value')
+        .select('*')
         .eq('key_name', 'OPENAI_API_KEY')
         .eq('is_active', true)
         .single();
 
-      if (error || !data?.key_value) {
+      if (error) {
+        console.error("Error fetching OpenAI API key:", error);
+        throw new Error('Failed to fetch OpenAI API key');
+      }
+
+      if (!data?.key_value) {
         throw new Error('No active OpenAI API key found');
       }
 
