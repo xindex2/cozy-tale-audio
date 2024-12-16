@@ -20,8 +20,8 @@ export function StoryDisplay({
   const containerRef = useRef<HTMLDivElement>(null);
   const height = useContainerHeight(containerRef);
   
-  // Split text into phrases using natural breaks (commas, periods, exclamation marks, question marks)
-  const phrases = text?.split(/([,!?.])\s+/).filter(Boolean).map((phrase, i) => phrase.trim()).filter(phrase => phrase.length > 0) || [];
+  // Split text into natural phrases without adding extra punctuation
+  const phrases = text?.split(/[،,.!?؟]/).map(phrase => phrase.trim()).filter(phrase => phrase.length > 0) || [];
   
   // Calculate the time per phrase based on total duration
   const timePerPhrase = duration > 0 ? duration / phrases.length : 0;

@@ -19,13 +19,24 @@ export function LoadingState({ stage = 'text' }: LoadingStateProps) {
     }
   };
 
+  const getLoadingMessage = () => {
+    switch (stage) {
+      case 'text':
+        return "Creating your story... This may take a minute";
+      case 'audio':
+        return "Generating audio narration...";
+      case 'music':
+        return "Adding background music...";
+      default:
+        return "Loading...";
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center py-12 space-y-4">
       <Loader className="h-8 w-8 animate-spin text-blue-500" />
       <p className="text-blue-600 font-medium">
-        {stage === 'text' && "Creating your story..."}
-        {stage === 'audio' && "Generating audio narration..."}
-        {stage === 'music' && "Adding background music..."}
+        {getLoadingMessage()}
       </p>
       <div className="w-full max-w-md">
         <Progress value={getLoadingProgress()} className="h-2" />

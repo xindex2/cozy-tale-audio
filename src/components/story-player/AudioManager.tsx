@@ -73,7 +73,7 @@ export function AudioManager({
     };
   }, [voiceUrl, toast, onTimeUpdate, isPlaying]);
 
-  // Handle background music
+  // Handle background music with immediate play
   useEffect(() => {
     if (!backgroundMusicUrl) {
       console.log("No background music URL provided");
@@ -84,7 +84,7 @@ export function AudioManager({
     const audio = new Audio(backgroundMusicUrl);
     audio.preload = "auto";
     audio.loop = true;
-    audio.volume = musicVolume;
+    audio.volume = isMusicMuted ? 0 : musicVolume;
     
     const handleError = (e: Event) => {
       console.error("Music error:", e);
@@ -95,25 +95,30 @@ export function AudioManager({
       });
     };
 
-    const handleCanPlay = () => {
-      console.log("Background music ready to play");
-      if (isPlaying) {
-        audio.play().catch(error => {
-          console.error("Error playing background music:", error);
-        });
+    const playMusic = async () => {
+      try {
+        if (isPlaying) {
+          await audio.play();
+          console.log("Background music playing");
+        }
+      } catch (error) {
+        console.error("Error playing background music:", error);
       }
     };
 
     audio.addEventListener('error', handleError);
-    audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('canplaythrough', playMusic);
     musicRef.current = audio;
+
+    // Start playing as soon as possible
+    playMusic();
 
     return () => {
       audio.pause();
       audio.removeEventListener('error', handleError);
-      audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('canplaythrough', playMusic);
     };
-  }, [backgroundMusicUrl, toast, isPlaying, musicVolume]);
+  }, [backgroundMusicUrl, toast, isPlaying, musicVolume, isMusicMuted]);
 
   // Handle volume changes
   useEffect(() => {
@@ -124,34 +129,6 @@ export function AudioManager({
       musicRef.current.volume = isMusicMuted ? 0 : musicVolume;
     }
   }, [volume, isMuted, musicVolume, isMusicMuted]);
-
-  // Handle play/pause
-  useEffect(() => {
-    const playAudio = async (audio: HTMLAudioElement | null) => {
-      if (!audio) return;
-      
-      try {
-        if (isPlaying) {
-          console.log("Attempting to play audio");
-          await audio.play();
-          console.log("Audio playing successfully");
-        } else {
-          console.log("Pausing audio");
-          audio.pause();
-        }
-      } catch (error) {
-        console.error("Playback error:", error);
-        toast({
-          title: "Playback Error",
-          description: "Failed to play audio. Please try again.",
-          variant: "destructive",
-        });
-      }
-    };
-
-    playAudio(voiceRef.current);
-    playAudio(musicRef.current);
-  }, [isPlaying, toast]);
 
   return null;
 }

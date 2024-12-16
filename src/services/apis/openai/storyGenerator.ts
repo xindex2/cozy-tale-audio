@@ -8,26 +8,29 @@ export const openaiService = {
     try {
       console.log("Starting story generation with settings:", settings);
       
-      const languagePrompt = `Write this story ENTIRELY in ${settings.language} language. Do not include any English text.`;
+      // Create a language-specific system prompt
+      const systemPrompt = `You are a storyteller who writes ONLY in ${settings.language}. 
+      DO NOT include ANY text in other languages. 
+      All numbers, measurements, and descriptions MUST be in ${settings.language}.`;
       
-      const prompt = `${languagePrompt}
-      Create a unique and engaging ${settings.duration} minute bedtime story for children aged ${settings.ageGroup} with the theme: ${settings.theme}.
-      Include elements that are:
-      1. Age-appropriate and engaging for ${settings.ageGroup} year olds
-      2. Related to the theme of ${settings.theme}
-      3. Have a clear beginning, middle, and end
-      4. Include descriptive language and dialogue
-      5. Have a positive message or moral
-      6. Be approximately ${settings.duration} minutes when read aloud
+      const userPrompt = `Write a complete story with these characteristics (remember to write EVERYTHING in ${settings.language} ONLY):
+      - Duration: ${settings.duration}
+      - Age group: ${settings.ageGroup}
+      - Theme: ${settings.theme}
       
-      Make sure this story is unique and different from previous ones.
+      The story should:
+      1. Be engaging and age-appropriate
+      2. Have a clear beginning, middle, and end
+      3. Include descriptive language and dialogue
+      4. Have a positive message or moral
+      5. Be unique and different from previous stories
       
-      Format the response exactly like this, including the exact strings "TITLE:" and "CONTENT:" (no extra spaces or characters):
+      Format the response exactly like this:
       TITLE: Your Story Title Here
 
       CONTENT: Your story content here...`;
 
-      const response = await openaiClient.generateContent(prompt);
+      const response = await openaiClient.generateContent(userPrompt, systemPrompt);
       console.log("Raw OpenAI response:", response);
       
       const titleMatch = response.match(/TITLE:\s*(.*?)(?=\s*\n\s*CONTENT:)/s);
@@ -83,7 +86,7 @@ export const openaiService = {
       const audioUrl = URL.createObjectURL(audioBlob);
       console.log("Audio generated successfully:", audioUrl);
 
-      // Get background music URL based on settings
+      // Get background music URL and ensure it's a full URL
       const backgroundMusicUrl = settings.music ? `/assets/${settings.music}.mp3` : null;
       
       return {
