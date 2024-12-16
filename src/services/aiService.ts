@@ -40,16 +40,9 @@ export const aiService = {
       const generated = await generateStoryWithGemini(settings);
       const backgroundMusicUrl = AUDIO_URLS[settings.music as keyof typeof AUDIO_URLS] || null;
 
-      let audioUrl = null;
-      if (settings.voice && settings.voice !== "no-voice") {
-        // Here you would generate audio from the story text
-        // For now, we'll skip this part as it's not the focus of the current changes
-        audioUrl = null;
-      }
-
       return {
         text: generated.content,
-        audioUrl,
+        audioUrl: null, // We'll implement audio generation later
         backgroundMusicUrl,
         title: generated.title
       };
@@ -69,14 +62,9 @@ export const aiService = {
     try {
       const responseText = `${message}... ${responses[language] || responses['en']}`;
       
-      let audioUrl = null;
-      if (this.apiKey) {
-        audioUrl = await generateAudio(responseText, "EXAVITQu4vr4xnSDxMaL", this.apiKey);
-      }
-
       return {
         text: responseText,
-        audioUrl,
+        audioUrl: null,
         backgroundMusicUrl: null,
         title: "Story Continuation"
       };
