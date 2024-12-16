@@ -15,7 +15,10 @@ export const openaiService = {
       2. Use proper grammar, punctuation, and formatting for ${settings.language}
       3. Never mix languages or include any English text
       4. Ensure the story flows naturally with appropriate sentence structure
-      5. Include proper punctuation marks according to ${settings.language} rules`;
+      5. Include proper punctuation marks according to ${settings.language} rules
+      6. ALWAYS format your response exactly like this, with these exact English labels followed by the content in the target language:
+         TITLE: [Story Title in ${settings.language}]
+         CONTENT: [Story Content in ${settings.language}]`;
       
       const userPrompt = `Create an engaging story with these specifications:
       - Duration: ${settings.duration} minutes
@@ -29,15 +32,15 @@ export const openaiService = {
       4. Maintain consistent narrative flow
       5. Use appropriate punctuation and grammar
       
-      Format:
+      Remember to format your response exactly as:
       TITLE: [Story Title]
-
       CONTENT: [Story Content]`;
 
       const response = await openaiClient.generateContent(userPrompt, systemPrompt);
       console.log("Raw OpenAI response:", response);
       
-      const titleMatch = response.match(/TITLE:\s*(.*?)(?=\s*\n\s*CONTENT:)/s);
+      // Enhanced parsing logic for multilingual content
+      const titleMatch = response.match(/TITLE:\s*(.*?)(?=\s*\n+\s*CONTENT:)/s);
       const contentMatch = response.match(/CONTENT:\s*([\s\S]*$)/s);
       
       if (!titleMatch || !contentMatch) {
