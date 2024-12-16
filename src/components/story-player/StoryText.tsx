@@ -22,14 +22,12 @@ export const StoryText = memo(function StoryText({
             initial={{ opacity: 0.8 }}
             animate={{ 
               opacity: 1,
-              backgroundColor: isHighlighted ? "rgba(59, 130, 246, 0.1)" : "transparent",
+              color: isHighlighted ? "#4F46E5" : isPast ? "#6B7280" : "#1F2937",
             }}
             transition={{ duration: 0.3 }}
-            className={`text-gray-800 leading-relaxed p-2 rounded-md transition-all duration-300 ${
+            className={`leading-relaxed p-2 rounded-md transition-all duration-300 ${
               isHighlighted 
-                ? "font-semibold text-blue-800" 
-                : isPast
-                ? "text-gray-500"
+                ? "bg-indigo-50 font-medium" 
                 : ""
             }`}
           >
