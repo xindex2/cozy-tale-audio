@@ -8,7 +8,7 @@ class GeminiClient {
   private isInitialized = false;
   private retryCount = 0;
   private maxRetries = 3;
-  private baseDelay = 1000; // 1 second
+  private baseDelay = 2000; // Increased from 1s to 2s
 
   async initialize() {
     if (this.isInitialized) return;
@@ -41,10 +41,13 @@ class GeminiClient {
   }
 
   private async retryWithBackoff(operation: () => Promise<any>) {
+    let lastError: any = null;
+    
     while (this.retryCount < this.maxRetries) {
       try {
         return await operation();
       } catch (error: any) {
+        lastError = error;
         console.error("Operation error:", error);
         
         if (error?.status === 429) {
@@ -52,10 +55,14 @@ class GeminiClient {
           if (this.retryCount < this.maxRetries) {
             const delayTime = this.baseDelay * Math.pow(2, this.retryCount - 1);
             console.log(`Rate limited. Retrying in ${delayTime}ms... (Attempt ${this.retryCount}/${this.maxRetries})`);
+            
+            // Show toast for retry attempt
             toast({
-              title: "Rate limit reached",
+              title: "API Rate Limit",
               description: `Retrying in ${delayTime / 1000} seconds... (Attempt ${this.retryCount}/${this.maxRetries})`,
+              duration: delayTime - 500, // Show toast until just before retry
             });
+            
             await this.delay(delayTime);
             continue;
           }
@@ -63,7 +70,15 @@ class GeminiClient {
         throw error;
       }
     }
-    throw new Error("Max retries reached");
+    
+    // If we've exhausted all retries, show a final error toast
+    toast({
+      title: "Error",
+      description: "Maximum retry attempts reached. Please try again in a few minutes.",
+      variant: "destructive",
+    });
+    
+    throw lastError;
   }
 
   async generateContent(prompt: string) {
@@ -79,8 +94,9 @@ class GeminiClient {
         model: GEMINI_MODEL,
         generationConfig: {
           ...generationConfig,
-          temperature: 0.7, // Slightly lower temperature for more focused responses
-          candidateCount: 1, // Request only one response to reduce API usage
+          temperature: 0.7,
+          candidateCount: 1,
+          maxOutputTokens: 2048, // Reduced to help with rate limits
         }
       });
 
@@ -93,19 +109,18 @@ class GeminiClient {
       return result.response.text();
     } catch (error: any) {
       console.error("Error generating content:", error);
-      if (error?.status === 429) {
-        toast({
-          title: "Rate Limit Exceeded",
-          description: "Please try again in a few minutes.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to generate content. Please try again.",
-          variant: "destructive",
-        });
-      }
+      
+      // Show appropriate error message based on error type
+      const errorMessage = error?.status === 429 
+        ? "API rate limit reached. Please try again in a few minutes."
+        : "Failed to generate content. Please try again.";
+      
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      
       throw error;
     }
   }
