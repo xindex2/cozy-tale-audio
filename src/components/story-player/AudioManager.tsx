@@ -36,7 +36,6 @@ export function AudioManager({
     console.log("Setting up voice audio with URL:", voiceUrl);
     const audio = new Audio(voiceUrl);
     audio.preload = "auto";
-    audio.crossOrigin = "anonymous";
     
     const handleError = (e: Event) => {
       console.error("Voice audio error:", e);
@@ -49,6 +48,11 @@ export function AudioManager({
 
     const handleCanPlay = () => {
       console.log("Voice audio ready to play");
+      if (isPlaying) {
+        audio.play().catch(error => {
+          console.error("Error playing voice audio:", error);
+        });
+      }
     };
 
     const handleTimeUpdate = () => {
@@ -67,7 +71,7 @@ export function AudioManager({
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
     };
-  }, [voiceUrl, toast, onTimeUpdate]);
+  }, [voiceUrl, toast, onTimeUpdate, isPlaying]);
 
   // Handle background music
   useEffect(() => {
@@ -80,8 +84,7 @@ export function AudioManager({
     const audio = new Audio(backgroundMusicUrl);
     audio.preload = "auto";
     audio.loop = true;
-    audio.crossOrigin = "anonymous";
-
+    
     const handleError = (e: Event) => {
       console.error("Music error:", e);
       toast({
@@ -93,6 +96,11 @@ export function AudioManager({
 
     const handleCanPlay = () => {
       console.log("Background music ready to play");
+      if (isPlaying) {
+        audio.play().catch(error => {
+          console.error("Error playing background music:", error);
+        });
+      }
     };
 
     audio.addEventListener('error', handleError);
@@ -104,7 +112,7 @@ export function AudioManager({
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('canplay', handleCanPlay);
     };
-  }, [backgroundMusicUrl, toast]);
+  }, [backgroundMusicUrl, toast, isPlaying]);
 
   // Handle volume changes
   useEffect(() => {

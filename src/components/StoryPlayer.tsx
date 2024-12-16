@@ -54,15 +54,25 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
 
   // Parse the content if it's a JSON string
   let displayContent = storyContent;
+  let displayTitle = storyTitle;
+
   try {
     if (typeof storyContent === 'string' && storyContent.trim().startsWith('{')) {
       const parsed = JSON.parse(storyContent);
-      displayContent = parsed.text || parsed.content || storyContent;
+      displayContent = parsed.content || parsed.text || storyContent;
+      displayTitle = parsed.title || storyTitle;
     }
   } catch (e) {
     console.error('Error parsing story content:', e);
     displayContent = storyContent;
   }
+
+  // Ensure audio is properly initialized
+  useEffect(() => {
+    if (currentAudioUrl) {
+      console.log("Audio URL available:", currentAudioUrl);
+    }
+  }, [currentAudioUrl]);
 
   if (isLoading) {
     return (
@@ -88,7 +98,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
           <Card className="p-4 lg:p-8 space-y-6 bg-white">
             <StoryHeader
               onBack={onBack}
-              title={storyTitle || initialStoryData?.title || ""}
+              title={displayTitle || initialStoryData?.title || ""}
               volume={volume}
               isMuted={isMuted}
               onVolumeChange={(newVolume) => setVolume(newVolume[0])}

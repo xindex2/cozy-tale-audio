@@ -12,29 +12,19 @@ export async function generateStory(settings: StoryGenerationSettings): Promise<
     3. Have a clear beginning, middle, and end
     4. Include descriptive language and dialogue
     5. Have a positive message or moral
-    6. Be approximately ${settings.duration} minutes when read aloud
-    
-    Format the response as a JSON object with 'title' and 'content' fields.`;
+    6. Be approximately ${settings.duration} minutes when read aloud`;
 
     const response = await openaiClient.generateContent(prompt);
     
-    try {
-      const parsed = JSON.parse(response);
-      return {
-        title: parsed.title || "Bedtime Story",
-        content: parsed.content
-      };
-    } catch (parseError) {
-      console.error("Error parsing story JSON:", parseError);
-      const lines = response.split('\n');
-      const title = lines[0].replace(/^(Title:|\#|\*)/gi, '').trim();
-      const content = lines.slice(1).join('\n').trim();
-      
-      return {
-        title: title || "Bedtime Story",
-        content
-      };
-    }
+    // Extract title from first line and content from rest
+    const lines = response.split('\n');
+    const title = lines[0].replace(/^(Title:|\#|\*)/gi, '').trim();
+    const content = lines.slice(1).join('\n').trim();
+    
+    return {
+      title,
+      content
+    };
   } catch (error) {
     console.error("Error generating story:", error);
     toast({
