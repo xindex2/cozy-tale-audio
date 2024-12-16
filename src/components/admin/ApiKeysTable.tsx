@@ -83,7 +83,7 @@ export function ApiKeysTable() {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Missing required API key: {missingKeys.join(", ")}
+            Missing required API keys: {missingKeys.join(", ")}. These keys are required for story generation to work.
           </AlertDescription>
         </Alert>
       )}

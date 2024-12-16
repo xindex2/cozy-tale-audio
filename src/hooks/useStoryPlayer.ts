@@ -24,11 +24,10 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
   const [currentTime, setCurrentTime] = useState(0);
   const { toast } = useToast();
 
-  // Fetch both required API keys
+  // Fetch API keys once at component mount
   const { data: apiKeys, isLoading: isLoadingKeys } = useQuery({
     queryKey: ['story-api-keys'],
     queryFn: async () => {
-      console.log('Fetching API keys...');
       const { data, error } = await supabase
         .from('api_keys')
         .select('key_name, key_value')
@@ -38,31 +37,25 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
         console.error('Error fetching API keys:', error);
         throw error;
       }
-      
-      console.log('API keys data:', data); // Debug log
-      
-      const keys = data.reduce((acc: Record<string, string>, curr) => {
+
+      if (!data || data.length < 2) {
+        throw new Error('Required API keys not found in database');
+      }
+
+      return data.reduce((acc: Record<string, string>, curr) => {
         acc[curr.key_name] = curr.key_value;
         return acc;
       }, {});
-      
-      console.log('Processed API keys:', keys); // Debug log
-      return keys;
     },
+    retry: false,
+    staleTime: Infinity, // Cache the API keys for the session
   });
 
   const startStory = async () => {
-    console.log('Starting story with API keys:', apiKeys); // Debug log
-    
-    if (!apiKeys?.ELEVEN_LABS_API_KEY || !apiKeys?.GEMINI_API_KEY) {
-      console.error('Missing API keys:', {
-        elevenlabs: !!apiKeys?.ELEVEN_LABS_API_KEY,
-        gemini: !!apiKeys?.GEMINI_API_KEY
-      });
-      
+    if (!apiKeys) {
       toast({
-        title: "API Keys Required",
-        description: "Please add both ElevenLabs and Gemini API keys in the Admin Dashboard.",
+        title: "Error",
+        description: "Unable to generate story. Please try again later.",
         variant: "destructive",
       });
       return;
@@ -70,11 +63,10 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
 
     setIsLoading(true);
     try {
-      console.log('Setting API keys in services...'); // Debug log
+      // Initialize services with API keys
       aiService.setApiKey(apiKeys.ELEVEN_LABS_API_KEY);
       aiService.setGeminiApiKey(apiKeys.GEMINI_API_KEY);
       
-      console.log('Generating story...'); // Debug log
       const { text, audioUrl, backgroundMusicUrl, title } = await aiService.startChat(settings);
       setStoryTitle(title || "Your Bedtime Story");
       setStoryContent(text);
@@ -94,7 +86,7 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
       console.error("Error starting story:", error);
       toast({
         title: "Error",
-        description: "Failed to start the story. Please try again.",
+        description: "Failed to generate story. Please try again.",
         variant: "destructive",
       });
     } finally {
