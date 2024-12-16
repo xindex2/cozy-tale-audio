@@ -58,13 +58,13 @@ export const aiService = {
     
     if (!this.genAI) {
       console.error("Gemini API not initialized");
-      throw new Error("Gemini API not properly initialized");
+      throw new Error("Story generation service not properly initialized. Please try again in a few moments.");
     }
 
     try {
       console.log("Creating Gemini model...");
       const model = this.genAI.getGenerativeModel({ 
-        model: "gemini-2.0-flash-exp",
+        model: "gemini-pro",
         generationConfig,
       });
 
@@ -87,20 +87,24 @@ export const aiService = {
       
       Make sure this story is unique and different from previous ones.
       
-      Return ONLY the story content without any JSON formatting or code blocks. Start with the title on the first line, followed by the story content.`;
+      Format your response with the title on the first line, followed by two line breaks, then the story content.
+      Do not include any JSON formatting, code blocks, or special characters.`;
 
       console.log("Sending prompt to Gemini...");
       const result = await this.chatSession.sendMessage(prompt);
-      const response = result.response.text();
+      const response = await result.response.text();
       console.log("Received response from Gemini");
       
       // Split the response into title and content
-      const lines = response.split('\n');
-      const title = lines[0].replace(/^(Title:|#|\*)/gi, '').trim();
-      const content = lines.slice(1).join('\n')
+      const lines = response.trim().split('\n');
+      const title = lines[0].replace(/^(Title:|#|\*|```.*$)/gi, '').trim();
+      const content = lines.slice(1)
+        .join('\n')
         .replace(/```json/g, '')
         .replace(/```/g, '')
         .trim();
+      
+      console.log("Successfully processed story response");
       
       return {
         title,
@@ -110,7 +114,7 @@ export const aiService = {
       };
     } catch (error) {
       console.error("Error generating story with Gemini:", error);
-      throw error;
+      throw new Error("Failed to generate story. Please try again.");
     }
   },
 
