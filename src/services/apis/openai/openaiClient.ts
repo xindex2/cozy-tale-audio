@@ -77,7 +77,7 @@ class OpenAIClient {
     throw lastError;
   }
 
-  async generateContent(prompt: string) {
+  async generateContent(prompt: string, language: string = 'en') {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -97,7 +97,10 @@ class OpenAIClient {
           body: JSON.stringify({
             model: 'gpt-4',
             messages: [
-              { role: 'system', content: 'You are a helpful assistant that generates children\'s stories.' },
+              { 
+                role: 'system', 
+                content: `You are a helpful assistant that generates children's stories. Please respond in ${language} language.` 
+              },
               { role: 'user', content: prompt }
             ],
             temperature: 0.7,
