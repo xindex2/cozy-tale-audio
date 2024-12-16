@@ -19,8 +19,8 @@ const AUDIO_URLS = {
 };
 
 const generationConfig = {
-  temperature: 1,
-  topP: 0.95,
+  temperature: 0.9,
+  topP: 1,
   topK: 40,
   maxOutputTokens: 8192,
 };
@@ -65,12 +65,18 @@ export const aiService = {
       console.log("Creating Gemini model...");
       const model = this.genAI.getGenerativeModel({ 
         model: "gemini-pro",
-        generationConfig,
+        generationConfig: {
+          ...generationConfig,
+          temperature: 1, // Increase creativity
+        },
       });
 
       this.chatSession = model.startChat({
-        generationConfig,
         history: [],
+        generationConfig: {
+          ...generationConfig,
+          temperature: 1,
+        },
       });
 
       console.log("Gemini chat session created successfully");
@@ -87,27 +93,30 @@ export const aiService = {
       
       Make sure this story is unique and different from previous ones.
       
-      Format your response with the title on the first line, followed by two line breaks, then the story content.
-      Do not include any JSON formatting, code blocks, or special characters.`;
+      Write the story in plain text format. Start with the title, then add two empty lines, and then write the story content.
+      Do not use any special formatting, markdown, or code blocks.`;
 
       console.log("Sending prompt to Gemini...");
       const result = await this.chatSession.sendMessage(prompt);
       const response = await result.response.text();
       console.log("Received response from Gemini");
       
-      // Split the response into title and content
-      const lines = response.trim().split('\n');
-      const title = lines[0].replace(/^(Title:|#|\*|```.*$)/gi, '').trim();
-      const content = lines.slice(1)
-        .join('\n')
-        .replace(/```json/g, '')
-        .replace(/```/g, '')
+      // Clean and parse the response
+      const cleanedResponse = response
+        .replace(/```[^`]*```/g, '') // Remove code blocks
+        .replace(/\n{3,}/g, '\n\n')  // Normalize multiple line breaks
         .trim();
+      
+      const [title, ...contentParts] = cleanedResponse.split('\n\n');
+      const cleanTitle = title
+        .replace(/^(Title:|\#|\*)/gi, '')
+        .trim();
+      const content = contentParts.join('\n\n').trim();
       
       console.log("Successfully processed story response");
       
       return {
-        title,
+        title: cleanTitle,
         text: content,
         audioUrl: null,
         backgroundMusicUrl: AUDIO_URLS[settings.music as keyof typeof AUDIO_URLS] || null

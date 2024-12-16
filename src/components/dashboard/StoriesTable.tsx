@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye, Trash2 } from "lucide-react";
+import { Eye, Play, Trash2 } from "lucide-react";
 import { Story } from "@/types/story";
 import { useNavigate } from "react-router-dom";
 
@@ -23,6 +23,20 @@ export function StoriesTable({ stories, onDelete }: StoriesTableProps) {
     navigate(`/stories/${story.id}`, { state: { story } });
   };
 
+  const handlePlay = (story: Story) => {
+    navigate(`/create-story`, {
+      state: {
+        settings: story.settings,
+        existingStory: {
+          title: story.title,
+          content: story.content,
+          audioUrl: story.audio_url,
+          backgroundMusicUrl: story.background_music_url,
+        },
+      },
+    });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow">
       <Table>
@@ -30,7 +44,7 @@ export function StoriesTable({ stories, onDelete }: StoriesTableProps) {
           <TableRow>
             <TableHead>Title</TableHead>
             <TableHead>Created</TableHead>
-            <TableHead className="w-[150px]">Actions</TableHead>
+            <TableHead className="w-[200px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -48,6 +62,14 @@ export function StoriesTable({ stories, onDelete }: StoriesTableProps) {
                   className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                 >
                   <Eye className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handlePlay(story)}
+                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                >
+                  <Play className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="ghost"
