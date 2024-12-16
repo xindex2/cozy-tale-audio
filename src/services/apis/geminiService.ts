@@ -4,9 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 class GeminiService {
   private genAI: GoogleGenerativeAI | null = null;
   private isInitialized = false;
-  private retryCount = 0;
   private maxRetries = 3;
-  private retryDelay = 1000; // Start with 1 second delay
+  private baseDelay = 1000; // Base delay of 1 second
 
   async initialize() {
     if (this.isInitialized) return;
@@ -39,19 +38,24 @@ class GeminiService {
     }
   }
 
-  private async retryWithBackoff<T>(operation: () => Promise<T>): Promise<T> {
+  private async retryWithBackoff<T>(operation: () => Promise<T>, retryCount = 0): Promise<T> {
     try {
       return await operation();
     } catch (error: any) {
-      if (error?.status === 429 && this.retryCount < this.maxRetries) {
-        console.log(`Rate limited. Retrying in ${this.retryDelay}ms... (Attempt ${this.retryCount + 1}/${this.maxRetries})`);
-        await new Promise(resolve => setTimeout(resolve, this.retryDelay));
-        this.retryDelay *= 2; // Exponential backoff
-        this.retryCount++;
-        return this.retryWithBackoff(operation);
+      console.log("Operation failed:", error);
+      
+      // Check if it's a rate limit error (429)
+      const isRateLimit = error?.status === 429 || 
+                         (error?.body && JSON.parse(error.body)?.error?.code === 429);
+
+      if (isRateLimit && retryCount < this.maxRetries) {
+        const delay = this.baseDelay * Math.pow(2, retryCount); // Exponential backoff
+        console.log(`Rate limited. Retrying in ${delay}ms... (Attempt ${retryCount + 1}/${this.maxRetries})`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return this.retryWithBackoff(operation, retryCount + 1);
       }
-      this.retryCount = 0;
-      this.retryDelay = 1000;
+
       throw error;
     }
   }
