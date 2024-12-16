@@ -11,6 +11,8 @@ import { AudioManager } from "./story-player/AudioManager";
 import { StoryDisplay } from "./story-player/StoryDisplay";
 import { useToast } from "@/hooks/use-toast";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface Message {
   role: "user" | "assistant";
@@ -49,19 +51,32 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const { toast } = useToast();
 
+  const { data: apiKey } = useQuery({
+    queryKey: ['eleven-labs-api-key'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('api_keys')
+        .select('key_value')
+        .eq('key_name', 'ELEVEN_LABS_API_KEY')
+        .single();
+
+      if (error) throw error;
+      return data.key_value;
+    },
+  });
+
   useEffect(() => {
-    const apiKey = prompt("Please enter your ElevenLabs API key:");
     if (apiKey) {
       aiService.setApiKey(apiKey);
       startStory();
     } else {
       toast({
         title: "API Key Required",
-        description: "An ElevenLabs API key is required for voice generation.",
+        description: "Please add your ElevenLabs API key in the Admin Dashboard.",
         variant: "destructive",
       });
     }
-  }, []);
+  }, [apiKey]);
 
   const startStory = async () => {
     setIsLoading(true);
@@ -242,4 +257,3 @@ export function StoryPlayer({ settings, onBack, onSave }: StoryPlayerProps) {
       </div>
     </div>
   );
-}
