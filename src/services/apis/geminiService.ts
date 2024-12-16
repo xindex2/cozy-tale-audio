@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 class GeminiService {
   private genAI: GoogleGenerativeAI | null = null;
@@ -53,6 +53,12 @@ class GeminiService {
         const delay = this.baseDelay * Math.pow(2, retryCount); // Exponential backoff
         console.log(`Rate limited. Retrying in ${delay}ms... (Attempt ${retryCount + 1}/${this.maxRetries})`);
         
+        toast({
+          title: "Rate limit reached",
+          description: `Retrying in ${delay / 1000} seconds...`,
+          variant: "default",
+        });
+
         await new Promise(resolve => setTimeout(resolve, delay));
         return this.retryWithBackoff(operation, retryCount + 1);
       }
