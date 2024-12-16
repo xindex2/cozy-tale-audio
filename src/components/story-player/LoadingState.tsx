@@ -4,20 +4,22 @@ import { Progress } from "@/components/ui/progress";
 
 interface LoadingStateProps {
   stage?: 'text' | 'audio' | 'music';
+  retryCount?: number;
 }
 
-export function LoadingState({ stage = 'text' }: LoadingStateProps) {
+export function LoadingState({ stage = 'text', retryCount = 0 }: LoadingStateProps) {
   const getStageText = () => {
-    switch (stage) {
-      case 'text':
-        return "Creating your story...";
-      case 'audio':
-        return "Generating audio narration...";
-      case 'music':
-        return "Adding background music...";
-      default:
-        return "Loading...";
+    const baseText = {
+      'text': "Creating your story",
+      'audio': "Generating audio narration",
+      'music': "Adding background music",
+    }[stage] || "Loading";
+
+    if (retryCount > 0) {
+      return `${baseText} (Retry ${retryCount})...`;
     }
+
+    return `${baseText}...`;
   };
 
   const getProgress = () => {

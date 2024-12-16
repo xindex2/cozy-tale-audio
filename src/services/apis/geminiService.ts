@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 class GeminiService {
   private genAI: GoogleGenerativeAI | null = null;
   private isInitialized = false;
+  private retryCount = 0;
+  private maxRetries = 3;
+  private retryDelay = 1000; // Start with 1 second delay
 
   async initialize() {
     if (this.isInitialized) return;
@@ -32,6 +35,23 @@ class GeminiService {
     } catch (error) {
       console.error("Error initializing Gemini:", error);
       this.isInitialized = false;
+      throw error;
+    }
+  }
+
+  private async retryWithBackoff<T>(operation: () => Promise<T>): Promise<T> {
+    try {
+      return await operation();
+    } catch (error: any) {
+      if (error?.status === 429 && this.retryCount < this.maxRetries) {
+        console.log(`Rate limited. Retrying in ${this.retryDelay}ms... (Attempt ${this.retryCount + 1}/${this.maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, this.retryDelay));
+        this.retryDelay *= 2; // Exponential backoff
+        this.retryCount++;
+        return this.retryWithBackoff(operation);
+      }
+      this.retryCount = 0;
+      this.retryDelay = 1000;
       throw error;
     }
   }
@@ -76,12 +96,13 @@ class GeminiService {
       Write the story in plain text format. Start with the title, then add two empty lines, and then write the story content.
       Do not use any special formatting, markdown, or code blocks.`;
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      const result = await this.retryWithBackoff(async () => {
+        const response = await model.generateContent(prompt);
+        return response.response.text();
+      });
       
       // Extract title and content from the generated text
-      const lines = text.split('\n');
+      const lines = result.split('\n');
       const title = lines[0]
         .replace(/^(Title:|\#|\*)/gi, '') // Remove title prefix
         .replace(/\*\*/g, '') // Remove asterisks
@@ -90,7 +111,7 @@ class GeminiService {
       
       return {
         title: title || "Bedtime Story",
-        content: content || text
+        content: content || result
       };
     } catch (error) {
       console.error("Error generating story with Gemini:", error);
@@ -122,9 +143,11 @@ class GeminiService {
         },
       });
 
-      const result = await model.generateContent(message);
-      const response = await result.response;
-      return response.text();
+      return await this.retryWithBackoff(async () => {
+        const result = await model.generateContent(message);
+        const response = await result.response;
+        return response.text();
+      });
     } catch (error) {
       console.error("Error generating response:", error);
       throw new Error(
