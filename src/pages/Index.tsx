@@ -18,11 +18,11 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-500">
       <Header />
-      <main className="flex-1 container py-8">
+      <main className="flex-1 w-full px-0 sm:container sm:px-8 py-8">
         {storySettings ? (
           <StoryPlayer settings={storySettings} onBack={handleBack} />
         ) : (
-          <div className="max-w-7xl mx-auto">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <StoryOptions onStart={handleStart} />
           </div>
         )}
