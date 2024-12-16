@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useContainerHeight } from "@/hooks/useContainerHeight";
 import { StoryText } from "./StoryText";
 
@@ -11,7 +11,7 @@ interface StoryDisplayProps {
 }
 
 export function StoryDisplay({ 
-  text = "", // Provide default empty string
+  text = "", 
   audioUrl, 
   isPlaying, 
   currentTime, 
@@ -20,13 +20,18 @@ export function StoryDisplay({
   const containerRef = useRef<HTMLDivElement>(null);
   const height = useContainerHeight(containerRef);
   
-  // Only split text if it exists
-  const sentences = text?.split(". ").filter(s => s.trim()).map(s => 
-    s.endsWith(".") ? s : s + "."
-  ) || [];
+  // Split text into phrases using punctuation marks
+  const phrases = text?.split(/([.!?]+)/).filter(Boolean).map((phrase, i, arr) => {
+    // Add back the punctuation mark if it was removed
+    if (i < arr.length - 1 && /[.!?]+/.test(arr[i + 1])) {
+      return phrase + arr[i + 1];
+    }
+    return phrase;
+  }).filter(phrase => phrase.trim()) || [];
   
-  const sentencesPerSecond = duration > 0 ? sentences.length / duration : 0;
-  const currentSentenceIndex = Math.floor(currentTime * sentencesPerSecond);
+  // Calculate the time per phrase based on total duration
+  const timePerPhrase = duration > 0 ? duration / phrases.length : 0;
+  const currentPhraseIndex = Math.floor(currentTime / timePerPhrase);
 
   return (
     <div 
@@ -36,8 +41,8 @@ export function StoryDisplay({
     >
       {text ? (
         <StoryText 
-          sentences={sentences}
-          currentSentenceIndex={currentSentenceIndex}
+          phrases={phrases}
+          currentPhraseIndex={currentPhraseIndex}
         />
       ) : (
         <p className="text-gray-500 italic">Story text will appear here...</p>

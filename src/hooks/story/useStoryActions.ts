@@ -24,13 +24,8 @@ export function useStoryActions(
         state.audio.setCurrentAudioUrl(audioUrl);
       }
       
-      // Set background music if selected
-      if (settings.music !== 'no-music') {
-        state.loading.setStage('music');
-        const musicUrl = audioService.getBackgroundMusicUrl(settings.music);
-        if (musicUrl) {
-          state.audio.setCurrentMusicUrl(musicUrl);
-        }
+      if (backgroundMusicUrl) {
+        state.audio.setCurrentMusicUrl(backgroundMusicUrl);
       }
       
       // Start playing automatically after generation
@@ -44,6 +39,11 @@ export function useStoryActions(
           backgroundMusicUrl || ""
         );
       }
+
+      toast({
+        title: "Story Generated",
+        description: "Your story is ready to play!",
+      });
     } catch (error) {
       console.error("Error starting story:", error);
       toast({

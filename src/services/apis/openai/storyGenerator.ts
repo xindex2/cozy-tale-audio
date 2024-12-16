@@ -6,10 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const openaiService = {
   async generateStory(settings: StoryGenerationSettings): Promise<StoryResponse> {
     try {
-      console.log("Starting story generation...");
+      console.log("Starting story generation with settings:", settings);
       
       const prompt = `Create a unique and engaging ${settings.duration} minute bedtime story for children aged ${settings.ageGroup} with the theme: ${settings.theme}.
-      The story should be in ${settings.language} language.
+      The story MUST be written in ${settings.language} language.
       Include elements that are:
       1. Age-appropriate and engaging for ${settings.ageGroup} year olds
       2. Related to the theme of ${settings.theme}
@@ -28,7 +28,6 @@ export const openaiService = {
       const response = await openaiClient.generateContent(prompt);
       console.log("Raw OpenAI response:", response);
       
-      // Parse the response to extract title and content
       const titleMatch = response.match(/TITLE:\s*(.*?)(?=\s*\n\s*CONTENT:)/s);
       const contentMatch = response.match(/CONTENT:\s*([\s\S]*$)/s);
       
@@ -55,7 +54,7 @@ export const openaiService = {
         throw new Error("ElevenLabs API key not found");
       }
 
-      // Generate audio using ElevenLabs
+      // Generate audio using ElevenLabs with the correct language model
       const voiceId = settings.voice || "21m00Tcm4TlvDq8ikWAM"; // Default voice ID
       const audioResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
         method: 'POST',
@@ -81,12 +80,15 @@ export const openaiService = {
       const audioBlob = await audioResponse.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       console.log("Audio generated successfully:", audioUrl);
+
+      // Get background music URL if specified
+      const backgroundMusicUrl = settings.music ? `/assets/${settings.music}.mp3` : null;
       
       return {
         title,
         content,
         audioUrl,
-        backgroundMusicUrl: settings.music ? `/assets/${settings.music}.mp3` : null
+        backgroundMusicUrl
       };
     } catch (error) {
       console.error("Error generating story:", error);
