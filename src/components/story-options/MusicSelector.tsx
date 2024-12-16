@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { RadioGroup } from "@/components/ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Music } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -68,7 +68,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
           >
             {musicOptions.map((option) => (
               <div key={option.id} className="relative">
-                <RadioGroup.Item
+                <RadioGroupItem
                   value={option.id}
                   id={option.id}
                   className="peer sr-only"
