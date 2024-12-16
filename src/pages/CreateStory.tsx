@@ -10,23 +10,34 @@ import { supabase } from "@/integrations/supabase/client";
 export default function CreateStory() {
   const [storySettings, setStorySettings] = useState<StorySettings | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check authentication status
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          toast({
+            title: "Authentication required",
+            description: "Please log in to create stories",
+            variant: "destructive",
+          });
+          navigate("/auth");
+          return;
+        }
+        setUserId(session.user.id);
+      } catch (error) {
+        console.error("Auth check error:", error);
         toast({
-          title: "Authentication required",
-          description: "Please log in to create stories",
+          title: "Authentication error",
+          description: "Please try again later",
           variant: "destructive",
         });
-        navigate("/auth");
-        return;
+      } finally {
+        setIsLoading(false);
       }
-      setUserId(session.user.id);
     };
 
     checkAuth();
@@ -59,38 +70,49 @@ export default function CreateStory() {
       return;
     }
 
-    const { error } = await supabase
-      .from('stories')
-      .insert({
-        title,
-        content,
-        audio_url: audioUrl,
-        background_music_url: backgroundMusicUrl,
-        settings: JSON.stringify(storySettings),
-        user_id: userId // Add the user_id to satisfy RLS policy
+    try {
+      const { error } = await supabase
+        .from('stories')
+        .insert({
+          title,
+          content,
+          audio_url: audioUrl,
+          background_music_url: backgroundMusicUrl,
+          settings: JSON.stringify(storySettings),
+          user_id: userId
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Story saved",
+        description: "Your story has been saved successfully."
       });
 
-    if (error) {
+      navigate("/dashboard");
+    } catch (error) {
       console.error("Error saving story:", error);
       toast({
         variant: "destructive",
         title: "Error saving story",
-        description: error.message
+        description: "Failed to save your story. Please try again."
       });
-      return;
     }
-
-    toast({
-      title: "Story saved",
-      description: "Your story has been saved successfully."
-    });
-
-    navigate("/dashboard");
   };
 
-  // Don't render anything until we've checked authentication
-  if (userId === null) {
-    return null;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-50">
+        <Header />
+        <main className="flex-1 container py-8 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   return (
