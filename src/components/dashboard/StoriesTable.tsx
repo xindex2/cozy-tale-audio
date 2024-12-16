@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,6 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 import type { Story } from "@/types/story";
 
 interface StoriesTableProps {
@@ -19,8 +20,16 @@ export function StoriesTable({ stories, onRefresh }: StoriesTableProps) {
   const navigate = useNavigate();
 
   const handleView = (story: Story) => {
-    navigate(`/stories/${story.id}`, {
-      state: { settings: story.settings }
+    navigate(`/stories/${story.id}`, { 
+      state: { 
+        settings: story.settings,
+        initialStoryData: {
+          title: story.title,
+          content: story.content,
+          audioUrl: story.audio_url,
+          backgroundMusicUrl: story.background_music_url,
+        }
+      } 
     });
   };
 
@@ -31,23 +40,23 @@ export function StoriesTable({ stories, onRefresh }: StoriesTableProps) {
           <TableRow>
             <TableHead>Title</TableHead>
             <TableHead>Created At</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {stories.map((story) => (
             <TableRow key={story.id}>
-              <TableCell>{story.title}</TableCell>
+              <TableCell className="font-medium">{story.title}</TableCell>
               <TableCell>
                 {new Date(story.created_at).toLocaleDateString()}
               </TableCell>
-              <TableCell>
+              <TableCell className="text-right">
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant="ghost"
+                  size="icon"
                   onClick={() => handleView(story)}
                 >
-                  View
+                  <Eye className="h-4 w-4" />
                 </Button>
               </TableCell>
             </TableRow>
