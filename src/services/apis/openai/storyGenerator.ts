@@ -8,8 +8,10 @@ export const openaiService = {
     try {
       console.log("Starting story generation with settings:", settings);
       
-      const prompt = `Create a unique and engaging ${settings.duration} minute bedtime story for children aged ${settings.ageGroup} with the theme: ${settings.theme}.
-      The story MUST be written in ${settings.language} language.
+      const languagePrompt = `Write this story ENTIRELY in ${settings.language} language. Do not include any English text.`;
+      
+      const prompt = `${languagePrompt}
+      Create a unique and engaging ${settings.duration} minute bedtime story for children aged ${settings.ageGroup} with the theme: ${settings.theme}.
       Include elements that are:
       1. Age-appropriate and engaging for ${settings.ageGroup} year olds
       2. Related to the theme of ${settings.theme}
@@ -81,7 +83,7 @@ export const openaiService = {
       const audioUrl = URL.createObjectURL(audioBlob);
       console.log("Audio generated successfully:", audioUrl);
 
-      // Get background music URL if specified
+      // Get background music URL based on settings
       const backgroundMusicUrl = settings.music ? `/assets/${settings.music}.mp3` : null;
       
       return {

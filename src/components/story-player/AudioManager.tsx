@@ -84,6 +84,7 @@ export function AudioManager({
     const audio = new Audio(backgroundMusicUrl);
     audio.preload = "auto";
     audio.loop = true;
+    audio.volume = musicVolume;
     
     const handleError = (e: Event) => {
       console.error("Music error:", e);
@@ -112,7 +113,7 @@ export function AudioManager({
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('canplay', handleCanPlay);
     };
-  }, [backgroundMusicUrl, toast, isPlaying]);
+  }, [backgroundMusicUrl, toast, isPlaying, musicVolume]);
 
   // Handle volume changes
   useEffect(() => {
