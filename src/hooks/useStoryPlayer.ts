@@ -3,6 +3,8 @@ import { useToast } from "@/hooks/use-toast";
 import { aiService } from "@/services/aiService";
 import type { StorySettings } from "@/components/StoryOptions";
 import type { Message, QuizQuestion } from "@/types/story";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 export function useStoryPlayer(settings: StorySettings, onSave?: (title: string, content: string, audioUrl: string, backgroundMusicUrl: string) => void) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -22,9 +24,33 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
   const [currentTime, setCurrentTime] = useState(0);
   const { toast } = useToast();
 
+  const { data: apiKey } = useQuery({
+    queryKey: ['eleven-labs-api-key'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('api_keys')
+        .select('key_value')
+        .eq('key_name', 'ELEVEN_LABS_API_KEY')
+        .single();
+
+      if (error) throw error;
+      return data.key_value;
+    },
+  });
+
   const startStory = async () => {
+    if (!apiKey) {
+      toast({
+        title: "API Key Required",
+        description: "Please add your ElevenLabs API key in the Admin Dashboard.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
+      aiService.setApiKey(apiKey);
       const { text, audioUrl, backgroundMusicUrl, title } = await aiService.startChat(settings);
       setStoryTitle(title || "Your Bedtime Story");
       setStoryContent(text);
