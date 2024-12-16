@@ -28,8 +28,12 @@ export function AudioManager({
 
   // Handle voice audio
   useEffect(() => {
-    if (!voiceUrl) return;
+    if (!voiceUrl) {
+      console.log("No voice URL provided");
+      return;
+    }
 
+    console.log("Setting up voice audio with URL:", voiceUrl);
     const audio = new Audio(voiceUrl);
     audio.preload = "auto";
     audio.crossOrigin = "anonymous";
@@ -43,11 +47,16 @@ export function AudioManager({
       });
     };
 
+    const handleCanPlay = () => {
+      console.log("Voice audio ready to play");
+    };
+
     const handleTimeUpdate = () => {
       onTimeUpdate?.(audio.currentTime);
     };
 
     audio.addEventListener('error', handleError);
+    audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     
     voiceRef.current = audio;
@@ -55,14 +64,19 @@ export function AudioManager({
     return () => {
       audio.pause();
       audio.removeEventListener('error', handleError);
+      audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
     };
   }, [voiceUrl, toast, onTimeUpdate]);
 
   // Handle background music
   useEffect(() => {
-    if (!backgroundMusicUrl) return;
+    if (!backgroundMusicUrl) {
+      console.log("No background music URL provided");
+      return;
+    }
 
+    console.log("Setting up background music with URL:", backgroundMusicUrl);
     const audio = new Audio(backgroundMusicUrl);
     audio.preload = "auto";
     audio.loop = true;
@@ -77,12 +91,18 @@ export function AudioManager({
       });
     };
 
+    const handleCanPlay = () => {
+      console.log("Background music ready to play");
+    };
+
     audio.addEventListener('error', handleError);
+    audio.addEventListener('canplay', handleCanPlay);
     musicRef.current = audio;
 
     return () => {
       audio.pause();
       audio.removeEventListener('error', handleError);
+      audio.removeEventListener('canplay', handleCanPlay);
     };
   }, [backgroundMusicUrl, toast]);
 
@@ -103,8 +123,11 @@ export function AudioManager({
       
       try {
         if (isPlaying) {
+          console.log("Attempting to play audio");
           await audio.play();
+          console.log("Audio playing successfully");
         } else {
+          console.log("Pausing audio");
           audio.pause();
         }
       } catch (error) {

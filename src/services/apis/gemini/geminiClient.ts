@@ -45,6 +45,8 @@ class GeminiClient {
       try {
         return await operation();
       } catch (error: any) {
+        console.error("Operation error:", error);
+        
         if (error?.status === 429) {
           this.retryCount++;
           if (this.retryCount < this.maxRetries) {
@@ -72,6 +74,7 @@ class GeminiClient {
     this.retryCount = 0; // Reset retry count for new requests
     
     try {
+      console.log("Generating content with prompt:", prompt);
       const model = this.genAI!.getGenerativeModel({ 
         model: GEMINI_MODEL,
         generationConfig: {
@@ -86,6 +89,7 @@ class GeminiClient {
         return response;
       });
 
+      console.log("Content generated successfully");
       return result.response.text();
     } catch (error: any) {
       console.error("Error generating content:", error);
