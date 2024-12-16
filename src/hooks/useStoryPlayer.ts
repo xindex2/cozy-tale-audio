@@ -24,57 +24,50 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
   const [currentTime, setCurrentTime] = useState(0);
   const { toast } = useToast();
 
-  // Fetch API keys when the hook initializes
-  const { data: apiKeys, isLoading: isLoadingKeys, error: apiKeysError } = useQuery({
-    queryKey: ['story-api-keys'],
+  // Fetch and initialize Gemini API key
+  useQuery({
+    queryKey: ['gemini-api-key'],
     queryFn: async () => {
-      console.log("Fetching API keys from database...");
-      const { data, error } = await supabase
-        .from('api_keys')
-        .select('key_name, key_value')
-        .eq('key_name', 'GEMINI_API_KEY')
-        .single();
+      try {
+        console.log("Fetching Gemini API key...");
+        const { data, error } = await supabase
+          .from('api_keys')
+          .select('key_value')
+          .eq('key_name', 'GEMINI_API_KEY')
+          .single();
 
-      if (error) {
-        console.error('Error fetching API keys:', error);
-        throw error;
-      }
+        if (error) {
+          console.error('Error fetching Gemini API key:', error);
+          throw new Error('Failed to fetch Gemini API key');
+        }
 
-      if (!data) {
-        console.error('No API keys found in database');
-        throw new Error('Required API keys not found in database');
-      }
+        if (!data?.key_value) {
+          console.error('No Gemini API key found');
+          throw new Error('Gemini API key not found');
+        }
 
-      console.log("API keys fetched successfully:", {
-        hasGeminiKey: !!data.key_value
-      });
-
-      // Initialize the Gemini API immediately after fetching the key
-      if (data.key_value) {
-        console.log("Initializing Gemini API with key...");
+        console.log("Initializing Gemini API...");
         aiService.setGeminiApiKey(data.key_value);
         console.log("Gemini API initialized successfully");
+        
+        return data.key_value;
+      } catch (error) {
+        console.error('Failed to initialize Gemini API:', error);
+        throw error;
       }
-
-      return {
-        GEMINI_API_KEY: data.key_value
-      };
     },
-    retry: 1,
-    staleTime: Infinity // Cache the API keys for the session
+    retry: 2,
+    staleTime: Infinity,
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to initialize story generation. Please check API key in admin dashboard.",
+        variant: "destructive",
+      });
+    }
   });
 
   const startStory = async () => {
-    if (!apiKeys?.GEMINI_API_KEY) {
-      console.error("Missing Gemini API key");
-      toast({
-        title: "Error",
-        description: "Missing required API key. Please check the admin dashboard.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
       console.log("Starting story generation...");
