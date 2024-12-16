@@ -24,8 +24,8 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
   const [currentTime, setCurrentTime] = useState(0);
   const { toast } = useToast();
 
-  // Fetch API keys once at component mount
-  const { data: apiKeys, isLoading: isLoadingKeys } = useQuery({
+  // Fetch API keys from database
+  const { data: apiKeys } = useQuery({
     queryKey: ['story-api-keys'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -38,35 +38,26 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
         throw error;
       }
 
-      if (!data || data.length < 2) {
-        throw new Error('Required API keys not found in database');
-      }
-
-      return data.reduce((acc: Record<string, string>, curr) => {
+      const keys = data.reduce((acc: Record<string, string>, curr) => {
         acc[curr.key_name] = curr.key_value;
         return acc;
       }, {});
+
+      // Initialize services with API keys immediately after fetching
+      if (keys.ELEVEN_LABS_API_KEY && keys.GEMINI_API_KEY) {
+        aiService.setApiKey(keys.ELEVEN_LABS_API_KEY);
+        aiService.setGeminiApiKey(keys.GEMINI_API_KEY);
+      }
+
+      return keys;
     },
-    retry: false,
     staleTime: Infinity, // Cache the API keys for the session
+    retry: 1,
   });
 
   const startStory = async () => {
-    if (!apiKeys) {
-      toast({
-        title: "Error",
-        description: "Unable to generate story. Please try again later.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
-      // Initialize services with API keys
-      aiService.setApiKey(apiKeys.ELEVEN_LABS_API_KEY);
-      aiService.setGeminiApiKey(apiKeys.GEMINI_API_KEY);
-      
       const { text, audioUrl, backgroundMusicUrl, title } = await aiService.startChat(settings);
       setStoryTitle(title || "Your Bedtime Story");
       setStoryContent(text);
@@ -86,7 +77,7 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
       console.error("Error starting story:", error);
       toast({
         title: "Error",
-        description: "Failed to generate story. Please try again.",
+        description: "Failed to generate story. Please check console for details.",
         variant: "destructive",
       });
     } finally {
@@ -166,7 +157,7 @@ export function useStoryPlayer(settings: StorySettings, onSave?: (title: string,
     messages,
     currentAudioUrl,
     currentMusicUrl,
-    isLoading: isLoading || isLoadingKeys,
+    isLoading,
     isSending,
     storyTitle,
     storyContent,
