@@ -52,12 +52,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     loadingStage
   } = useStoryPlayer(settings, onSave, initialStoryData);
 
-  useEffect(() => {
-    if (!initialStoryData && settings) {
-      startStory(settings);
-    }
-  }, [settings, initialStoryData, startStory]);
-
   // Parse the content if it's a JSON string
   let displayContent = storyContent;
   try {

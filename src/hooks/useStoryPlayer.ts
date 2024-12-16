@@ -26,8 +26,14 @@ export function useStoryPlayer(
       if (initialStoryData.backgroundMusicUrl) {
         state.audio.setCurrentMusicUrl(initialStoryData.backgroundMusicUrl);
       }
+    } else if (!state.loading.isLoading && settings && !state.story.content) {
+      // Only start story generation if:
+      // 1. We're not already loading
+      // 2. We have settings
+      // 3. We don't already have content
+      actions.startStory(settings);
     }
-  }, [initialStoryData]);
+  }, [initialStoryData, settings]);
 
   return {
     // Playback controls
