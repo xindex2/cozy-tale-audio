@@ -87,8 +87,8 @@ class OpenAIClient {
     try {
       console.log("Generating content with prompt:", prompt);
       
-      const response = await this.retryWithBackoff(async () => {
-        const result = await fetch('https://api.openai.com/v1/chat/completions', {
+      const result = await this.retryWithBackoff(async () => {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${this.apiKey}`,
@@ -113,7 +113,7 @@ class OpenAIClient {
       });
 
       console.log("Content generated successfully");
-      return response.choices[0].message.content;
+      return result.choices[0].message.content;
     } catch (error: any) {
       console.error("Error generating content:", error);
       toast({
