@@ -4,9 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Music } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
-import { MusicOption } from "./music/MusicOption";
-import { VolumeControl } from "./music/VolumeControl";
-import { useAudioPreview } from "./music/useAudioPreview";
+import { useToast } from "@/hooks/use-toast";
 
 interface MusicSelectorProps {
   selectedMusic: string;
@@ -15,10 +13,8 @@ interface MusicSelectorProps {
 
 export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorProps) {
   const [useMusic, setUseMusic] = useState(selectedMusic !== "no-music");
-  const [previewVolume, setPreviewVolume] = useState(0.15);
+  const { toast } = useToast();
   
-  const { playingId, togglePreview } = useAudioPreview(previewVolume);
-
   useEffect(() => {
     setUseMusic(selectedMusic !== "no-music");
   }, [selectedMusic]);
@@ -28,11 +24,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
     { id: "peaceful-dreams", name: "Peaceful Dreams", description: "Soothing lullaby for sweet dreams", url: "/assets/peaceful-dreams.mp3" },
     { id: "ocean-waves", name: "Ocean Waves", description: "Gentle water sounds with soft music", url: "/assets/ocean-waves.mp3" },
     { id: "soft-piano", name: "Relaxing Piano", description: "Soothing piano melodies", url: "/assets/soft-piano.mp3" },
-    { id: "healing-fountain", name: "Healing Fountain", description: "Water fountain with healing music", url: "/assets/healing-fountain.mp3" },
-    { id: "ocean-piano", name: "Ocean Piano", description: "Piano with calming ocean waves", url: "/assets/ocean-piano.mp3" },
     { id: "nature-sounds", name: "Forest Birds", description: "Peaceful forest ambiance with birds", url: "/assets/nature-sounds.mp3" },
-    { id: "sleep-music", name: "Sleep Music", description: "Gentle music for peaceful sleep", url: "/assets/sleep-music.mp3" },
-    { id: "guided-sleep", name: "Guided Sleep", description: "Relaxing guided sleep music", url: "/assets/guided-sleep.mp3" },
   ];
 
   const handleMusicToggle = (checked: boolean) => {
@@ -67,11 +59,6 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
           </Label>
         </div>
 
-        <VolumeControl 
-          volume={previewVolume}
-          onVolumeChange={(value) => setPreviewVolume(value[0])}
-        />
-
         {useMusic && (
           <RadioGroup
             value={selectedMusic}
@@ -80,14 +67,34 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
             disabled={!useMusic}
           >
             {musicOptions.map((option) => (
-              <MusicOption
-                key={option.id}
-                id={option.id}
-                name={option.name}
-                description={option.description}
-                isPlaying={playingId === option.id}
-                onPreviewToggle={() => togglePreview(option.id, option.url)}
-              />
+              <div key={option.id} className="relative">
+                <RadioGroup.Item
+                  value={option.id}
+                  id={option.id}
+                  className="peer sr-only"
+                />
+                <Label
+                  htmlFor={option.id}
+                  className="flex flex-col p-4 border-2 rounded-xl cursor-pointer hover:bg-blue-50 peer-data-[state=checked]:border-blue-500 peer-data-[state=checked]:bg-blue-50"
+                >
+                  <div className="flex flex-col space-y-2">
+                    <span className="font-semibold text-lg">{option.name}</span>
+                    <p className="text-sm text-gray-500">{option.description}</p>
+                    <audio 
+                      src={option.url} 
+                      controls 
+                      className="w-full mt-2"
+                      onError={() => {
+                        toast({
+                          title: "Audio Error",
+                          description: `Failed to load ${option.name}. Please try another option.`,
+                          variant: "destructive",
+                        });
+                      }}
+                    />
+                  </div>
+                </Label>
+              </div>
             ))}
           </RadioGroup>
         )}
