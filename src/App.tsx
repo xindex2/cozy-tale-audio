@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Toaster } from "@/components/ui/toast";
+import { Toaster } from "@/components/ui/toaster";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminApiKeys from "@/pages/admin/ApiKeys";
 import AdminPlans from "@/pages/admin/Plans";
