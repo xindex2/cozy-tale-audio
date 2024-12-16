@@ -2,7 +2,7 @@ import { useToast } from "@/hooks/use-toast";
 import { openaiService } from "@/services/apis/openai/storyGenerator";
 import { audioService } from "@/services/apis/audioService";
 import type { StorySettings } from "@/components/StoryOptions";
-import type { Message } from "@/types/story";
+import type { Message, QuizQuestion } from "@/types/story";
 
 export function useStoryActions(
   state: ReturnType<typeof import("./useStoryState").useStoryState>,
@@ -15,10 +15,14 @@ export function useStoryActions(
     state.loading.setStage('text');
     try {
       console.log("Starting story generation with settings:", settings);
-      const { title, content } = await openaiService.generateStory(settings);
+      const { title, content, audioUrl, backgroundMusicUrl } = await openaiService.generateStory(settings);
       
       state.story.setTitle(title);
       state.story.setContent(content);
+      
+      if (audioUrl) {
+        state.audio.setCurrentAudioUrl(audioUrl);
+      }
       
       // Set background music if selected
       if (settings.music !== 'no-music') {
@@ -36,8 +40,8 @@ export function useStoryActions(
         onSave(
           title,
           content,
-          state.audio.currentAudioUrl || "",
-          state.audio.currentMusicUrl || ""
+          audioUrl || "",
+          backgroundMusicUrl || ""
         );
       }
     } catch (error) {
@@ -53,13 +57,22 @@ export function useStoryActions(
   };
 
   const generateQuiz = async () => {
+    if (!state.story.content) {
+      toast({
+        title: "Error",
+        description: "No story content available to generate quiz.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     state.loading.setIsGeneratingQuiz(true);
     try {
       const prompt = `Generate a quiz about this story: ${state.story.content}
       Format the response as a JSON array of questions, each with:
       - question: the question text
       - options: array of 4 possible answers
-      - correct: index of the correct answer (0-3)
+      - correctAnswer: index of the correct answer (0-3)
       Make questions appropriate for children and focus on reading comprehension.`;
 
       const response = await openaiService.generateContent(prompt);
@@ -87,14 +100,20 @@ export function useStoryActions(
   };
 
   const handleSendMessage = async (text: string) => {
-    if (!text.trim()) return;
+    if (!text.trim() || !state.story.content) return;
     
     state.loading.setIsSending(true);
     try {
       const newMessage: Message = { role: "user", content: text };
       state.story.setMessages(prev => [...prev, newMessage]);
       
-      const response = await openaiService.generateContent(text);
+      const prompt = `You are a helpful assistant discussing this story: "${state.story.content}". 
+      The user asks: "${text}"
+      
+      Provide a helpful, engaging response about the story's content, characters, themes, or moral lessons. 
+      Keep the response focused on the story and appropriate for children.`;
+      
+      const response = await openaiService.generateContent(prompt, state.story.content);
       
       state.story.setMessages(prev => [
         ...prev,

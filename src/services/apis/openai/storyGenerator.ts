@@ -99,9 +99,13 @@ export const openaiService = {
     }
   },
 
-  async generateContent(prompt: string): Promise<string> {
+  async generateContent(prompt: string, storyContext?: string): Promise<string> {
     try {
-      const response = await openaiClient.generateContent(prompt);
+      const fullPrompt = storyContext 
+        ? `Based on this story: "${storyContext}"\n\n${prompt}`
+        : prompt;
+        
+      const response = await openaiClient.generateContent(fullPrompt);
       return response;
     } catch (error) {
       console.error("Error generating content:", error);
