@@ -2,7 +2,7 @@ import { generateStory } from "./openai/storyGenerator";
 import type { StoryGenerationSettings } from "./gemini/types";
 import { openaiClient } from "./openai/openaiClient";
 
-class GeminiService {
+class StoryService {
   async generateStory(settings: StoryGenerationSettings) {
     return generateStory(settings);
   }
@@ -18,4 +18,4 @@ class GeminiService {
   }
 }
 
-export const geminiService = new GeminiService();
+export const geminiService = new StoryService();
