@@ -53,7 +53,7 @@ export function StoryHeader({
           />
         </div>
       </div>
-      <p className="text-sm text-gray-600 dark:text-gray-400 text-center sm:text-left">
+      <p className="text-sm text-gray-800 dark:text-gray-200 bg-story-orange/10 border border-story-orange/20 rounded-lg p-3 text-center sm:text-left shadow-sm">
         Click the play button to listen to the story narration. You can adjust the volume or mute the audio using the controls above.
       </p>
     </div>
