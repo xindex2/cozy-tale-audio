@@ -9,6 +9,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { EditUserDialog } from "./EditUserDialog";
+import { Badge } from "@/components/ui/badge";
 
 interface User {
   id: string;
@@ -17,21 +19,51 @@ interface User {
   created_at: string;
 }
 
+interface UserSubscription {
+  plan_id: string;
+  status: string;
+  subscription_plans: {
+    name: string;
+  };
+}
+
 export function UsersTable() {
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          user_subscriptions (
+            plan_id,
+            status,
+            subscription_plans (
+              name
+            )
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as User[];
+      return data;
     },
   });
 
-  if (isLoading) {
+  const { data: plans } = useQuery({
+    queryKey: ['subscription-plans'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('subscription_plans')
+        .select('id, name')
+        .eq('is_active', true);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  if (isLoadingUsers) {
     return (
       <div className="flex justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
@@ -46,19 +78,38 @@ export function UsersTable() {
           <TableRow>
             <TableHead>Email</TableHead>
             <TableHead>Admin</TableHead>
+            <TableHead>Plan</TableHead>
             <TableHead>Created At</TableHead>
+            <TableHead className="w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users?.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.is_admin ? "Yes" : "No"}</TableCell>
-              <TableCell>
-                {new Date(user.created_at).toLocaleDateString()}
-              </TableCell>
-            </TableRow>
-          ))}
+          {users?.map((user) => {
+            const subscription = user.user_subscriptions?.[0] as UserSubscription | undefined;
+            const planName = subscription?.subscription_plans?.name || 'Free';
+            
+            return (
+              <TableRow key={user.id}>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.is_admin ? "Yes" : "No"}</TableCell>
+                <TableCell>
+                  <Badge variant={planName === 'Free' ? 'secondary' : 'default'}>
+                    {planName}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {new Date(user.created_at).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  <EditUserDialog 
+                    user={user} 
+                    subscription={subscription}
+                    plans={plans || []}
+                  />
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

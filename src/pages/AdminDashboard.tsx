@@ -19,23 +19,18 @@ export default function AdminDashboard() {
   const { toast } = useToast();
 
   // Check if user is authenticated
-  const { data: session, isLoading: isLoadingSession, error: sessionError } = useQuery({
+  const { data: session, isLoading: isLoadingSession } = useQuery({
     queryKey: ['session'],
     queryFn: async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error('Session error:', error);
-        throw error;
-      }
-      if (!session) {
-        throw new Error('No session found');
-      }
+      if (error) throw error;
+      if (!session) throw new Error('No session found');
       return session;
     },
   });
 
   // Check if user is admin
-  const { data: profile, isLoading: isLoadingProfile, error: profileError } = useQuery({
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ['admin-profile', session?.user?.id],
     enabled: !!session?.user?.id,
     queryFn: async () => {
@@ -45,38 +40,29 @@ export default function AdminDashboard() {
         .eq('id', session!.user.id)
         .single();
 
-      if (error) {
-        console.error('Profile error:', error);
-        throw error;
-      }
-      if (!data) {
-        throw new Error('No profile found');
-      }
+      if (error) throw error;
+      if (!data) throw new Error('No profile found');
       return data;
     },
   });
 
-  // Fetch stats only if user is admin
-  const { data: stats, isLoading: isLoadingStats, error: statsError } = useQuery({
+  // Fetch stats
+  const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ['admin-stats'],
     enabled: !!profile?.is_admin,
     queryFn: async () => {
-      const [usersResponse, storiesResponse] = await Promise.all([
-        supabase.from('profiles').select('count'),
-        supabase.from('stories').select('count'),
+      const [{ count: usersCount }, { count: storiesCount }] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('stories').select('*', { count: 'exact', head: true }),
       ]);
 
-      if (usersResponse.error) throw usersResponse.error;
-      if (storiesResponse.error) throw storiesResponse.error;
-
       return {
-        users: usersResponse.count || 0,
-        stories: storiesResponse.count || 0,
+        users: usersCount || 0,
+        stories: storiesCount || 0,
       };
     },
   });
 
-  // Show loading state while checking session and admin status
   if (isLoadingSession || isLoadingProfile) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
