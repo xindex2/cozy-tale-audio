@@ -134,21 +134,21 @@ export function MusicControls({
   };
 
   return (
-    <Card className="p-6 space-y-4 bg-white/90 dark:bg-gray-800/90 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700">
+    <Card className="p-6 space-y-4 bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700">
       <div className="flex items-center gap-2 mb-2">
         <Music className="h-5 w-5 text-blue-500" />
         <h3 className="text-lg font-medium">Background Music</h3>
       </div>
 
       <div className="space-y-4">
-        <Select value={selectedMusic} onValueChange={handleMusicChange}>
+        <Select value={selectedMusic} onValueChange={onMusicChange}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select background music" />
           </SelectTrigger>
           <SelectContent>
             {Object.entries(MUSIC_OPTIONS).map(([value, { label }]) => (
-              <SelectItem key={value} value={value} className="flex justify-between">
-                <span>{label}</span>
+              <SelectItem key={value} value={value}>
+                {label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -168,25 +168,26 @@ export function MusicControls({
             {previewingMusic === selectedMusic ? "Stop Preview" : "Preview Music"}
           </Button>
         )}
-      </div>
 
-      <div className="flex items-center space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={onToggleMute}
-          className="h-8 w-8"
-        >
-          {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-        </Button>
-        <Slider
-          value={[volume]}
-          max={1}
-          step={0.01}
-          onValueChange={onVolumeChange}
-          className="w-full"
-          disabled={selectedMusic === "no-music"}
-        />
+        <div className="flex items-center space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onToggleMute}
+            className="h-8 w-8"
+            disabled={selectedMusic === "no-music"}
+          >
+            {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          </Button>
+          <Slider
+            value={[volume]}
+            max={1}
+            step={0.01}
+            onValueChange={onVolumeChange}
+            className="w-full"
+            disabled={selectedMusic === "no-music"}
+          />
+        </div>
       </div>
     </Card>
   );

@@ -30,6 +30,8 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
   const { usage, checkAndIncrementUsage } = useUserUsage();
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [isFreeTrial, setIsFreeTrial] = useState(false);
+  const [persistedAudioUrl, setPersistedAudioUrl] = useState<string | null>(null);
+  const [persistedMusicUrl, setPersistedMusicUrl] = useState<string | null>(null);
 
   const {
     isPlaying,
@@ -65,7 +67,26 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     }
   }, [usage, initialStoryData]);
 
-  // Handle chat message with usage check
+  useEffect(() => {
+    if (initialStoryData?.audioUrl) {
+      setPersistedAudioUrl(initialStoryData.audioUrl);
+    }
+    if (initialStoryData?.backgroundMusicUrl) {
+      setPersistedMusicUrl(initialStoryData.backgroundMusicUrl);
+    }
+  }, [initialStoryData]);
+
+  useEffect(() => {
+    if (currentAudioUrl && onSave) {
+      onSave(
+        storyTitle,
+        storyContent,
+        currentAudioUrl,
+        currentMusicUrl || ""
+      );
+    }
+  }, [currentAudioUrl, currentMusicUrl, storyTitle, storyContent, onSave]);
+
   const handleChatMessage = async (message: string) => {
     const canProceed = await checkAndIncrementUsage('chat_messages_sent');
     if (!canProceed) {
@@ -75,7 +96,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     handleSendMessage(message);
   };
 
-  // Handle quiz with usage check
   const handleQuizGeneration = async () => {
     const canProceed = await checkAndIncrementUsage('quiz_questions_answered');
     if (!canProceed) {
@@ -85,7 +105,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     generateQuiz();
   };
 
-  // Parse the content if it's a JSON string
   let displayContent = storyContent;
   let displayTitle = storyTitle;
 
@@ -109,31 +128,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
       </div>
     );
   }
-
-  // Add state for persisted audio URLs
-  const [persistedAudioUrl, setPersistedAudioUrl] = useState<string | null>(null);
-  const [persistedMusicUrl, setPersistedMusicUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (initialStoryData?.audioUrl) {
-      setPersistedAudioUrl(initialStoryData.audioUrl);
-    }
-    if (initialStoryData?.backgroundMusicUrl) {
-      setPersistedMusicUrl(initialStoryData.backgroundMusicUrl);
-    }
-  }, [initialStoryData]);
-
-  // Modify the existing useEffect for audio persistence
-  useEffect(() => {
-    if (currentAudioUrl && onSave) {
-      onSave(
-        storyTitle,
-        storyContent,
-        currentAudioUrl,
-        currentMusicUrl || ""
-      );
-    }
-  }, [currentAudioUrl, currentMusicUrl, storyTitle, storyContent, onSave]);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
@@ -162,19 +156,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
               onTimeUpdate={setCurrentTime}
             />
 
-            <MusicControls
-              volume={musicVolume}
-              isMuted={isMusicMuted}
-              onVolumeChange={(newVolume) => setMusicVolume(newVolume[0])}
-              onToggleMute={() => setIsMusicMuted(!isMusicMuted)}
-              selectedMusic={settings?.music}
-              onMusicChange={(music) => {
-                if (settings) {
-                  settings.music = music;
-                }
-              }}
-            />
-
             <ErrorBoundary>
               <StoryDisplay
                 text={displayContent || initialStoryData?.content || ""}
@@ -188,7 +169,20 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
           </Card>
         </div>
 
-        <div className="h-[600px] lg:h-[800px]">
+        <div className="lg:h-[800px] space-y-4">
+          <MusicControls
+            volume={musicVolume}
+            isMuted={isMusicMuted}
+            onVolumeChange={(newVolume) => setMusicVolume(newVolume[0])}
+            onToggleMute={() => setIsMusicMuted(!isMusicMuted)}
+            selectedMusic={settings?.music}
+            onMusicChange={(music) => {
+              if (settings) {
+                settings.music = music;
+              }
+            }}
+          />
+
           <ChatPanel
             messages={messages}
             onSendMessage={handleChatMessage}
