@@ -43,19 +43,14 @@ export default function Pricing() {
         return;
       }
 
-      const response = await fetch('/functions/v1/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.data.session.access_token}`,
-        },
-        body: JSON.stringify({ priceId }),
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: { priceId },
       });
 
-      const { url, error } = await response.json();
-      if (error) throw new Error(error);
-      if (url) window.location.href = url;
+      if (error) throw error;
+      if (data?.url) window.location.href = data.url;
     } catch (error) {
+      console.error('Checkout error:', error);
       toast({
         title: "Error",
         description: "Failed to start checkout process. Please try again.",
