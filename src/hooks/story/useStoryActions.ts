@@ -1,6 +1,6 @@
 import { useToast } from "@/hooks/use-toast";
 import { openaiService } from "@/services/apis/openai/storyGenerator";
-import { audioService } from "@/services/apis/audioService";
+import { audioService } from "@/services/audioService";
 import type { StorySettings } from "@/components/StoryOptions";
 import type { Message, QuizQuestion } from "@/types/story";
 
@@ -55,7 +55,7 @@ export function useStoryActions(
         // Generate audio if voice is enabled
         if (settings.voice !== 'none') {
           state.loading.setStage('audio');
-          const audioUrl = await audioService.generateSpeech(content, settings.voice);
+          const audioUrl = await audioService.generateAudio(content);
           state.audio.setCurrentAudioUrl(audioUrl);
         }
 

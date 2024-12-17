@@ -6,26 +6,23 @@ const AUDIO_URLS = {
   "gentle-lullaby": "https://cdn.pixabay.com/download/audio/2023/09/05/audio_168a3e0caa.mp3"
 };
 
-export const generateAudio = async (text: string, voiceId: string, apiKey: string): Promise<string> => {
+export const generateAudio = async (text: string): Promise<string> => {
   try {
-    const response = await fetch(`${ELEVEN_LABS_API_URL}/${voiceId}`, {
-      method: "POST",
+    const response = await fetch('https://api.openai.com/v1/audio/speech', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "xi-api-key": apiKey,
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        text,
-        model_id: "eleven_multilingual_v2",
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.5,
-        },
+        model: 'tts-1',
+        input: text,
+        voice: 'alloy',
       }),
     });
 
     if (!response.ok) {
-      throw new Error("Failed to generate audio");
+      throw new Error('Failed to generate audio');
     }
 
     const audioBlob = await response.blob();
