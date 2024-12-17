@@ -22,8 +22,28 @@ export default function Auth() {
     checkAuth();
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN") {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_UP") {
+        // Get the free trial plan
+        const { data: freePlan } = await supabase
+          .from('subscription_plans')
+          .select('id')
+          .eq('name', 'Free Trial')
+          .single();
+
+        if (freePlan && session?.user) {
+          // Assign free trial plan to new user
+          await supabase
+            .from('user_subscriptions')
+            .insert([{
+              user_id: session.user.id,
+              plan_id: freePlan.id,
+              status: 'active'
+            }]);
+        }
+      }
+      
+      if (event === "SIGNED_IN" || event === "SIGNED_UP") {
         navigate('/');
         toast({
           title: "Welcome to Bedtimey!",
@@ -80,6 +100,23 @@ export default function Auth() {
           providers={[]}
           redirectTo={`${window.location.origin}/auth/callback`}
           view="sign_up"
+          localization={{
+            variables: {
+              sign_up: {
+                full_name_label: "Full Name",
+                full_name_placeholder: "Enter your full name",
+                email_label: "Email",
+                password_label: "Password",
+                button_label: "Sign up",
+              },
+            },
+          }}
+          options={{
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            meta: {
+              full_name: "",
+            },
+          }}
         />
       </Card>
     </div>
