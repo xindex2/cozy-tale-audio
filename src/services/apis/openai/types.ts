@@ -3,9 +3,9 @@ export interface StoryGenerationSettings {
   ageGroup: string;
   theme: string;
   language: string;
+  audio?: boolean;
   voice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
   music?: string;
-  audio?: boolean;
 }
 
 export interface StoryResponse {
