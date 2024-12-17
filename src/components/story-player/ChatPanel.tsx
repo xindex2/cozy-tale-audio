@@ -57,7 +57,7 @@ export function ChatPanel({
   };
 
   return (
-    <Card className="h-full flex flex-col bg-gradient-to-r from-blue-50 to-blue-100">
+    <Card className="h-[calc(100vh-24rem)] md:h-[800px] flex flex-col bg-gradient-to-r from-blue-50 to-blue-100">
       <Tabs defaultValue="chat" className="flex-1 flex flex-col h-full">
         <div className="p-4 border-b border-blue-100">
           <TabsList className="w-full bg-white/50">
@@ -127,7 +127,7 @@ export function ChatPanel({
             <Button 
               onClick={handleSend}
               disabled={isLoading}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shrink-0"
             >
               <Send className="h-4 w-4" />
             </Button>

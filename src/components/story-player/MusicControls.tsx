@@ -27,32 +27,27 @@ export function MusicControls({
   const musicOptions = [
     { 
       id: "sleeping-lullaby", 
-      name: "Sleeping Lullaby", 
-      description: "Gentle lullaby for peaceful sleep", 
+      name: "Sleeping Lullaby",
       url: "/assets/gentle-lullaby.mp3"
     },
     { 
       id: "water-dreams", 
-      name: "Water Dreams", 
-      description: "Calming water sounds with soft music", 
+      name: "Water Dreams",
       url: "/assets/ocean-waves.mp3"
     },
     { 
       id: "forest-birds", 
-      name: "Nature Sounds", 
-      description: "Peaceful nature ambiance", 
+      name: "Nature Sounds",
       url: "/assets/nature-sounds.mp3"
     },
     { 
       id: "relaxing-piano", 
-      name: "Relaxing Piano", 
-      description: "Soft piano melodies for bedtime", 
+      name: "Relaxing Piano",
       url: "/assets/soft-piano.mp3"
     },
     { 
       id: "gentle-dreams", 
-      name: "Peaceful Dreams", 
-      description: "Soft and calming melody for sweet dreams", 
+      name: "Peaceful Dreams",
       url: "/assets/peaceful-dreams.mp3"
     },
   ];
@@ -65,7 +60,7 @@ export function MusicControls({
   const musicUrl = currentMusic ? getMusicUrl(currentMusic) : null;
 
   return (
-    <Card className="p-6 space-y-4">
+    <Card className="p-4 space-y-4 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="flex items-center space-x-3">
         <Music className="h-6 w-6 text-blue-500" />
         <h2 className="text-lg font-semibold text-blue-500">Background Music</h2>
@@ -100,10 +95,7 @@ export function MusicControls({
               <SelectContent>
                 {musicOptions.map((option) => (
                   <SelectItem key={option.id} value={option.id}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{option.name}</span>
-                      <span className="text-sm text-gray-500">{option.description}</span>
-                    </div>
+                    {option.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -116,6 +108,7 @@ export function MusicControls({
                   controls
                   className="w-full"
                   src={musicUrl}
+                  preload="metadata"
                 >
                   Your browser does not support the audio element.
                 </audio>
