@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AgeGroupSelector } from "./story-options/AgeGroupSelector";
 import { ThemeSelector } from "./story-options/ThemeSelector";
@@ -6,6 +6,7 @@ import { DurationSelector } from "./story-options/DurationSelector";
 import { VoiceLanguageSelector } from "./story-options/VoiceLanguageSelector";
 import { Play, BookOpen, Sparkles, MessageCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StoryOptionsProps {
   onStart: (options: StorySettings) => void;
@@ -29,6 +30,23 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
     theme: "fantasy",
     language: "en"
   });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Check initial auth state
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsLoggedIn(!!session);
+    };
+    checkAuth();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <div className="min-h-screen w-full">
@@ -40,90 +58,94 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
               Bedtime Stories AI
             </h1>
 
-            {/* Features Section */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-6 sm:my-8">
-              <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-blue-100">
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 text-blue-600" />
+            {!isLoggedIn && (
+              <>
+                {/* Features Section */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-6 sm:my-8">
+                  <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-blue-100">
+                    <div className="flex flex-col items-center text-center space-y-3">
+                      <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                        <BookOpen className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <h3 className="font-semibold text-base sm:text-lg">Interactive Reading</h3>
+                      <p className="text-sm text-gray-600">
+                        Follow along with highlighted text as the story is narrated
+                      </p>
+                    </div>
+                  </Card>
+
+                  <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-purple-100">
+                    <div className="flex flex-col items-center text-center space-y-3">
+                      <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                        <Sparkles className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <h3 className="font-semibold text-base sm:text-lg">AI-Powered Quiz</h3>
+                      <p className="text-sm text-gray-600">
+                        Test comprehension with auto-generated questions
+                      </p>
+                    </div>
+                  </Card>
+
+                  <Card className="p-4 sm:p-6 bg-gradient-to-br from-green-50 to-green-100 sm:col-span-2 lg:col-span-1">
+                    <div className="flex flex-col items-center text-center space-y-3">
+                      <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                        <MessageCircle className="w-6 h-6 text-green-600" />
+                      </div>
+                      <h3 className="font-semibold text-base sm:text-lg">Story Discussion</h3>
+                      <p className="text-sm text-gray-600">
+                        Chat about the story and ask questions
+                      </p>
+                    </div>
+                  </Card>
+                </div>
+
+                <div className="space-y-4 sm:space-y-6">
+                  <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-story-purple to-story-blue bg-clip-text text-transparent">
+                    Welcome to the Future of Bedtime Stories! ✨
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <p className="text-base sm:text-lg text-gray-800 max-w-3xl mx-auto leading-relaxed px-4">
+                      Transform bedtime into a <span className="font-bold text-story-purple">magical adventure</span> with our{' '}
+                      <span className="bg-gradient-to-r from-story-purple to-story-blue bg-clip-text text-transparent font-bold">AI-powered storytelling</span>{' '}
+                      that adapts perfectly to your child's world!
+                    </p>
+                    
+                    <div className="bg-blue-50 p-4 sm:p-6 rounded-xl shadow-sm max-w-3xl mx-auto">
+                      <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                        <span className="font-bold text-story-blue">✨ How it works:</span>{' '}
+                        Simply choose your perfect story settings below —{' '}
+                        <span className="font-semibold text-story-purple">age group</span>,{' '}
+                        <span className="font-semibold text-story-orange">story duration</span>,{' '}
+                        <span className="font-semibold text-story-blue">voice</span>, and{' '}
+                        <span className="font-semibold text-story-purple">theme</span>. Our AI crafts a{' '}
+                        <span className="italic font-medium">unique, engaging narrative</span> complete with professional narration and optional atmospheric music.
+                      </p>
+                    </div>
+
+                    <div className="bg-purple-50 p-4 sm:p-6 rounded-xl shadow-sm max-w-3xl mx-auto">
+                      <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                        <span className="font-bold text-story-purple">🎯 Interactive Features:</span>{' '}
+                        Each story comes with{' '}
+                        <span className="font-medium">highlighted text synchronization</span>,{' '}
+                        <span className="text-story-blue font-medium">comprehension-boosting activities</span>, and{' '}
+                        <span className="text-story-orange font-medium">educational elements</span> that make learning fun!
+                      </p>
+                    </div>
+
+                    <div className="bg-orange-50 p-4 sm:p-6 rounded-xl shadow-sm max-w-3xl mx-auto">
+                      <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                        <span className="font-bold text-story-orange">🌟 After the Story:</span>{' '}
+                        Engage with our{' '}
+                        <span className="font-medium text-story-purple">AI-powered quiz</span> to check understanding, or use our{' '}
+                        <span className="font-medium text-story-blue">chat feature</span> to explore the story's themes and characters.{' '}
+                        <span className="font-medium italic">Save your favorites</span> to your personal library for endless storytelling magic!
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-base sm:text-lg">Interactive Reading</h3>
-                  <p className="text-sm text-gray-600">
-                    Follow along with highlighted text as the story is narrated
-                  </p>
                 </div>
-              </Card>
-
-              <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-purple-100">
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <h3 className="font-semibold text-base sm:text-lg">AI-Powered Quiz</h3>
-                  <p className="text-sm text-gray-600">
-                    Test comprehension with auto-generated questions
-                  </p>
-                </div>
-              </Card>
-
-              <Card className="p-4 sm:p-6 bg-gradient-to-br from-green-50 to-green-100 sm:col-span-2 lg:col-span-1">
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                    <MessageCircle className="w-6 h-6 text-green-600" />
-                  </div>
-                  <h3 className="font-semibold text-base sm:text-lg">Story Discussion</h3>
-                  <p className="text-sm text-gray-600">
-                    Chat about the story and ask questions
-                  </p>
-                </div>
-              </Card>
-            </div>
-
-            <div className="space-y-4 sm:space-y-6">
-              <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-story-purple to-story-blue bg-clip-text text-transparent">
-                Welcome to the Future of Bedtime Stories! ✨
-              </p>
-              
-              <div className="space-y-4">
-                <p className="text-base sm:text-lg text-gray-800 max-w-3xl mx-auto leading-relaxed px-4">
-                  Transform bedtime into a <span className="font-bold text-story-purple">magical adventure</span> with our{' '}
-                  <span className="bg-gradient-to-r from-story-purple to-story-blue bg-clip-text text-transparent font-bold">AI-powered storytelling</span>{' '}
-                  that adapts perfectly to your child's world!
-                </p>
-                
-                <div className="bg-blue-50 p-4 sm:p-6 rounded-xl shadow-sm max-w-3xl mx-auto">
-                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                    <span className="font-bold text-story-blue">✨ How it works:</span>{' '}
-                    Simply choose your perfect story settings below —{' '}
-                    <span className="font-semibold text-story-purple">age group</span>,{' '}
-                    <span className="font-semibold text-story-orange">story duration</span>,{' '}
-                    <span className="font-semibold text-story-blue">voice</span>, and{' '}
-                    <span className="font-semibold text-story-purple">theme</span>. Our AI crafts a{' '}
-                    <span className="italic font-medium">unique, engaging narrative</span> complete with professional narration and optional atmospheric music.
-                  </p>
-                </div>
-
-                <div className="bg-purple-50 p-4 sm:p-6 rounded-xl shadow-sm max-w-3xl mx-auto">
-                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                    <span className="font-bold text-story-purple">🎯 Interactive Features:</span>{' '}
-                    Each story comes with{' '}
-                    <span className="font-medium">highlighted text synchronization</span>,{' '}
-                    <span className="text-story-blue font-medium">comprehension-boosting activities</span>, and{' '}
-                    <span className="text-story-orange font-medium">educational elements</span> that make learning fun!
-                  </p>
-                </div>
-
-                <div className="bg-orange-50 p-4 sm:p-6 rounded-xl shadow-sm max-w-3xl mx-auto">
-                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                    <span className="font-bold text-story-orange">🌟 After the Story:</span>{' '}
-                    Engage with our{' '}
-                    <span className="font-medium text-story-purple">AI-powered quiz</span> to check understanding, or use our{' '}
-                    <span className="font-medium text-story-blue">chat feature</span> to explore the story's themes and characters.{' '}
-                    <span className="font-medium italic">Save your favorites</span> to your personal library for endless storytelling magic!
-                  </p>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           {/* Voice and Language Section */}
