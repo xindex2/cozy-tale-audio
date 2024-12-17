@@ -115,8 +115,8 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
             </div>
 
             <AudioManager
-              voiceUrl={currentAudioUrl || initialStoryData?.audioUrl}
-              backgroundMusicUrl={currentMusicUrl || initialStoryData?.backgroundMusicUrl}
+              voiceUrl={currentAudioUrl || initialStoryData?.audioUrl || ''}
+              backgroundMusicUrl={currentMusicUrl || initialStoryData?.backgroundMusicUrl || ''}
               isPlaying={isPlaying}
               volume={volume}
               isMuted={isMuted}

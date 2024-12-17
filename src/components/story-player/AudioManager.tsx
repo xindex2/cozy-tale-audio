@@ -64,6 +64,7 @@ export function AudioManager({
     audio.addEventListener('timeupdate', handleTimeUpdate);
     
     voiceRef.current = audio;
+    audio.volume = isMuted ? 0 : volume;
 
     return () => {
       audio.pause();
@@ -71,9 +72,9 @@ export function AudioManager({
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
     };
-  }, [voiceUrl, toast, onTimeUpdate, isPlaying]);
+  }, [voiceUrl, toast, onTimeUpdate]);
 
-  // Handle background music with immediate play
+  // Handle background music
   useEffect(() => {
     if (!backgroundMusicUrl) {
       console.log("No background music URL provided");
@@ -81,10 +82,10 @@ export function AudioManager({
     }
 
     console.log("Setting up background music with URL:", backgroundMusicUrl);
-    const audio = new Audio(backgroundMusicUrl);
+    const audio = new Audio();
+    audio.src = backgroundMusicUrl;
     audio.preload = "auto";
     audio.loop = true;
-    audio.volume = isMusicMuted ? 0 : musicVolume;
     
     const handleError = (e: Event) => {
       console.error("Music error:", e);
@@ -95,30 +96,32 @@ export function AudioManager({
       });
     };
 
-    const playMusic = async () => {
-      try {
-        if (isPlaying) {
-          await audio.play();
-          console.log("Background music playing");
-        }
-      } catch (error) {
-        console.error("Error playing background music:", error);
-      }
-    };
-
     audio.addEventListener('error', handleError);
-    audio.addEventListener('canplaythrough', playMusic);
     musicRef.current = audio;
+    audio.volume = isMusicMuted ? 0 : musicVolume;
 
-    // Start playing as soon as possible
-    playMusic();
+    if (isPlaying) {
+      audio.play().catch(error => {
+        console.error("Error playing background music:", error);
+      });
+    }
 
     return () => {
       audio.pause();
       audio.removeEventListener('error', handleError);
-      audio.removeEventListener('canplaythrough', playMusic);
     };
-  }, [backgroundMusicUrl, toast, isPlaying, musicVolume, isMusicMuted]);
+  }, [backgroundMusicUrl, isPlaying, musicVolume, isMusicMuted]);
+
+  // Handle play/pause
+  useEffect(() => {
+    if (isPlaying) {
+      voiceRef.current?.play().catch(console.error);
+      musicRef.current?.play().catch(console.error);
+    } else {
+      voiceRef.current?.pause();
+      musicRef.current?.pause();
+    }
+  }, [isPlaying]);
 
   // Handle volume changes
   useEffect(() => {

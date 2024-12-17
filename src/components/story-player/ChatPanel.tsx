@@ -7,7 +7,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Quiz } from "./Quiz";
 import { motion, AnimatePresence } from "framer-motion";
-import { openaiService } from "@/services/apis/openai/storyGenerator";
 
 interface Message {
   role: "user" | "assistant";
@@ -39,24 +38,6 @@ const getPlaceholderText = (language: string) => {
   return placeholders[language] || placeholders['en'];
 };
 
-const getGenerateQuizText = (language: string) => {
-  const texts: { [key: string]: string } = {
-    en: "Generate Quiz",
-    es: "Generar Cuestionario",
-    ar: "إنشاء اختبار"
-  };
-  return texts[language] || texts['en'];
-};
-
-const getLoadingText = (language: string) => {
-  const texts: { [key: string]: string } = {
-    en: "Generating Quiz...",
-    es: "Generando Cuestionario...",
-    ar: "جاري إنشاء الاختبار..."
-  };
-  return texts[language] || texts['en'];
-};
-
 export function ChatPanel({ 
   messages, 
   onSendMessage, 
@@ -76,8 +57,8 @@ export function ChatPanel({
   };
 
   return (
-    <Card className="h-[85%] flex flex-col bg-gradient-to-r from-blue-50 to-blue-100">
-      <Tabs defaultValue="chat" className="flex-1 flex flex-col">
+    <Card className="h-full flex flex-col bg-gradient-to-r from-blue-50 to-blue-100">
+      <Tabs defaultValue="chat" className="flex-1 flex flex-col h-full">
         <div className="p-4 border-b border-blue-100">
           <TabsList className="w-full bg-white/50">
             <TabsTrigger value="chat" className="flex-1">
@@ -91,29 +72,31 @@ export function ChatPanel({
           </TabsList>
         </div>
 
-        <TabsContent value="chat" className="flex-1 flex flex-col p-4">
-          <ScrollArea className="flex-1">
+        <TabsContent value="chat" className="flex-1 flex flex-col p-4 overflow-hidden">
+          <ScrollArea className="flex-1 pr-4">
             <div className="space-y-4">
-              {messages.map((message, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
-                      message.role === "user"
-                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                        : "bg-white"
-                    }`}
-                    style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}
+              <AnimatePresence>
+                {messages.map((message, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                   >
-                    {message.content}
-                  </div>
-                </motion.div>
-              ))}
+                    <div
+                      className={`max-w-[80%] p-3 rounded-lg ${
+                        message.role === "user"
+                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                          : "bg-white"
+                      }`}
+                      style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}
+                    >
+                      {message.content}
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
               {isLoading && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -121,48 +104,9 @@ export function ChatPanel({
                   className="flex justify-start"
                 >
                   <div className="max-w-[80%] p-3 rounded-lg bg-white">
-                    <div className="flex space-x-2">
-                      <motion.span
-                        animate={{
-                          scale: [1, 1.2, 1],
-                          opacity: [1, 0.5, 1]
-                        }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          repeatType: "loop",
-                          times: [0, 0.5, 1]
-                        }}
-                        className="w-2 h-2 bg-blue-500 rounded-full"
-                      />
-                      <motion.span
-                        animate={{
-                          scale: [1, 1.2, 1],
-                          opacity: [1, 0.5, 1]
-                        }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          repeatType: "loop",
-                          delay: 0.2,
-                          times: [0, 0.5, 1]
-                        }}
-                        className="w-2 h-2 bg-blue-500 rounded-full"
-                      />
-                      <motion.span
-                        animate={{
-                          scale: [1, 1.2, 1],
-                          opacity: [1, 0.5, 1]
-                        }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          repeatType: "loop",
-                          delay: 0.4,
-                          times: [0, 0.5, 1]
-                        }}
-                        className="w-2 h-2 bg-blue-500 rounded-full"
-                      />
+                    <div className="flex items-center space-x-2">
+                      <Loader className="h-4 w-4 animate-spin text-blue-500" />
+                      <span className="text-sm text-gray-500">Thinking...</span>
                     </div>
                   </div>
                 </motion.div>
@@ -170,7 +114,7 @@ export function ChatPanel({
             </div>
           </ScrollArea>
 
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex gap-2 sticky bottom-0 bg-white/50 backdrop-blur-sm p-2 rounded-lg">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -190,12 +134,13 @@ export function ChatPanel({
           </div>
         </TabsContent>
 
-        <TabsContent value="quiz" className="flex-1 p-4">
+        <TabsContent value="quiz" className="flex-1 p-4 overflow-hidden">
           <ScrollArea className="h-full">
             <Quiz 
               questions={quiz} 
               onRegenerateQuiz={onGenerateQuiz}
               language={language}
+              isGenerating={isGeneratingQuiz}
             />
           </ScrollArea>
         </TabsContent>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trophy, RefreshCw } from "lucide-react";
+import { Trophy, RefreshCw, Loader } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Question {
@@ -14,6 +14,7 @@ interface QuizProps {
   questions: Question[];
   onRegenerateQuiz: () => void;
   language: string;
+  isGenerating: boolean;
 }
 
 const getNoQuizText = (language: string) => ({
@@ -34,7 +35,7 @@ const getScoreText = (language: string, score: number, total: number) => ({
   ar: `نتيجتك: ${score} من ${total}`
 }[language] || `Your score: ${score} out of ${total}`);
 
-export function Quiz({ questions, onRegenerateQuiz, language }: QuizProps) {
+export function Quiz({ questions, onRegenerateQuiz, language, isGenerating }: QuizProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
@@ -73,12 +74,27 @@ export function Quiz({ questions, onRegenerateQuiz, language }: QuizProps) {
   if (!questions.length) {
     return (
       <Card className="p-6 text-center">
-        <p className="text-gray-600" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
+        <p className="text-gray-600 mb-4" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
           {getNoQuizText(language)}
         </p>
-        <Button onClick={onRegenerateQuiz} className="mt-4">
-          <RefreshCw className="w-4 h-4 mr-2" />
-          {getGenerateQuizText(language)}
+        <Button 
+          onClick={onRegenerateQuiz} 
+          disabled={isGenerating}
+          className="relative"
+        >
+          {isGenerating ? (
+            <>
+              <Loader className="w-4 h-4 mr-2 animate-spin" />
+              {language === 'ar' ? 'جاري إنشاء الاختبار...' : 
+               language === 'es' ? 'Generando cuestionario...' : 
+               'Generating quiz...'}
+            </>
+          ) : (
+            <>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              {getGenerateQuizText(language)}
+            </>
+          )}
         </Button>
       </Card>
     );
