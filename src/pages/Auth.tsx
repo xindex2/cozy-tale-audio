@@ -79,6 +79,18 @@ export default function Auth() {
           }}
           providers={[]}
           redirectTo={`${window.location.origin}/auth/callback`}
+          localization={{
+            variables: {
+              sign_up: {
+                full_name_label: 'Full Name',
+                full_name_placeholder: 'Enter your full name',
+              },
+            },
+          }}
+          view="sign_up"
+          additionalData={{
+            full_name: true,
+          }}
         />
       </Card>
     </div>
