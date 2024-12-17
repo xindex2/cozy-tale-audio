@@ -25,7 +25,7 @@ export function StoryDisplay({
   const currentPhraseIndex = Math.floor(currentTime / timePerPhrase);
   
   // Calculate progress percentage - ensure it's between 0 and 100
-  const progress = Math.min(Math.max((currentTime / duration) * 100, 0), 100);
+  const progress = Math.min(Math.max((currentTime / (duration || 1)) * 100, 0), 100);
 
   // Scroll to current phrase
   useEffect(() => {
@@ -41,6 +41,14 @@ export function StoryDisplay({
       }
     }
   }, [currentPhraseIndex]);
+
+  if (!text) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <p className="text-gray-500">No story content available</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
