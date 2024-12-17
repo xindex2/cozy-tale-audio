@@ -12,6 +12,8 @@ import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
 import Billing from "@/pages/Billing";
 import Contact from "@/pages/Contact";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminPlans from "@/pages/admin/Plans";
 import AdminApiKeys from "@/pages/admin/ApiKeys";
@@ -65,6 +67,14 @@ const router = createBrowserRouter([
   {
     path: "/contact",
     element: <Contact />,
+  },
+  {
+    path: "/privacy",
+    element: <Privacy />,
+  },
+  {
+    path: "/terms",
+    element: <Terms />,
   },
   {
     path: "/admin",

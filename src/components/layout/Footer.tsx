@@ -9,7 +9,7 @@ export function Footer() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Book className="h-5 w-5 text-blue-600" />
-              <span className="font-semibold">Story Time</span>
+              <span className="font-semibold">Bedtimey</span>
             </div>
             <p className="text-sm text-gray-500">
               Made with ❤️ for bedtime stories
@@ -35,7 +35,7 @@ export function Footer() {
                 <Link to="/contact" className="text-gray-500 hover:text-gray-900">Contact</Link>
               </li>
               <li>
-                <a href="mailto:support@storytime.com" className="text-gray-500 hover:text-gray-900">
+                <a href="mailto:support@bedtimey.com" className="text-gray-500 hover:text-gray-900">
                   Email Support
                 </a>
               </li>
@@ -56,7 +56,7 @@ export function Footer() {
         </div>
         
         <div className="mt-8 pt-8 border-t text-center text-sm text-gray-500">
-          <p>© {new Date().getFullYear()} Story Time. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Bedtimey. All rights reserved.</p>
         </div>
       </div>
     </footer>
