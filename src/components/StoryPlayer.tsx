@@ -176,11 +176,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
             onVolumeChange={(newVolume) => setMusicVolume(newVolume[0])}
             onToggleMute={() => setIsMusicMuted(!isMusicMuted)}
             selectedMusic={settings?.music}
-            onMusicChange={(music) => {
-              if (settings) {
-                settings.music = music;
-              }
-            }}
           />
 
           <ChatPanel
