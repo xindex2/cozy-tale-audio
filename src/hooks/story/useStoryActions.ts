@@ -15,7 +15,15 @@ export function useStoryActions(
     state.loading.setStage('text');
     try {
       console.log("Starting story generation with settings:", settings);
-      const { title, content, audioUrl, backgroundMusicUrl } = await openaiService.generateStory(settings);
+      
+      // Convert settings to match StoryGenerationSettings
+      const generationSettings = {
+        ...settings,
+        audio: settings.voice !== 'none',
+        voice: settings.voice === 'none' ? undefined : settings.voice
+      };
+
+      const { title, content, audioUrl, backgroundMusicUrl } = await openaiService.generateStory(generationSettings);
       
       state.story.setTitle(title);
       state.story.setContent(content);
