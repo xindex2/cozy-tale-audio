@@ -49,7 +49,7 @@ export default function SleepStoriesForAdults() {
 
             <div className="space-y-4">
               <Button 
-                onClick={() => navigate("/create-story")}
+                onClick={() => navigate("/create")}
                 className="h-14 px-8 text-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
               >
                 Start Your Sleep Journey

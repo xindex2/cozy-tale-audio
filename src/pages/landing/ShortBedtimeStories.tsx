@@ -49,7 +49,7 @@ export default function ShortBedtimeStories() {
 
             <div className="space-y-4">
               <Button 
-                onClick={() => navigate("/create-story")}
+                onClick={() => navigate("/create")}
                 className="h-14 px-8 text-lg bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
               >
                 Create Quick Story
