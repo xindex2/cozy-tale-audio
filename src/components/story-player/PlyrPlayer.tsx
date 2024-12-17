@@ -21,6 +21,7 @@ export function PlyrPlayer({
 }: PlyrPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playerRef = useRef<Plyr | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!url) {
@@ -28,15 +29,27 @@ export function PlyrPlayer({
       return;
     }
 
-    const audio = new Audio(url);
+    // Create audio element
+    const audio = document.createElement('audio');
+    audio.src = url;
     audio.preload = "auto";
     if (isMusic) {
       audio.loop = true;
     }
+
+    // Ensure container exists
+    if (!containerRef.current) return;
+
+    // Clear container
+    containerRef.current.innerHTML = '';
+    
+    // Append audio to container
+    containerRef.current.appendChild(audio);
     audioRef.current = audio;
 
-    if (!playerRef.current) {
-      playerRef.current = new Plyr(audio, {
+    // Initialize Plyr
+    if (audioRef.current) {
+      playerRef.current = new Plyr(audioRef.current, {
         controls: isMusic 
           ? ['play', 'progress', 'current-time', 'mute', 'volume']
           : ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume'],
@@ -50,33 +63,34 @@ export function PlyrPlayer({
       document.documentElement.style.setProperty('--plyr-audio-controls-background', '#1e293b');
       document.documentElement.style.setProperty('--plyr-audio-control-color', '#ffffff');
       document.documentElement.style.setProperty('--plyr-audio-control-color-hover', '#60A5FA');
-    }
 
-    const handleError = (e: Event) => {
-      console.error(`${isMusic ? 'Music' : 'Voice'} audio error:`, e);
-    };
+      const handleError = (e: Event) => {
+        console.error(`${isMusic ? 'Music' : 'Voice'} audio error:`, e);
+      };
 
-    const handleTimeUpdate = () => {
-      onTimeUpdate?.(audio.currentTime);
-    };
+      const handleTimeUpdate = () => {
+        if (audioRef.current) {
+          onTimeUpdate?.(audioRef.current.currentTime);
+        }
+      };
 
-    audio.addEventListener('error', handleError);
-    if (!isMusic) {
-      audio.addEventListener('timeupdate', handleTimeUpdate);
-    }
-
-    return () => {
-      audio.pause();
-      audio.removeEventListener('error', handleError);
+      audio.addEventListener('error', handleError);
       if (!isMusic) {
-        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.addEventListener('timeupdate', handleTimeUpdate);
       }
-      if (playerRef.current) {
-        playerRef.current.destroy();
-        playerRef.current = null;
-      }
-      audioRef.current = null;
-    };
+
+      return () => {
+        audio.removeEventListener('error', handleError);
+        if (!isMusic) {
+          audio.removeEventListener('timeupdate', handleTimeUpdate);
+        }
+        if (playerRef.current) {
+          playerRef.current.destroy();
+          playerRef.current = null;
+        }
+        audioRef.current = null;
+      };
+    }
   }, [url, isMusic, onTimeUpdate]);
 
   useEffect(() => {
@@ -93,5 +107,5 @@ export function PlyrPlayer({
     }
   }, [isPlaying]);
 
-  return null;
+  return <div ref={containerRef} className="plyr-container" />;
 }
