@@ -14,7 +14,7 @@ async function getOpenAIKey() {
     const { data, error } = await supabase
       .from('api_keys')
       .select('key_value')
-      .eq('api_type', 'openai')
+      .eq('key_name', 'OPENAI_API_KEY')
       .eq('is_active', true)
       .single();
 
