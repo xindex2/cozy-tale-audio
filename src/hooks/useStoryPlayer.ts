@@ -58,8 +58,6 @@ export function useStoryPlayer(
     messages: state.story.messages,
     storyTitle: state.story.title,
     storyContent: state.story.content,
-    isStreaming: state.story.isStreaming,
-    streamedContent: state.story.streamedContent,
 
     // Loading states
     isLoading: state.loading.isLoading,
