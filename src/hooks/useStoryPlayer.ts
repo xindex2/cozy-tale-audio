@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import type { StorySettings } from "@/components/StoryOptions";
 import { useStoryState } from "./story/useStoryState";
 import { useStoryActions } from "./story/useStoryActions";
+import { uploadAudioToStorage } from "@/utils/audioStorage";
 
 export function useStoryPlayer(
   settings: StorySettings,
@@ -27,13 +28,27 @@ export function useStoryPlayer(
         state.audio.setCurrentMusicUrl(initialStoryData.backgroundMusicUrl);
       }
     } else if (!state.loading.isLoading && settings && !state.story.content) {
-      // Only start story generation if:
-      // 1. We're not already loading
-      // 2. We have settings
-      // 3. We don't already have content
       actions.startStory(settings);
     }
   }, [initialStoryData, settings]);
+
+  const handleAudioGeneration = async (audioBlob: Blob) => {
+    try {
+      const audioUrl = await uploadAudioToStorage(audioBlob, `${state.story.title}-audio.mp3`);
+      if (audioUrl) {
+        state.audio.setCurrentAudioUrl(audioUrl);
+      } else {
+        throw new Error('Failed to upload audio');
+      }
+    } catch (error) {
+      console.error('Error handling audio generation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process audio. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return {
     // Playback controls
@@ -72,5 +87,6 @@ export function useStoryPlayer(
     startStory: actions.startStory,
     generateQuiz: actions.generateQuiz,
     handleSendMessage: actions.handleSendMessage,
+    handleAudioGeneration,
   };
 }
