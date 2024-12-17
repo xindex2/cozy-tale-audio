@@ -23,6 +23,7 @@ export const StoryText = memo(function StoryText({
       {phrases.map((phrase, index) => {
         const isHighlighted = currentPhraseIndex >= 0 && index === currentPhraseIndex;
         const isPast = currentPhraseIndex >= 0 && index < currentPhraseIndex;
+        const characters = phrase.split('');
         
         return (
           <motion.p 
@@ -43,7 +44,21 @@ export const StoryText = memo(function StoryText({
                 : ""
             }`}
           >
-            {phrase.trim()}
+            <AnimatePresence mode="popLayout">
+              {characters.map((char, charIndex) => (
+                <motion.span
+                  key={`${index}-${charIndex}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ 
+                    duration: 0.05,
+                    delay: charIndex * 0.02 // This creates the typing effect
+                  }}
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </AnimatePresence>
           </motion.p>
         );
       })}

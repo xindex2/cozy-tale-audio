@@ -14,3 +14,9 @@ export interface StoryResponse {
   audioUrl: string | null;
   backgroundMusicUrl: string | null;
 }
+
+export interface StreamingResponse {
+  title?: string;
+  content?: string;
+  done: boolean;
+}
