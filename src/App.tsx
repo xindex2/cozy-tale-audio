@@ -15,6 +15,10 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import BedtimeStoriesForKids from "@/pages/landing/BedtimeStoriesForKids";
 import ShortBedtimeStories from "@/pages/landing/ShortBedtimeStories";
 import SleepStoriesForAdults from "@/pages/landing/SleepStoriesForAdults";
+import FairyTalesForKids from "@/pages/landing/FairyTalesForKids";
+import DreamtimeStories from "@/pages/landing/DreamtimeStories";
+import NightTimeStories from "@/pages/landing/NightTimeStories";
+import StoriesForToddlers from "@/pages/landing/StoriesForToddlers";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 
@@ -38,6 +42,10 @@ export default function App() {
         <Route path="/bedtime-stories-for-kids" element={<BedtimeStoriesForKids />} />
         <Route path="/short-bedtime-stories" element={<ShortBedtimeStories />} />
         <Route path="/sleep-stories-for-adults" element={<SleepStoriesForAdults />} />
+        <Route path="/fairy-tales-for-kids" element={<FairyTalesForKids />} />
+        <Route path="/dreamtime-stories" element={<DreamtimeStories />} />
+        <Route path="/night-time-stories" element={<NightTimeStories />} />
+        <Route path="/stories-for-toddlers" element={<StoriesForToddlers />} />
       </Routes>
       <Toaster />
       <Sonner />
