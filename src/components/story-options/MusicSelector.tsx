@@ -19,6 +19,12 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
   const { handlePreview } = useAudioPreview();
   
   const musicOptions = [
+    {
+      id: "no-music",
+      name: "No Music",
+      description: "Play the story without background music",
+      url: null
+    },
     { 
       id: "sleeping-lullaby", 
       name: "Sleeping Lullaby", 
@@ -55,12 +61,21 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
     // Initialize loading states
     const initialLoadingStates: { [key: string]: boolean } = {};
     musicOptions.forEach(option => {
-      initialLoadingStates[option.id] = true;
+      if (option.url) { // Only check loading state for options with URLs
+        initialLoadingStates[option.id] = true;
+      } else {
+        initialLoadingStates[option.id] = false; // No loading state for "No Music"
+      }
     });
     setLoadingStates(initialLoadingStates);
 
     // Validate each music option
     musicOptions.forEach(option => {
+      if (!option.url) {
+        setValidMusicOptions(prev => [...prev, option.id]); // "No Music" is always valid
+        return;
+      }
+
       const audio = new Audio(option.url);
       
       audio.addEventListener('loadedmetadata', () => {
@@ -89,7 +104,11 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
     if (!checked) {
       onMusicSelect("no-music");
     } else if (selectedMusic === "no-music" && validMusicOptions.length > 0) {
-      onMusicSelect(validMusicOptions[0]);
+      // Select first valid music option that isn't "no-music"
+      const firstValidMusic = validMusicOptions.find(id => id !== "no-music");
+      if (firstValidMusic) {
+        onMusicSelect(firstValidMusic);
+      }
     }
   };
 
@@ -131,7 +150,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
                 description={option.description}
                 isLoading={loadingStates[option.id]}
                 isValid={validMusicOptions.includes(option.id)}
-                onPreview={() => handlePreview(option.url)}
+                onPreview={option.url ? () => handlePreview(option.url!) : undefined}
               />
             ))}
           </RadioGroup>

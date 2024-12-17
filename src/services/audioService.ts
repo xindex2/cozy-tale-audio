@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const AUDIO_URLS = {
+  "no-music": null,
   "sleeping-lullaby": "/assets/gentle-lullaby.mp3",
   "water-dreams": "/assets/ocean-waves.mp3",
   "forest-birds": "/assets/nature-sounds.mp3",
@@ -9,26 +10,30 @@ const AUDIO_URLS = {
 };
 
 async function getOpenAIKey() {
-  const { data, error } = await supabase
-    .from('api_keys')
-    .select('key_value')
-    .eq('key_name', 'OPENAI_API_KEY')
-    .eq('is_active', true)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('api_keys')
+      .select('key_value')
+      .eq('api_type', 'openai')
+      .eq('is_active', true)
+      .single();
 
-  if (error || !data) {
-    console.error("Error fetching OpenAI API key:", error);
-    throw new Error('OpenAI API key not found or not active');
+    if (error) throw error;
+    return data?.key_value;
+  } catch (error) {
+    console.error('Error fetching OpenAI API key:', error);
+    throw new Error('Failed to fetch OpenAI API key');
   }
-
-  return data.key_value;
 }
 
 export const audioService = {
   async generateAudio(text: string): Promise<string> {
     try {
       const apiKey = await getOpenAIKey();
-      
+      if (!apiKey) {
+        throw new Error('OpenAI API key not found');
+      }
+
       const response = await fetch('https://api.openai.com/v1/audio/speech', {
         method: 'POST',
         headers: {
@@ -36,9 +41,9 @@ export const audioService = {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'tts-1',
+          model: "tts-1",
+          voice: "alloy",
           input: text,
-          voice: 'alloy',
         }),
       });
 
@@ -47,14 +52,16 @@ export const audioService = {
       }
 
       const audioBlob = await response.blob();
-      return URL.createObjectURL(audioBlob);
+      const audioUrl = URL.createObjectURL(audioBlob);
+      return audioUrl;
     } catch (error) {
-      console.error("Error generating audio:", error);
+      console.error('Error generating audio:', error);
       throw error;
     }
   },
 
-  getBackgroundMusicUrl(musicSetting: string): string | null {
-    return musicSetting && musicSetting !== 'no-music' ? AUDIO_URLS[musicSetting as keyof typeof AUDIO_URLS] || null : null;
+  getBackgroundMusicUrl(musicSetting: string | null): string | null {
+    if (!musicSetting || musicSetting === 'no-music') return null;
+    return AUDIO_URLS[musicSetting as keyof typeof AUDIO_URLS] || null;
   }
 };
