@@ -44,40 +44,32 @@ export function EditUserDialog({ user, subscription, plans }: EditUserDialogProp
 
       // Handle subscription update/creation
       if (selectedPlan) {
-        if (subscription?.id) {
+        // First check if user already has a subscription
+        const { data: existingSubscription } = await supabase
+          .from('user_subscriptions')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (existingSubscription) {
           // Update existing subscription
           await supabase
             .from('user_subscriptions')
             .update({ 
               plan_id: selectedPlan,
+              status: 'active',
               updated_at: new Date().toISOString()
             })
-            .eq('id', subscription.id);
+            .eq('id', existingSubscription.id);
         } else {
           // Create new subscription
-          const { error: subscriptionError } = await supabase
+          await supabase
             .from('user_subscriptions')
             .insert([{ 
               user_id: user.id, 
               plan_id: selectedPlan,
               status: 'active'
             }]);
-
-          if (subscriptionError) {
-            if (subscriptionError.code === '23505') { // Unique constraint violation
-              // If insert failed due to unique constraint, try updating instead
-              await supabase
-                .from('user_subscriptions')
-                .update({ 
-                  plan_id: selectedPlan,
-                  status: 'active',
-                  updated_at: new Date().toISOString()
-                })
-                .eq('user_id', user.id);
-            } else {
-              throw subscriptionError;
-            }
-          }
         }
       }
 
