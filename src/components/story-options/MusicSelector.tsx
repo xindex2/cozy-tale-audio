@@ -20,34 +20,34 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
   
   const musicOptions = [
     { 
-      id: "gentle-lullaby", 
-      name: "Gentle Lullaby", 
-      description: "Soft and calming melody perfect for bedtime", 
-      url: "/assets/gentle-lullaby.mp3"
+      id: "sleeping-lullaby", 
+      name: "Sleeping Lullaby", 
+      description: "Gentle lullaby for peaceful sleep", 
+      url: "https://cdn.pixabay.com/download/audio/2023/05/16/audio_166b9c7242.mp3"
     },
     { 
-      id: "peaceful-dreams", 
-      name: "Peaceful Dreams", 
-      description: "Soothing lullaby for sweet dreams", 
-      url: "/assets/peaceful-dreams.mp3"
+      id: "water-dreams", 
+      name: "Water Dreams", 
+      description: "Calming water sounds with soft music", 
+      url: "https://cdn.pixabay.com/download/audio/2022/02/23/audio_ea70ad08e3.mp3"
     },
     { 
-      id: "ocean-waves", 
-      name: "Ocean Waves", 
-      description: "Gentle water sounds with soft music", 
-      url: "/assets/ocean-waves.mp3"
-    },
-    { 
-      id: "soft-piano", 
-      name: "Relaxing Piano", 
-      description: "Soothing piano melodies", 
-      url: "/assets/soft-piano.mp3"
-    },
-    { 
-      id: "nature-sounds", 
+      id: "forest-birds", 
       name: "Forest Birds", 
       description: "Peaceful forest ambiance with birds", 
-      url: "/assets/nature-sounds.mp3"
+      url: "https://cdn.pixabay.com/download/audio/2022/02/12/audio_8ca49a7f20.mp3"
+    },
+    { 
+      id: "relaxing-piano", 
+      name: "Relaxing Piano", 
+      description: "Soft piano melodies for bedtime", 
+      url: "https://cdn.pixabay.com/download/audio/2024/11/04/audio_4956b4edd1.mp3"
+    },
+    { 
+      id: "gentle-lullaby", 
+      name: "Gentle Lullaby", 
+      description: "Soft and calming melody for sweet dreams", 
+      url: "https://cdn.pixabay.com/download/audio/2023/09/05/audio_168a3e0caa.mp3"
     },
   ];
 
