@@ -78,7 +78,7 @@ export function VoiceLanguageSelector({
   return (
     <Card className="p-6 bg-white shadow-md">
       <div className="space-y-6">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Language and Voice</h2>
+        <h2 className="text-2xl font-semibold text-story-blue mb-6">Language and Voice</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Language Selection - Now on the left */}
