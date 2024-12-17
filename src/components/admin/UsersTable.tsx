@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { EditUserDialog } from "./EditUserDialog";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
 
 interface User {
   id: string;
@@ -28,7 +29,9 @@ interface UserSubscription {
 }
 
 export function UsersTable() {
-  const { data: users, isLoading: isLoadingUsers } = useQuery({
+  const { toast } = useToast();
+  
+  const { data: users, isLoading: isLoadingUsers, error } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
       console.log('Fetching users...');
@@ -50,9 +53,12 @@ export function UsersTable() {
         console.error('Error fetching users:', error);
         throw error;
       }
+      
       console.log('Fetched users:', data);
       return data;
     },
+    retry: 1,
+    refetchOnWindowFocus: true,
   });
 
   const { data: plans } = useQuery({
@@ -68,10 +74,26 @@ export function UsersTable() {
     },
   });
 
+  if (error) {
+    toast({
+      variant: "destructive",
+      title: "Error loading users",
+      description: "There was a problem loading the users list. Please try again.",
+    });
+  }
+
   if (isLoadingUsers) {
     return (
       <div className="flex justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  if (!users?.length) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        No users found
       </div>
     );
   }
