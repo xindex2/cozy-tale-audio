@@ -5,11 +5,15 @@ import { Card } from "@/components/ui/card";
 import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
+  const [fullName, setFullName] = useState("");
 
   useEffect(() => {
     // Check if user is already logged in
@@ -84,6 +88,17 @@ export default function Auth() {
           <p className="text-center text-gray-600">
             Sign in to your account or create a new one
           </p>
+          <div className="mt-4">
+            <Label htmlFor="fullName">Full Name</Label>
+            <Input
+              id="fullName"
+              type="text"
+              placeholder="Enter your full name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="mt-1"
+            />
+          </div>
         </div>
 
         <SupabaseAuth
@@ -117,7 +132,7 @@ export default function Auth() {
             },
           }}
           additionalData={{
-            full_name: "",
+            full_name: fullName,
           }}
         />
       </Card>
