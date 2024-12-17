@@ -14,10 +14,12 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/hooks/use-theme";
+import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
 
   const { data: session } = useQuery({
     queryKey: ['session'],
@@ -43,8 +45,43 @@ export function Header() {
   });
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
+    try {
+      // First check if we have a valid session
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      
+      if (!currentSession) {
+        // If no session exists, just redirect to auth page
+        navigate('/auth');
+        return;
+      }
+
+      // Attempt to sign out
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Sign out error:', error);
+        // If we get a session_not_found error, we can safely ignore it
+        if (error.message !== 'session_not_found') {
+          toast({
+            variant: "destructive",
+            title: "Error signing out",
+            description: "Please try again",
+          });
+        }
+      }
+
+      // Always navigate to auth page after sign out attempt
+      navigate('/auth');
+      
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out",
+      });
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Navigate to auth page even if there's an error
+      navigate('/auth');
+    }
   };
 
   return (
