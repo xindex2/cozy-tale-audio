@@ -1,10 +1,10 @@
 import { MusicPlayer } from "./MusicPlayer";
 import { Card } from "@/components/ui/card";
-import { RadioGroup } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Music } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface MusicControlsProps {
   volume: number;
@@ -22,6 +22,7 @@ export function MusicControls({
   selectedMusic,
 }: MusicControlsProps) {
   const [useMusic, setUseMusic] = useState(selectedMusic !== "no-music");
+  const [currentMusic, setCurrentMusic] = useState<string | undefined>(selectedMusic);
 
   const musicOptions = [
     { 
@@ -61,10 +62,10 @@ export function MusicControls({
     return option?.url || null;
   };
 
-  const musicUrl = selectedMusic ? getMusicUrl(selectedMusic) : null;
+  const musicUrl = currentMusic ? getMusicUrl(currentMusic) : null;
 
   return (
-    <div className="space-y-4">
+    <Card className="p-6 space-y-4">
       <div className="flex items-center space-x-3">
         <Music className="h-6 w-6 text-blue-500" />
         <h2 className="text-lg font-semibold text-blue-500">Background Music</h2>
@@ -87,36 +88,50 @@ export function MusicControls({
         </div>
 
         {useMusic && (
-          <RadioGroup
-            value={selectedMusic}
-            className="grid grid-cols-1 gap-4"
-            disabled={!useMusic}
-          >
-            {musicOptions.map((option) => (
-              <div key={option.id} className="relative">
-                <Label
-                  htmlFor={option.id}
-                  className="flex flex-col p-4 border-2 rounded-xl cursor-pointer hover:bg-blue-50 
-                    peer-data-[state=checked]:border-blue-500 peer-data-[state=checked]:bg-blue-50"
-                >
-                  <div className="flex flex-col space-y-2">
-                    <span className="font-semibold text-lg">{option.name}</span>
-                    <p className="text-sm text-gray-500">{option.description}</p>
-                  </div>
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        )}
+          <div className="space-y-4">
+            <Select
+              value={currentMusic}
+              onValueChange={setCurrentMusic}
+              disabled={!useMusic}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a music track" />
+              </SelectTrigger>
+              <SelectContent>
+                {musicOptions.map((option) => (
+                  <SelectItem key={option.id} value={option.id}>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{option.name}</span>
+                      <span className="text-sm text-gray-500">{option.description}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-        <MusicPlayer
-          musicUrl={musicUrl}
-          volume={volume}
-          isMuted={isMuted}
-          onVolumeChange={onVolumeChange}
-          onToggleMute={onToggleMute}
-        />
+            {musicUrl && (
+              <div className="space-y-2">
+                <Label>Preview</Label>
+                <audio
+                  controls
+                  className="w-full"
+                  src={musicUrl}
+                >
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            )}
+
+            <MusicPlayer
+              musicUrl={musicUrl}
+              volume={volume}
+              isMuted={isMuted}
+              onVolumeChange={onVolumeChange}
+              onToggleMute={onToggleMute}
+            />
+          </div>
+        )}
       </div>
-    </div>
+    </Card>
   );
 }
