@@ -86,10 +86,8 @@ export default function CreateStory() {
         description: "Your story has been saved successfully."
       });
 
-      // Instead of immediately navigating, let's wait for 5 seconds
-      setTimeout(() => {
-        navigate(`/stories/${savedStory.id}`);
-      }, 5000);
+      // We'll let the user stay on the current page to enjoy their story
+      // They can use the back button or navigation menu when they're ready to leave
 
     } catch (error) {
       console.error("Error saving story:", error);
