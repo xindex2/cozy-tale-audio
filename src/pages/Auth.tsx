@@ -29,13 +29,13 @@ export default function Auth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
         // Check if this is a new signup by checking if they have a subscription
-        const { data: existingSubscription } = await supabase
+        const { data: existingSubscription, error } = await supabase
           .from('user_subscriptions')
           .select('id')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
 
-        if (!existingSubscription) {
+        if (!existingSubscription && !error) {
           // This is likely a new user, get the free trial plan
           const { data: freePlan } = await supabase
             .from('subscription_plans')
