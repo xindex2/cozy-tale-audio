@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import Plyr from 'plyr';
+import 'plyr/dist/plyr.css';
 
 interface AudioManagerProps {
   voiceUrl: string | null;
@@ -23,10 +25,12 @@ export function AudioManager({
   onTimeUpdate 
 }: AudioManagerProps) {
   const voiceRef = useRef<HTMLAudioElement | null>(null);
+  const voicePlayerRef = useRef<Plyr | null>(null);
   const musicRef = useRef<HTMLAudioElement | null>(null);
+  const musicPlayerRef = useRef<Plyr | null>(null);
   const { toast } = useToast();
 
-  // Handle voice audio
+  // Initialize Plyr for voice audio
   useEffect(() => {
     if (!voiceUrl) {
       console.log("No voice URL provided");
@@ -36,6 +40,20 @@ export function AudioManager({
     console.log("Setting up voice audio with URL:", voiceUrl);
     const audio = new Audio(voiceUrl);
     audio.preload = "auto";
+    voiceRef.current = audio;
+
+    // Initialize Plyr for voice
+    if (!voicePlayerRef.current) {
+      voicePlayerRef.current = new Plyr(audio, {
+        controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume'],
+        hideControls: false,
+        resetOnEnd: true,
+      });
+
+      // Apply custom styling
+      document.documentElement.style.setProperty('--plyr-color-main', '#818CF8');
+      document.documentElement.style.setProperty('--plyr-range-fill-background', '#818CF8');
+    }
     
     const handleError = (e: Event) => {
       console.error("Voice audio error:", e);
@@ -46,36 +64,34 @@ export function AudioManager({
       });
     };
 
-    const handleCanPlay = () => {
-      console.log("Voice audio ready to play");
-      if (isPlaying) {
-        audio.play().catch(error => {
-          console.error("Error playing voice audio:", error);
-        });
-      }
-    };
-
     const handleTimeUpdate = () => {
       onTimeUpdate?.(audio.currentTime);
     };
 
     audio.addEventListener('error', handleError);
-    audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     
-    voiceRef.current = audio;
     audio.volume = isMuted ? 0 : volume;
+
+    if (isPlaying) {
+      audio.play().catch(error => {
+        console.error("Error playing voice audio:", error);
+      });
+    }
 
     return () => {
       audio.pause();
       audio.removeEventListener('error', handleError);
-      audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
+      if (voicePlayerRef.current) {
+        voicePlayerRef.current.destroy();
+        voicePlayerRef.current = null;
+      }
       voiceRef.current = null;
     };
   }, [voiceUrl, toast, onTimeUpdate]);
 
-  // Handle background music
+  // Initialize Plyr for background music
   useEffect(() => {
     if (!backgroundMusicUrl) {
       console.log("No background music URL provided");
@@ -86,6 +102,16 @@ export function AudioManager({
     const audio = new Audio(backgroundMusicUrl);
     audio.preload = "auto";
     audio.loop = true;
+    musicRef.current = audio;
+
+    // Initialize Plyr for music
+    if (!musicPlayerRef.current) {
+      musicPlayerRef.current = new Plyr(audio, {
+        controls: ['play', 'progress', 'current-time', 'mute', 'volume'],
+        hideControls: false,
+        resetOnEnd: true,
+      });
+    }
     
     const handleError = (e: Event) => {
       console.error("Music error:", e);
@@ -96,24 +122,22 @@ export function AudioManager({
       });
     };
 
-    const handleCanPlay = () => {
-      console.log("Background music ready to play");
-      if (isPlaying) {
-        audio.play().catch(error => {
-          console.error("Error playing background music:", error);
-        });
-      }
-    };
-
     audio.addEventListener('error', handleError);
-    audio.addEventListener('canplay', handleCanPlay);
-    musicRef.current = audio;
     audio.volume = isMusicMuted ? 0 : musicVolume;
+
+    if (isPlaying) {
+      audio.play().catch(error => {
+        console.error("Error playing background music:", error);
+      });
+    }
 
     return () => {
       audio.pause();
       audio.removeEventListener('error', handleError);
-      audio.removeEventListener('canplay', handleCanPlay);
+      if (musicPlayerRef.current) {
+        musicPlayerRef.current.destroy();
+        musicPlayerRef.current = null;
+      }
       musicRef.current = null;
     };
   }, [backgroundMusicUrl, isPlaying, musicVolume, isMusicMuted]);
@@ -121,19 +145,11 @@ export function AudioManager({
   // Handle play/pause
   useEffect(() => {
     if (isPlaying) {
-      if (voiceRef.current) {
-        voiceRef.current.play().catch(console.error);
-      }
-      if (musicRef.current) {
-        musicRef.current.play().catch(console.error);
-      }
+      voiceRef.current?.play().catch(console.error);
+      musicRef.current?.play().catch(console.error);
     } else {
-      if (voiceRef.current) {
-        voiceRef.current.pause();
-      }
-      if (musicRef.current) {
-        musicRef.current.pause();
-      }
+      voiceRef.current?.pause();
+      musicRef.current?.pause();
     }
   }, [isPlaying]);
 

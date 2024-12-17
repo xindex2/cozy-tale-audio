@@ -24,6 +24,13 @@
     --input: 240 5.9% 90%;
     --ring: 250 95% 76%;
     --radius: 1rem;
+
+    /* Plyr Custom Variables */
+    --plyr-color-main: #818CF8;
+    --plyr-range-fill-background: #818CF8;
+    --plyr-audio-controls-background: #fff;
+    --plyr-audio-control-color: #374151;
+    --plyr-audio-control-color-hover: #818CF8;
   }
  
   .dark {
@@ -46,6 +53,11 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 250 95% 76%;
+
+    /* Plyr Dark Mode Custom Variables */
+    --plyr-audio-controls-background: #1f2937;
+    --plyr-audio-control-color: #e5e7eb;
+    --plyr-audio-control-color-hover: #818CF8;
   }
 }
 
