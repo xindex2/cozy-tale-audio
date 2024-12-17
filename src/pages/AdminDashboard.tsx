@@ -19,7 +19,7 @@ export default function AdminDashboard() {
   const { toast } = useToast();
 
   // Check if user is authenticated
-  const { data: session, isLoading: isLoadingSession } = useQuery({
+  const { data: session, isLoading: isLoadingSession, error: sessionError } = useQuery({
     queryKey: ['session'],
     queryFn: async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -30,7 +30,7 @@ export default function AdminDashboard() {
   });
 
   // Check if user is admin
-  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+  const { data: profile, isLoading: isLoadingProfile, error: profileError } = useQuery({
     queryKey: ['admin-profile', session?.user?.id],
     enabled: !!session?.user?.id,
     queryFn: async () => {
@@ -47,7 +47,7 @@ export default function AdminDashboard() {
   });
 
   // Fetch stats
-  const { data: stats, isLoading: isLoadingStats } = useQuery({
+  const { data: stats, isLoading: isLoadingStats, error: statsError } = useQuery({
     queryKey: ['admin-stats'],
     enabled: !!profile?.is_admin,
     queryFn: async () => {
