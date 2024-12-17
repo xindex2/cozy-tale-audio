@@ -46,31 +46,36 @@ export function Header() {
 
   const handleSignOut = async () => {
     try {
-      // Attempt to sign out without checking session first
-      const { error: signOutError } = await supabase.auth.signOut();
-      
-      // Always clear local storage to ensure clean state
-      localStorage.removeItem('supabase.auth.token');
-      
-      // Show appropriate toast based on error type
-      if (signOutError && signOutError.message !== 'session_not_found') {
-        console.error('Sign out error:', signOutError);
-        toast({
-          variant: "destructive",
-          title: "Error signing out",
-          description: "Please try again later",
-        });
-      } else {
-        toast({
-          title: "Signed out successfully",
-          description: "You have been logged out",
-        });
-      }
+      // First, clear all Supabase-related items from localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('supabase.auth.')) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      // Clear any potential cookies
+      document.cookie.split(";").forEach(cookie => {
+        document.cookie = cookie
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+
+      // Attempt to sign out (but don't wait for it)
+      supabase.auth.signOut().catch(error => {
+        console.log('Sign out attempt error (expected):', error);
+      });
+
+      // Show success message
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out",
+      });
 
       // Always navigate to auth page
       navigate('/auth');
     } catch (error) {
-      console.error('Unexpected error during sign out:', error);
+      console.log('Cleanup error:', error);
+      // Still navigate to auth page
       navigate('/auth');
     }
   };
