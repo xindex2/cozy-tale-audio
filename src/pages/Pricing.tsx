@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check } from "lucide-react";
+import { Check, CreditCard, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,47 +65,86 @@ export default function Pricing() {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
   }
 
   return (
-    <div className="container py-12">
+    <div className="container max-w-6xl py-12 px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h1>
-        <p className="text-lg text-gray-600">Choose the plan that's right for you</p>
+        <h1 className="text-4xl font-bold tracking-tight mb-4 bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
+          Simple, Transparent Pricing
+        </h1>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Choose the plan that's right for you. All plans include unlimited access to our AI story generation.
+        </p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-8">
         {plans?.map((plan) => (
-          <Card key={plan.id} className="flex flex-col">
+          <Card 
+            key={plan.id} 
+            className={`flex flex-col relative overflow-hidden ${
+              plan.name === 'Pro' ? 'border-blue-500 shadow-blue-100 shadow-lg' : ''
+            }`}
+          >
+            {plan.name === 'Pro' && (
+              <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-lg text-sm font-medium">
+                Popular
+              </div>
+            )}
             <CardHeader>
-              <CardTitle>{plan.name}</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                {plan.name}
+              </CardTitle>
               <CardDescription>{plan.description}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow">
-              <div className="text-3xl font-bold mb-6">
-                ${(plan.price_amount / 100).toFixed(2)}
-                <span className="text-sm font-normal text-gray-600">/month</span>
+              <div className="mb-6">
+                <span className="text-4xl font-bold">
+                  ${(plan.price_amount / 100).toFixed(2)}
+                </span>
+                {plan.price_amount > 0 && (
+                  <span className="text-sm font-normal text-gray-600 ml-1">/month</span>
+                )}
               </div>
               <ul className="space-y-3">
-                {plan.features?.map((feature: string, index: number) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span>{feature}</span>
+                {plan.features?.map((feature, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-600">{feature}</span>
                   </li>
                 ))}
               </ul>
             </CardContent>
             <CardFooter>
               <Button 
-                className="w-full" 
+                className="w-full gap-2" 
                 onClick={() => handleSubscribe(plan.stripe_price_id)}
+                variant={plan.name === 'Pro' ? 'default' : 'outline'}
               >
-                Subscribe Now
+                <CreditCard className="h-4 w-4" />
+                {plan.price_amount === 0 ? 'Start Free Trial' : 'Subscribe Now'}
               </Button>
             </CardFooter>
           </Card>
         ))}
+      </div>
+
+      <div className="mt-12 text-center">
+        <p className="text-sm text-gray-500">
+          All prices in USD. Cancel anytime. Need help choosing?{' '}
+          <Button 
+            variant="link" 
+            className="text-blue-600 hover:text-blue-800 p-0 h-auto font-normal"
+            onClick={() => navigate('/contact')}
+          >
+            Contact us
+          </Button>
+        </p>
       </div>
     </div>
   );
