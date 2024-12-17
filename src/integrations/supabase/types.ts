@@ -155,6 +155,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_usage: {
+        Row: {
+          chat_messages_sent: number | null
+          created_at: string | null
+          id: string
+          quiz_questions_answered: number | null
+          stories_created: number | null
+          stories_read: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          chat_messages_sent?: number | null
+          created_at?: string | null
+          id?: string
+          quiz_questions_answered?: number | null
+          stories_created?: number | null
+          stories_read?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          chat_messages_sent?: number | null
+          created_at?: string | null
+          id?: string
+          quiz_questions_answered?: number | null
+          stories_created?: number | null
+          stories_read?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_usage_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

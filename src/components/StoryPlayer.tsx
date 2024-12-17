@@ -8,9 +8,11 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { StoryHeader } from "./story-player/StoryHeader";
 import { PlayButton } from "./story-player/PlayButton";
 import { useStoryPlayer } from "@/hooks/useStoryPlayer";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LoadingState } from "./story-player/LoadingState";
 import { useToast } from "@/hooks/use-toast";
+import { useUserUsage } from "@/hooks/useUserUsage";
+import { UpgradePrompt } from "./UpgradePrompt";
 
 interface StoryPlayerProps {
   settings: StorySettings;
@@ -26,6 +28,10 @@ interface StoryPlayerProps {
 
 export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: StoryPlayerProps) {
   const { toast } = useToast();
+  const { usage, checkAndIncrementUsage } = useUserUsage();
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [isFreeTrial, setIsFreeTrial] = useState(false);
+
   const {
     isPlaying,
     setIsPlaying,
@@ -54,6 +60,32 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     loadingStage
   } = useStoryPlayer(settings, onSave, initialStoryData);
 
+  useEffect(() => {
+    if (usage && !initialStoryData) {
+      setIsFreeTrial(usage.stories_created >= 1);
+    }
+  }, [usage, initialStoryData]);
+
+  // Handle chat message with usage check
+  const handleChatMessage = async (message: string) => {
+    const canProceed = await checkAndIncrementUsage('chat_messages_sent');
+    if (!canProceed) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+    handleSendMessage(message);
+  };
+
+  // Handle quiz with usage check
+  const handleQuizGeneration = async () => {
+    const canProceed = await checkAndIncrementUsage('quiz_questions_answered');
+    if (!canProceed) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+    generateQuiz();
+  };
+
   // Parse the content if it's a JSON string
   let displayContent = storyContent;
   let displayTitle = storyTitle;
@@ -68,27 +100,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     console.error('Error parsing story content:', e);
     displayContent = storyContent;
   }
-
-  // Ensure audio is properly initialized
-  useEffect(() => {
-    if (currentAudioUrl) {
-      console.log("Audio URL available:", currentAudioUrl);
-      toast({
-        title: "Audio Ready",
-        description: "Your bedtime story's narration is ready to play",
-      });
-    }
-  }, [currentAudioUrl]);
-
-  // Handle music changes
-  useEffect(() => {
-    if (currentMusicUrl) {
-      toast({
-        title: "Background Music Ready",
-        description: "Peaceful background music has been added to your story",
-      });
-    }
-  }, [currentMusicUrl]);
 
   if (isLoading) {
     return (
@@ -147,6 +158,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
                 isPlaying={isPlaying}
                 currentTime={currentTime}
                 duration={settings.duration * 60}
+                isFreeTrial={isFreeTrial}
               />
             </ErrorBoundary>
 
@@ -160,15 +172,20 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
         <div className="h-[600px] lg:h-[800px]">
           <ChatPanel
             messages={messages}
-            onSendMessage={handleSendMessage}
+            onSendMessage={handleChatMessage}
             isLoading={isSending}
             quiz={quiz}
-            onGenerateQuiz={generateQuiz}
+            onGenerateQuiz={handleQuizGeneration}
             isGeneratingQuiz={isGeneratingQuiz}
             language={settings.language}
           />
         </div>
       </div>
+
+      <UpgradePrompt
+        open={showUpgradePrompt}
+        onOpenChange={setShowUpgradePrompt}
+      />
     </div>
   );
 }

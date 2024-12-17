@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface StoryDisplayProps {
   text: string;
@@ -8,6 +10,7 @@ interface StoryDisplayProps {
   isPlaying: boolean;
   currentTime: number;
   duration: number;
+  isFreeTrial?: boolean;
 }
 
 export function StoryDisplay({ 
@@ -15,19 +18,21 @@ export function StoryDisplay({
   audioUrl, 
   isPlaying,
   currentTime,
-  duration
+  duration,
+  isFreeTrial = false
 }: StoryDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   
-  // Split text into phrases for highlighting
   const phrases = text.split(/(?<=[.!?])\s+/).filter(phrase => phrase.trim().length > 0);
   const timePerPhrase = duration / phrases.length;
   const currentPhraseIndex = Math.floor(currentTime / timePerPhrase);
   
-  // Calculate progress percentage - ensure it's between 0 and 100
+  // For free trial, only show 20% of the content
+  const visiblePhrases = isFreeTrial ? phrases.slice(0, Math.ceil(phrases.length * 0.2)) : phrases;
+  
   const progress = Math.min(Math.max((currentTime / (duration || 1)) * 100, 0), 100);
 
-  // Scroll to current phrase
   useEffect(() => {
     if (containerRef.current && currentPhraseIndex >= 0) {
       const phrases = containerRef.current.children;
@@ -62,7 +67,7 @@ export function StoryDisplay({
         className="prose prose-lg max-w-none space-y-2 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto max-h-[60vh]"
       >
         <AnimatePresence mode="wait">
-          {phrases.map((phrase, index) => (
+          {visiblePhrases.map((phrase, index) => (
             <motion.p
               key={index}
               initial={{ opacity: 0.7 }}
@@ -81,6 +86,23 @@ export function StoryDisplay({
             </motion.p>
           ))}
         </AnimatePresence>
+
+        {isFreeTrial && (
+          <div className="mt-8 p-6 bg-blue-50 rounded-lg text-center">
+            <h3 className="text-lg font-semibold mb-2">
+              Unlock the Full Story
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Upgrade your account to access the complete story and all our premium features.
+            </p>
+            <Button
+              onClick={() => navigate('/pricing')}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Upgrade Now
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
