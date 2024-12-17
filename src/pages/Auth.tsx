@@ -85,10 +85,10 @@ export default function Auth() {
       <Card className="w-full max-w-md p-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-center mb-2">Welcome to Bedtimey</h1>
-          <p className="text-center text-gray-600">
+          <p className="text-center text-gray-600 mb-6">
             Sign in to your account or create a new one
           </p>
-          <div className="mt-4">
+          <div className="space-y-2">
             <Label htmlFor="fullName">Full Name</Label>
             <Input
               id="fullName"
@@ -96,7 +96,6 @@ export default function Auth() {
               placeholder="Enter your full name"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="mt-1"
             />
           </div>
         </div>
@@ -115,8 +114,9 @@ export default function Auth() {
             },
             className: {
               container: "space-y-4",
-              button: "w-full",
-              input: "w-full",
+              button: "w-full px-4 py-2 bg-primary text-white rounded hover:bg-primary/90",
+              input: "w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary",
+              label: "block text-sm font-medium text-gray-700 mb-1",
             },
           }}
           providers={[]}
