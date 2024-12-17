@@ -15,7 +15,6 @@ export default function CreateStory() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // If there's an auth error, show it and redirect
   if (error) {
     console.error("Authentication error:", error);
     toast({
@@ -27,12 +26,10 @@ export default function CreateStory() {
     return null;
   }
 
-  // Show loading screen while checking auth
   if (isLoading) {
     return <LoadingScreen />;
   }
 
-  // If no userId after loading, redirect to auth
   if (!userId && !isLoading) {
     console.log("No user ID found, redirecting to auth");
     navigate("/auth");
@@ -75,7 +72,7 @@ export default function CreateStory() {
 
     try {
       console.log("Saving story...");
-      await saveStory({
+      const savedStory = await saveStory({
         userId,
         title,
         content,
@@ -89,7 +86,11 @@ export default function CreateStory() {
         description: "Your story has been saved successfully."
       });
 
-      navigate("/dashboard");
+      // Instead of immediately navigating, let's wait for 5 seconds
+      setTimeout(() => {
+        navigate(`/stories/${savedStory.id}`);
+      }, 5000);
+
     } catch (error) {
       console.error("Error saving story:", error);
       toast({

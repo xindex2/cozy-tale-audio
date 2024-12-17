@@ -4,8 +4,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { LoadingState } from "@/components/story-player/LoadingState";
+import { LoadingScreen } from "@/components/ui/loading-screen";
 import type { Story } from "@/types/story";
+import { useToast } from "@/hooks/use-toast";
 
 export default function StoryView() {
   const { id } = useParams();
@@ -14,6 +15,7 @@ export default function StoryView() {
   const [isLoading, setIsLoading] = useState(true);
   const [story, setStory] = useState<Story | null>(null);
   const { settings, initialStoryData } = location.state || {};
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchStory() {
@@ -29,42 +31,54 @@ export default function StoryView() {
           .eq("id", id)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
+        
         if (!data) {
+          toast({
+            title: "Story not found",
+            description: "The requested story could not be found.",
+            variant: "destructive",
+          });
           navigate("/stories");
           return;
         }
 
+        console.log("Fetched story:", data);
         setStory(data);
       } catch (error) {
         console.error("Error fetching story:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load the story. Please try again.",
+          variant: "destructive",
+        });
         navigate("/stories");
       } finally {
         setIsLoading(false);
       }
     }
 
-    // Only fetch if we don't have initialStoryData
     if (!initialStoryData) {
       fetchStory();
     } else {
       setIsLoading(false);
     }
-  }, [id, navigate, initialStoryData]);
+  }, [id, navigate, initialStoryData, toast]);
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-50">
         <Header />
         <main className="flex-1 container py-8">
-          <LoadingState />
+          <LoadingScreen />
         </main>
         <Footer />
       </div>
     );
   }
 
-  // Use either the fetched story data or the initial data passed through navigation
   const storyData = initialStoryData || (story && {
     title: story.title,
     content: story.content,
@@ -72,7 +86,20 @@ export default function StoryView() {
     backgroundMusicUrl: story.background_music_url,
   });
 
-  if (!storyData) return null;
+  if (!storyData) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-50">
+        <Header />
+        <main className="flex-1 container py-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900">Story Not Found</h2>
+            <p className="mt-2 text-gray-600">The story you're looking for could not be found.</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-50">
