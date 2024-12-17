@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 
 export default function Billing() {
   const { toast } = useToast();
@@ -58,47 +60,55 @@ export default function Billing() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-50">
+        <Header />
+        <main className="flex-1 container flex justify-center items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </main>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="container py-12">
-      <h1 className="text-3xl font-bold mb-8">Billing & Subscription</h1>
-      
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Current Plan</CardTitle>
-          <CardDescription>Manage your subscription and billing details</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <p className="font-medium">Status</p>
-              <p className="text-gray-600">
-                {subscription?.subscribed ? "Active" : "No active subscription"}
-              </p>
-              {subscription?.subscribed && (
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-50">
+      <Header />
+      <main className="flex-1 container py-12">
+        <h1 className="text-3xl font-bold mb-8">Billing & Subscription</h1>
+        
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Current Plan</CardTitle>
+            <CardDescription>Manage your subscription and billing details</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <p className="font-medium">Status</p>
                 <p className="text-gray-600">
-                  Current plan: {subscription.plan_name}
+                  {subscription?.subscribed ? "Active" : "No active subscription"}
                 </p>
-              )}
-            </div>
-            <div className="flex gap-4">
-              <Button onClick={handleManageSubscription}>
-                Manage Subscription
-              </Button>
-              {!subscription?.subscribed && (
-                <Button variant="outline" onClick={() => navigate('/pricing')}>
-                  View Plans
+                {subscription?.subscribed && (
+                  <p className="text-gray-600">
+                    Current plan: {subscription.plan_name}
+                  </p>
+                )}
+              </div>
+              <div className="flex gap-4">
+                <Button onClick={handleManageSubscription}>
+                  Manage Subscription
                 </Button>
-              )}
+                {!subscription?.subscribed && (
+                  <Button variant="outline" onClick={() => navigate('/pricing')}>
+                    View Plans
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </main>
+      <Footer />
     </div>
   );
 }
