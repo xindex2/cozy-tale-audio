@@ -46,40 +46,50 @@ export function Header() {
 
   const handleSignOut = async () => {
     try {
-      // First check if we have a valid session
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      // First try to get the current session
+      const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
       
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        // If there's an error getting the session, just redirect to auth
+        navigate('/auth');
+        return;
+      }
+
       if (!currentSession) {
-        // If no session exists, just redirect to auth page
+        // No active session found, just redirect to auth
         navigate('/auth');
         return;
       }
 
       // Attempt to sign out
-      const { error } = await supabase.auth.signOut();
+      const { error: signOutError } = await supabase.auth.signOut({
+        scope: 'local' // Only clear the current tab's session
+      });
       
-      if (error) {
-        console.error('Sign out error:', error);
-        // If we get a session_not_found error, we can safely ignore it
-        if (error.message !== 'session_not_found') {
+      if (signOutError) {
+        console.error('Sign out error:', signOutError);
+        // Only show error toast for non-session_not_found errors
+        if (signOutError.message !== 'session_not_found') {
           toast({
             variant: "destructive",
             title: "Error signing out",
-            description: "Please try again",
+            description: "Please try again later",
           });
         }
+      } else {
+        // Show success toast only if sign out was successful
+        toast({
+          title: "Signed out successfully",
+          description: "You have been logged out",
+        });
       }
 
-      // Always navigate to auth page after sign out attempt
+      // Always navigate to auth page
       navigate('/auth');
-      
-      toast({
-        title: "Signed out successfully",
-        description: "You have been logged out",
-      });
     } catch (error) {
-      console.error('Sign out error:', error);
-      // Navigate to auth page even if there's an error
+      console.error('Unexpected error during sign out:', error);
+      // For any unexpected errors, just redirect to auth
       navigate('/auth');
     }
   };
