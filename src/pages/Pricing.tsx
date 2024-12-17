@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, CreditCard, Loader2 } from "lucide-react";
+import { Check, CreditCard, Infinity, Loader2, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,13 +73,13 @@ export default function Pricing() {
   }
 
   return (
-    <div className="container max-w-6xl py-12 px-4 sm:px-6 lg:px-8">
+    <div className="container max-w-7xl py-12 px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight mb-4 bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">
-          Simple, Transparent Pricing
+          Choose Your Storytelling Journey
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Choose the plan that's right for you. All plans include unlimited access to our AI story generation.
+          Unlock the power of AI-driven storytelling with our flexible plans designed for every imagination.
         </p>
       </div>
 
@@ -88,22 +88,19 @@ export default function Pricing() {
           <Card 
             key={plan.id} 
             className={`flex flex-col relative overflow-hidden ${
-              plan.name === 'Pro' ? 'border-blue-500 shadow-blue-100 shadow-lg' : ''
+              plan.name === 'Pro' ? 'border-blue-500 shadow-blue-100 shadow-lg scale-105 md:translate-y-[-8px]' : ''
             }`}
           >
             {plan.name === 'Pro' && (
-              <div className="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 rounded-bl-lg text-sm font-medium">
-                Popular
+              <div className="absolute top-5 right-5">
+                <Star className="h-6 w-6 text-blue-500 fill-blue-500" />
               </div>
             )}
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-2xl">
                 {plan.name}
               </CardTitle>
-              <CardDescription>{plan.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <div className="mb-6">
+              <div className="mt-4 mb-2">
                 <span className="text-4xl font-bold">
                   ${(plan.price_amount / 100).toFixed(2)}
                 </span>
@@ -111,6 +108,9 @@ export default function Pricing() {
                   <span className="text-sm font-normal text-gray-600 ml-1">/month</span>
                 )}
               </div>
+              <CardDescription className="text-sm">{plan.description}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex-grow">
               <ul className="space-y-3">
                 {plan.features?.map((feature, index) => (
                   <li key={index} className="flex items-start gap-2">
@@ -120,11 +120,17 @@ export default function Pricing() {
                 ))}
               </ul>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="pt-6">
               <Button 
-                className="w-full gap-2" 
+                className={`w-full gap-2 ${
+                  plan.name === 'Pro' 
+                    ? 'bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700' 
+                    : plan.name === 'Free Trial' 
+                    ? 'bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50' 
+                    : ''
+                }`}
                 onClick={() => handleSubscribe(plan.stripe_price_id)}
-                variant={plan.name === 'Pro' ? 'default' : 'outline'}
+                variant={plan.name === 'Free Trial' ? 'outline' : 'default'}
               >
                 <CreditCard className="h-4 w-4" />
                 {plan.price_amount === 0 ? 'Start Free Trial' : 'Subscribe Now'}
@@ -134,7 +140,7 @@ export default function Pricing() {
         ))}
       </div>
 
-      <div className="mt-12 text-center">
+      <div className="mt-16 text-center">
         <p className="text-sm text-gray-500">
           All prices in USD. Cancel anytime. Need help choosing?{' '}
           <Button 
