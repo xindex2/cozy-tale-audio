@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Volume2, VolumeX } from "lucide-react";
@@ -17,10 +18,25 @@ export function MusicPlayer({
   onVolumeChange,
   onToggleMute,
 }: MusicPlayerProps) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
+
   if (!musicUrl) return null;
 
   return (
     <div className="space-y-4">
+      <audio ref={audioRef} src={musicUrl} loop />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button
