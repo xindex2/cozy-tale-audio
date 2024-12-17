@@ -41,7 +41,7 @@ export function AudioManager({
       console.error("Voice audio error:", e);
       toast({
         title: "Audio Error",
-        description: "Failed to play voice audio. Please try again.",
+        description: "Failed to load voice audio. Please try again.",
         variant: "destructive",
       });
     };
@@ -71,6 +71,7 @@ export function AudioManager({
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
+      voiceRef.current = null;
     };
   }, [voiceUrl, toast, onTimeUpdate]);
 
@@ -82,8 +83,7 @@ export function AudioManager({
     }
 
     console.log("Setting up background music with URL:", backgroundMusicUrl);
-    const audio = new Audio();
-    audio.src = backgroundMusicUrl;
+    const audio = new Audio(backgroundMusicUrl);
     audio.preload = "auto";
     audio.loop = true;
     
@@ -91,35 +91,49 @@ export function AudioManager({
       console.error("Music error:", e);
       toast({
         title: "Music Error",
-        description: "Failed to play background music. Please try again.",
+        description: "Failed to load background music. Please try again.",
         variant: "destructive",
       });
     };
 
+    const handleCanPlay = () => {
+      console.log("Background music ready to play");
+      if (isPlaying) {
+        audio.play().catch(error => {
+          console.error("Error playing background music:", error);
+        });
+      }
+    };
+
     audio.addEventListener('error', handleError);
+    audio.addEventListener('canplay', handleCanPlay);
     musicRef.current = audio;
     audio.volume = isMusicMuted ? 0 : musicVolume;
-
-    if (isPlaying) {
-      audio.play().catch(error => {
-        console.error("Error playing background music:", error);
-      });
-    }
 
     return () => {
       audio.pause();
       audio.removeEventListener('error', handleError);
+      audio.removeEventListener('canplay', handleCanPlay);
+      musicRef.current = null;
     };
   }, [backgroundMusicUrl, isPlaying, musicVolume, isMusicMuted]);
 
   // Handle play/pause
   useEffect(() => {
     if (isPlaying) {
-      voiceRef.current?.play().catch(console.error);
-      musicRef.current?.play().catch(console.error);
+      if (voiceRef.current) {
+        voiceRef.current.play().catch(console.error);
+      }
+      if (musicRef.current) {
+        musicRef.current.play().catch(console.error);
+      }
     } else {
-      voiceRef.current?.pause();
-      musicRef.current?.pause();
+      if (voiceRef.current) {
+        voiceRef.current.pause();
+      }
+      if (musicRef.current) {
+        musicRef.current.pause();
+      }
     }
   }, [isPlaying]);
 

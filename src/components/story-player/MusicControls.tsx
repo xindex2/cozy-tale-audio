@@ -1,4 +1,4 @@
-import { Volume2, VolumeX, Music, Play, Pause } from "lucide-react";
+import { Volume2, VolumeX, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
@@ -35,6 +35,7 @@ export function MusicControls({
   const [previewingMusic, setPreviewingMusic] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -44,27 +45,50 @@ export function MusicControls({
     };
   }, []);
 
+  // Update preview audio volume when main volume changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = isMuted ? 0 : volume;
+    }
+  }, [volume, isMuted]);
+
   const handlePreview = (musicKey: string) => {
     const musicUrl = MUSIC_OPTIONS[musicKey as keyof typeof MUSIC_OPTIONS]?.url;
     
-    if (!musicUrl) return;
-
-    if (previewingMusic === musicKey) {
+    if (!musicUrl) {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
+      setPreviewingMusic(null);
+      return;
+    }
+
+    if (previewingMusic === musicKey && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
       setPreviewingMusic(null);
     } else {
       if (audioRef.current) {
         audioRef.current.pause();
       }
       const audio = new Audio(musicUrl);
-      audio.volume = volume;
-      audio.play();
+      audio.volume = isMuted ? 0 : volume;
+      audio.loop = true;
+      audio.play().catch(console.error);
       audioRef.current = audio;
       setPreviewingMusic(musicKey);
     }
+  };
+
+  const handleMusicChange = (value: string) => {
+    // Stop any preview when changing selection
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      setPreviewingMusic(null);
+    }
+    onMusicChange?.(value);
   };
 
   return (
@@ -76,12 +100,7 @@ export function MusicControls({
 
       <RadioGroup
         value={selectedMusic}
-        onValueChange={(value) => {
-          if (previewingMusic) {
-            handlePreview(previewingMusic);
-          }
-          onMusicChange?.(value);
-        }}
+        onValueChange={handleMusicChange}
         className="grid gap-3"
       >
         {Object.entries(MUSIC_OPTIONS).map(([value, { label, url }]) => (
@@ -89,23 +108,23 @@ export function MusicControls({
             key={value}
             className="flex items-center space-x-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
           >
-            <RadioGroupItem value={value} id={value} />
+            <RadioGroupItem value={value} id={value} className="data-[state=checked]:bg-blue-500" />
             <Label htmlFor={value} className="flex-1 cursor-pointer">{label}</Label>
             {url && (
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-1 hover:bg-blue-100 dark:hover:bg-blue-900"
+                className={`h-8 px-3 ${
+                  previewingMusic === value 
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' 
+                    : 'hover:bg-blue-50 dark:hover:bg-blue-900'
+                }`}
                 onClick={(e) => {
                   e.preventDefault();
                   handlePreview(value);
                 }}
               >
-                {previewingMusic === value ? (
-                  <Pause className="h-4 w-4" />
-                ) : (
-                  <Play className="h-4 w-4" />
-                )}
+                {previewingMusic === value ? "Stop" : "Preview"}
               </Button>
             )}
           </div>
@@ -125,12 +144,7 @@ export function MusicControls({
           value={[volume]}
           max={1}
           step={0.01}
-          onValueChange={(newVolume) => {
-            onVolumeChange(newVolume);
-            if (audioRef.current) {
-              audioRef.current.volume = newVolume[0];
-            }
-          }}
+          onValueChange={onVolumeChange}
           className="w-full"
           disabled={selectedMusic === "no-music"}
         />
