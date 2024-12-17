@@ -1,17 +1,10 @@
 import { Volume2, VolumeX, Music, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useState, useRef, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { useState, useRef, useEffect } from "react";
 
 interface MusicControlsProps {
   volume: number;
@@ -57,14 +50,12 @@ export function MusicControls({
     if (!musicUrl) return;
 
     if (previewingMusic === musicKey) {
-      // Stop preview
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
       setPreviewingMusic(null);
     } else {
-      // Start new preview
       if (audioRef.current) {
         audioRef.current.pause();
       }
@@ -77,31 +68,34 @@ export function MusicControls({
   };
 
   return (
-    <Card className="p-4 space-y-4 bg-white/90 shadow-sm w-full max-w-md mx-auto">
-      <div className="flex items-center gap-2 mb-4">
-        <Music className="h-4 w-4 text-blue-500" />
-        <h3 className="text-sm font-medium">Background Music</h3>
+    <Card className="p-6 space-y-4 bg-white/90 dark:bg-gray-800/90 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700">
+      <div className="flex items-center gap-2 mb-2">
+        <Music className="h-5 w-5 text-blue-500" />
+        <h3 className="text-lg font-medium">Background Music</h3>
       </div>
 
       <RadioGroup
         value={selectedMusic}
         onValueChange={(value) => {
           if (previewingMusic) {
-            handlePreview(previewingMusic); // Stop current preview
+            handlePreview(previewingMusic);
           }
           onMusicChange?.(value);
         }}
         className="grid gap-3"
       >
         {Object.entries(MUSIC_OPTIONS).map(([value, { label, url }]) => (
-          <div key={value} className="flex items-center space-x-2">
+          <div
+            key={value}
+            className="flex items-center space-x-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+          >
             <RadioGroupItem value={value} id={value} />
-            <Label htmlFor={value} className="flex-1">{label}</Label>
+            <Label htmlFor={value} className="flex-1 cursor-pointer">{label}</Label>
             {url && (
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-1"
+                className="h-8 w-8 p-1 hover:bg-blue-100 dark:hover:bg-blue-900"
                 onClick={(e) => {
                   e.preventDefault();
                   handlePreview(value);
@@ -118,7 +112,7 @@ export function MusicControls({
         ))}
       </RadioGroup>
 
-      <div className="flex items-center space-x-4 pt-4 border-t">
+      <div className="flex items-center space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
         <Button 
           variant="ghost" 
           size="icon" 

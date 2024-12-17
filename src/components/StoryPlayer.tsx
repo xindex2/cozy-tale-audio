@@ -115,7 +115,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     <div className="w-full max-w-7xl mx-auto p-4 lg:p-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <Card className="p-4 lg:p-8 space-y-6 bg-white">
+          <Card className="p-4 lg:p-8 space-y-6 bg-white dark:bg-gray-800">
             <StoryHeader
               onBack={onBack}
               title={displayTitle || initialStoryData?.title || ""}
@@ -124,21 +124,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
               onVolumeChange={(newVolume) => setVolume(newVolume[0])}
               onToggleMute={() => setIsMuted(!isMuted)}
             />
-
-            <div className="flex items-center justify-end">
-              <MusicControls
-                volume={musicVolume}
-                isMuted={isMusicMuted}
-                onVolumeChange={(newVolume) => setMusicVolume(newVolume[0])}
-                onToggleMute={() => setIsMusicMuted(!isMusicMuted)}
-                selectedMusic={settings?.music}
-                onMusicChange={(music) => {
-                  if (settings) {
-                    settings.music = music;
-                  }
-                }}
-              />
-            </div>
 
             <AudioManager
               voiceUrl={currentAudioUrl || initialStoryData?.audioUrl || ''}
@@ -165,6 +150,19 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
             <PlayButton
               isPlaying={isPlaying}
               onTogglePlay={() => setIsPlaying(!isPlaying)}
+            />
+
+            <MusicControls
+              volume={musicVolume}
+              isMuted={isMusicMuted}
+              onVolumeChange={(newVolume) => setMusicVolume(newVolume[0])}
+              onToggleMute={() => setIsMusicMuted(!isMusicMuted)}
+              selectedMusic={settings?.music}
+              onMusicChange={(music) => {
+                if (settings) {
+                  settings.music = music;
+                }
+              }}
             />
           </Card>
         </div>
