@@ -74,6 +74,12 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     }
   }, [currentAudioUrl]);
 
+  const handleMusicChange = (newMusic: string) => {
+    if (settings) {
+      settings.music = newMusic;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="w-full max-w-7xl mx-auto p-4 lg:p-6">
@@ -111,6 +117,8 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
                 isMuted={isMusicMuted}
                 onVolumeChange={(newVolume) => setMusicVolume(newVolume[0])}
                 onToggleMute={() => setIsMusicMuted(!isMusicMuted)}
+                selectedMusic={settings?.music}
+                onMusicChange={handleMusicChange}
               />
             </div>
 
