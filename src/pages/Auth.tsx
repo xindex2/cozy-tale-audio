@@ -116,11 +116,8 @@ export default function Auth() {
               },
             },
           }}
-          options={{
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-            data: {
-              full_name: "",
-            },
+          additionalData={{
+            full_name: "",
           }}
         />
       </Card>
