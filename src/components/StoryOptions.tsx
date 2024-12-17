@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { AgeGroupSelector } from "./story-options/AgeGroupSelector";
 import { ThemeSelector } from "./story-options/ThemeSelector";
 import { DurationSelector } from "./story-options/DurationSelector";
-import { VoiceSelector } from "./story-options/VoiceSelector";
-import { LanguageSelector } from "./story-options/LanguageSelector";
+import { VoiceLanguageSelector } from "./story-options/VoiceLanguageSelector";
 import { Play, BookOpen, Sparkles, MessageCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -25,7 +24,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
   const [settings, setSettings] = useState<StorySettings>({
     ageGroup: "6-8",
     duration: 5,
-    music: "no-music", // Default to no-music since selection is moved to player
+    music: "no-music",
     voice: "alloy",
     theme: "fantasy",
     language: "en"
@@ -123,25 +122,15 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
             </div>
           </div>
 
-          {/* Language and Voice Column */}
+          {/* Voice and Language Section */}
           <div className="space-y-4 sm:space-y-6 pb-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              <div>
-                <div className="group transition-transform duration-200 ease-in-out hover:scale-[1.01]">
-                  <VoiceSelector
-                    selectedVoice={settings.voice}
-                    onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="group transition-transform duration-200 ease-in-out hover:scale-[1.01]">
-                  <LanguageSelector
-                    selectedLanguage={settings.language}
-                    onLanguageSelect={(language) => setSettings({ ...settings, language })}
-                  />
-                </div>
-              </div>
+            <div className="group transition-transform duration-200 ease-in-out hover:scale-[1.01]">
+              <VoiceLanguageSelector
+                selectedVoice={settings.voice}
+                onVoiceSelect={(voice) => setSettings({ ...settings, voice })}
+                selectedLanguage={settings.language}
+                onLanguageSelect={(language) => setSettings({ ...settings, language })}
+              />
             </div>
 
             {/* Age Group Section */}
