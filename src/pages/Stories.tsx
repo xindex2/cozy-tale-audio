@@ -2,10 +2,10 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Plus } from "lucide-react";
 import { StoriesTable } from "@/components/dashboard/StoriesTable";
+import { GradientButton } from "@/components/ui/gradient-button";
 
 export default function Stories() {
   const navigate = useNavigate();
@@ -50,10 +50,10 @@ export default function Stories() {
       <main className="container py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">My Stories</h1>
-          <Button onClick={() => navigate("/create-story")} className="gap-2">
+          <GradientButton onClick={() => navigate("/create-story")} className="gap-2">
             <Plus className="h-4 w-4" />
             Create Story
-          </Button>
+          </GradientButton>
         </div>
 
         {isLoading ? (

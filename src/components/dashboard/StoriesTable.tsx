@@ -7,11 +7,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { Eye, Trash2 } from "lucide-react";
 import type { Story } from "@/types/story";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { GradientButton } from "@/components/ui/gradient-button";
 
 interface StoriesTableProps {
   stories: Story[];
@@ -81,21 +81,21 @@ export function StoriesTable({ stories, onRefresh }: StoriesTableProps) {
                 {new Date(story.created_at).toLocaleDateString()}
               </TableCell>
               <TableCell className="text-right space-x-2">
-                <Button
+                <GradientButton
                   variant="ghost"
                   size="icon"
                   onClick={() => handleView(story)}
                 >
                   <Eye className="h-4 w-4" />
-                </Button>
-                <Button
+                </GradientButton>
+                <GradientButton
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDelete(story)}
                   className="text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
-                </Button>
+                </GradientButton>
               </TableCell>
             </TableRow>
           ))}
