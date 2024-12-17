@@ -2,7 +2,7 @@ import { MusicPlayer } from "./MusicPlayer";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Music } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -23,7 +23,6 @@ export function MusicControls({
 }: MusicControlsProps) {
   const [useMusic, setUseMusic] = useState(selectedMusic !== "no-music");
   const [currentMusic, setCurrentMusic] = useState<string | undefined>(selectedMusic);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const musicOptions = [
     { 
@@ -79,16 +78,6 @@ export function MusicControls({
   };
 
   const musicUrl = currentMusic ? getMusicUrl(currentMusic) : null;
-
-  useEffect(() => {
-    if (audioRef.current) {
-      if (useMusic && musicUrl) {
-        audioRef.current.play().catch(console.error);
-      } else {
-        audioRef.current.pause();
-      }
-    }
-  }, [useMusic, musicUrl]);
 
   return (
     <Card className="p-4 space-y-4 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">

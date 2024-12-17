@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
-import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
-import { Volume2, VolumeX } from "lucide-react";
+import Plyr from 'plyr';
+import 'plyr/dist/plyr.css';
 
 interface MusicPlayerProps {
   musicUrl: string | null;
@@ -13,53 +12,33 @@ interface MusicPlayerProps {
 
 export function MusicPlayer({
   musicUrl,
-  volume,
-  isMuted,
-  onVolumeChange,
-  onToggleMute,
 }: MusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playerRef = useRef<Plyr | null>(null);
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
+    if (audioRef.current && !playerRef.current) {
+      playerRef.current = new Plyr(audioRef.current, {
+        controls: ['play', 'progress', 'current-time', 'mute', 'volume'],
+        hideControls: false,
+        resetOnEnd: true,
+      });
     }
-  }, [volume]);
 
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.muted = isMuted;
-    }
-  }, [isMuted]);
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.destroy();
+      }
+    };
+  }, []);
 
   if (!musicUrl) return null;
 
   return (
     <div className="space-y-4">
-      <audio ref={audioRef} src={musicUrl} loop />
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleMute}
-            className="h-8 w-8"
-          >
-            {isMuted ? (
-              <VolumeX className="h-4 w-4" />
-            ) : (
-              <Volume2 className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      </div>
-      <Slider
-        value={[volume]}
-        max={1}
-        step={0.01}
-        onValueChange={onVolumeChange}
-        className="w-full"
-      />
+      <audio ref={audioRef} className="plyr-player">
+        <source src={musicUrl} type="audio/mp3" />
+      </audio>
     </div>
   );
 }
