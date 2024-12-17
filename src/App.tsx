@@ -1,33 +1,30 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
+import CreateStory from "@/pages/CreateStory";
 import Stories from "@/pages/Stories";
 import StoryView from "@/pages/StoryView";
-import CreateStory from "@/pages/CreateStory";
-import AdminDashboard from "@/pages/admin/Dashboard";
-import AdminApiKeys from "@/pages/admin/ApiKeys";
+import Profile from "@/pages/Profile";
+import Settings from "@/pages/Settings";
+import Billing from "@/pages/Billing";
+import Contact from "@/pages/Contact";
+import AdminDashboard from "@/pages/AdminDashboard";
 import AdminPlans from "@/pages/admin/Plans";
-import BedtimeStoriesForKids from "@/pages/landing/BedtimeStoriesForKids";
-import SleepStoriesForAdults from "@/pages/landing/SleepStoriesForAdults";
-import ShortBedtimeStories from "@/pages/landing/ShortBedtimeStories";
+import AdminApiKeys from "@/pages/admin/ApiKeys";
+import Pricing from "@/pages/Pricing";
+import "./App.css";
+
+const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Index />,
-  },
-  {
-    path: "/bedtime-stories-for-kids",
-    element: <BedtimeStoriesForKids />,
-  },
-  {
-    path: "/sleep-stories-for-adults",
-    element: <SleepStoriesForAdults />,
-  },
-  {
-    path: "/short-bedtime-stories",
-    element: <ShortBedtimeStories />,
+    errorElement: <ErrorBoundary />,
   },
   {
     path: "/auth",
@@ -38,33 +35,58 @@ const router = createBrowserRouter([
     element: <Dashboard />,
   },
   {
+    path: "/create",
+    element: <CreateStory />,
+  },
+  {
     path: "/stories",
     element: <Stories />,
   },
   {
-    path: "/stories/:id",
+    path: "/story/:id",
     element: <StoryView />,
   },
   {
-    path: "/create-story",
-    element: <CreateStory />,
+    path: "/profile",
+    element: <Profile />,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
+  },
+  {
+    path: "/billing",
+    element: <Billing />,
+  },
+  {
+    path: "/pricing",
+    element: <Pricing />,
+  },
+  {
+    path: "/contact",
+    element: <Contact />,
   },
   {
     path: "/admin",
     element: <AdminDashboard />,
   },
   {
-    path: "/admin/api-keys",
-    element: <AdminApiKeys />,
-  },
-  {
     path: "/admin/plans",
     element: <AdminPlans />,
+  },
+  {
+    path: "/admin/api-keys",
+    element: <AdminApiKeys />,
   },
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+      <Toaster />
+    </QueryClientProvider>
+  );
 }
 
 export default App;
