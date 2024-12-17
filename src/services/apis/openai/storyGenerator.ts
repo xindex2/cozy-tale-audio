@@ -37,7 +37,6 @@ export const openaiService = {
 
       let title = '';
       let content = '';
-      let isParsingTitle = false;
       let buffer = '';
 
       const response = await openaiClient.generateContent(

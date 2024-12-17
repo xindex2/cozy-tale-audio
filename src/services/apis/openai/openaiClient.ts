@@ -123,7 +123,7 @@ class OpenAIClient {
 
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
-        let buffer = '';
+        let fullContent = '';
 
         while (reader) {
           const { done, value } = await reader.read();
@@ -139,9 +139,9 @@ class OpenAIClient {
             try {
               const jsonStr = line.replace(/^data: /, '');
               const json = JSON.parse(jsonStr);
-              const content = json.choices[0]?.delta?.content;
+              const content = json.choices[0]?.delta?.content || '';
               if (content) {
-                buffer += content;
+                fullContent += content;
                 if (onStream) {
                   onStream(content);
                 }
@@ -152,7 +152,7 @@ class OpenAIClient {
           }
         }
 
-        return buffer;
+        return fullContent;
       });
 
       console.log("Content generated successfully");
