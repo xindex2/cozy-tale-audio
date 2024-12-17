@@ -24,9 +24,10 @@ export function StoryDisplay({
   const timePerPhrase = duration / phrases.length;
   const currentPhraseIndex = Math.floor(currentTime / timePerPhrase);
   
-  // Calculate progress percentage
-  const progress = (currentTime / duration) * 100;
+  // Calculate progress percentage - ensure it's between 0 and 100
+  const progress = Math.min(Math.max((currentTime / duration) * 100, 0), 100);
 
+  // Scroll to current phrase
   useEffect(() => {
     if (containerRef.current && currentPhraseIndex >= 0) {
       const phrases = containerRef.current.children;
@@ -43,7 +44,10 @@ export function StoryDisplay({
 
   return (
     <div className="space-y-4">
-      <Progress value={progress} className="w-full" />
+      <Progress 
+        value={progress} 
+        className="w-full h-2 bg-gray-200"
+      />
       
       <div 
         ref={containerRef}
