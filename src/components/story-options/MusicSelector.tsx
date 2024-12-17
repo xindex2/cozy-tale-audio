@@ -23,31 +23,31 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
       id: "sleeping-lullaby", 
       name: "Sleeping Lullaby", 
       description: "Gentle lullaby for peaceful sleep", 
-      url: "https://cdn.pixabay.com/download/audio/2023/05/16/audio_166b9c7242.mp3"
+      url: "/assets/gentle-lullaby.mp3"
     },
     { 
       id: "water-dreams", 
       name: "Water Dreams", 
       description: "Calming water sounds with soft music", 
-      url: "https://cdn.pixabay.com/download/audio/2022/02/23/audio_ea70ad08e3.mp3"
+      url: "/assets/ocean-waves.mp3"
     },
     { 
       id: "forest-birds", 
-      name: "Forest Birds", 
-      description: "Peaceful forest ambiance with birds", 
-      url: "https://cdn.pixabay.com/download/audio/2022/02/12/audio_8ca49a7f20.mp3"
+      name: "Nature Sounds", 
+      description: "Peaceful nature ambiance", 
+      url: "/assets/nature-sounds.mp3"
     },
     { 
       id: "relaxing-piano", 
       name: "Relaxing Piano", 
       description: "Soft piano melodies for bedtime", 
-      url: "https://cdn.pixabay.com/download/audio/2024/11/04/audio_4956b4edd1.mp3"
+      url: "/assets/soft-piano.mp3"
     },
     { 
-      id: "gentle-lullaby", 
-      name: "Gentle Lullaby", 
+      id: "gentle-dreams", 
+      name: "Peaceful Dreams", 
       description: "Soft and calming melody for sweet dreams", 
-      url: "https://cdn.pixabay.com/download/audio/2023/09/05/audio_168a3e0caa.mp3"
+      url: "/assets/peaceful-dreams.mp3"
     },
   ];
 

@@ -1,4 +1,5 @@
-import { getBackgroundMusicUrl } from './audioService';
+import { supabase } from "@/integrations/supabase/client";
+import { audioService } from './audioService';
 import { generateQuiz } from './quizService';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { StorySettings } from "@/components/StoryOptions";
@@ -130,7 +131,7 @@ class AIService {
         title: cleanTitle,
         text: content,
         audioUrl: null,
-        backgroundMusicUrl: AUDIO_URLS[settings.music as keyof typeof AUDIO_URLS] || null
+        backgroundMusicUrl: audioService.getBackgroundMusicUrl(settings.music) || null
       };
     } catch (error) {
       console.error("Error generating story with Gemini:", error);
