@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface StoryTextProps {
   phrases: string[];
@@ -19,7 +19,7 @@ export const StoryText = memo(function StoryText({
   }, [currentPhraseIndex]);
 
   return (
-    <>
+    <AnimatePresence mode="popLayout">
       {phrases.map((phrase, index) => {
         const isHighlighted = currentPhraseIndex >= 0 && index === currentPhraseIndex;
         const isPast = currentPhraseIndex >= 0 && index < currentPhraseIndex;
@@ -28,13 +28,15 @@ export const StoryText = memo(function StoryText({
           <motion.p 
             key={index}
             ref={isHighlighted ? activeRef : null}
-            initial={{ opacity: 0.8 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ 
               opacity: 1,
+              y: 0,
               color: isHighlighted ? "#4F46E5" : isPast ? "#6B7280" : "#1F2937",
               scale: isHighlighted ? 1.02 : 1,
             }}
-            transition={{ duration: 0.3 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
             className={`leading-relaxed p-2 rounded-md transition-all duration-300 ${
               isHighlighted 
                 ? "bg-indigo-50 font-medium" 
@@ -45,6 +47,6 @@ export const StoryText = memo(function StoryText({
           </motion.p>
         );
       })}
-    </>
+    </AnimatePresence>
   );
 });

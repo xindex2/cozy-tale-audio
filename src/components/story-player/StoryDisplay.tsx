@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
 import { useContainerHeight } from "@/hooks/useContainerHeight";
 import { StoryText } from "./StoryText";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface StoryDisplayProps {
   text: string | undefined;
@@ -29,20 +30,43 @@ export function StoryDisplay({
   const timePerPhrase = duration > 0 ? duration / phrases.length : 0;
   const currentPhraseIndex = Math.floor(currentTime / timePerPhrase);
 
+  // Auto-scroll to bottom when new content arrives
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [text]);
+
   return (
     <div 
       ref={containerRef}
       style={{ height: height ? `${height}px` : 'auto', minHeight: '50vh' }}
       className="prose prose-lg max-w-none space-y-4 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto scroll-smooth"
     >
-      {text ? (
-        <StoryText 
-          phrases={phrases}
-          currentPhraseIndex={currentPhraseIndex}
-        />
-      ) : (
-        <p className="text-gray-500 italic">Story text will appear here...</p>
-      )}
+      <AnimatePresence mode="wait">
+        {text ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <StoryText 
+              phrases={phrases}
+              currentPhraseIndex={currentPhraseIndex}
+            />
+          </motion.div>
+        ) : (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="text-gray-500 italic"
+          >
+            Story text will appear here...
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -111,7 +111,7 @@ class OpenAIClient {
             model: 'gpt-4',
             messages,
             temperature: 0.7,
-            stream: onStream ? true : false,
+            stream: true,
           }),
         });
 
@@ -121,41 +121,38 @@ class OpenAIClient {
           throw new Error(error.error?.message || 'Failed to generate content');
         }
 
-        if (onStream) {
-          const reader = response.body?.getReader();
-          const decoder = new TextDecoder();
-          let buffer = '';
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
 
-          while (reader) {
-            const { done, value } = await reader.read();
-            if (done) break;
+        while (reader) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          
+          for (const line of lines) {
+            if (line.trim() === '') continue;
+            if (line.trim() === 'data: [DONE]') continue;
             
-            for (const line of lines) {
-              if (line.trim() === '') continue;
-              if (line.trim() === 'data: [DONE]') continue;
-              
-              try {
-                const jsonStr = line.replace(/^data: /, '');
-                const json = JSON.parse(jsonStr);
-                const content = json.choices[0]?.delta?.content;
-                if (content) {
-                  buffer += content;
+            try {
+              const jsonStr = line.replace(/^data: /, '');
+              const json = JSON.parse(jsonStr);
+              const content = json.choices[0]?.delta?.content;
+              if (content) {
+                buffer += content;
+                if (onStream) {
                   onStream(content);
                 }
-              } catch (e) {
-                console.error('Error parsing streaming response:', e);
               }
+            } catch (e) {
+              console.error('Error parsing streaming response:', e);
             }
           }
-          return buffer;
         }
 
-        const data = await response.json();
-        console.log("OpenAI API response:", data);
-        return data.choices[0].message.content;
+        return buffer;
       });
 
       console.log("Content generated successfully");
