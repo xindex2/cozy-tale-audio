@@ -12,45 +12,62 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { ApiKeysTable } from "@/components/admin/ApiKeysTable";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminDashboard() {
   const [showPlanDialog, setShowPlanDialog] = useState(false);
   const { toast } = useToast();
 
   // Check if user is authenticated
-  const { data: session, isLoading: isLoadingSession, error: sessionError } = useQuery({
+  const { data: session, isLoading: isLoadingSession } = useQuery({
     queryKey: ['session'],
     queryFn: async () => {
+      console.log("Checking session...");
       const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) throw error;
-      if (!session) throw new Error('No session found');
+      if (error) {
+        console.error("Session error:", error);
+        throw error;
+      }
+      if (!session) {
+        console.log("No session found");
+        throw new Error('No session found');
+      }
+      console.log("Session found:", session);
       return session;
     },
   });
 
   // Check if user is admin
-  const { data: profile, isLoading: isLoadingProfile, error: profileError } = useQuery({
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ['admin-profile', session?.user?.id],
     enabled: !!session?.user?.id,
     queryFn: async () => {
+      console.log("Checking admin status for user:", session?.user?.id);
       const { data, error } = await supabase
         .from('profiles')
         .select('is_admin')
         .eq('id', session!.user.id)
         .single();
 
-      if (error) throw error;
-      if (!data) throw new Error('No profile found');
+      if (error) {
+        console.error("Profile error:", error);
+        throw error;
+      }
+      if (!data) {
+        console.log("No profile found");
+        throw new Error('No profile found');
+      }
+      console.log("Profile found:", data);
       return data;
     },
   });
 
   // Fetch stats
-  const { data: stats, isLoading: isLoadingStats, error: statsError } = useQuery({
+  const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ['admin-stats'],
     enabled: !!profile?.is_admin,
     queryFn: async () => {
+      console.log("Fetching admin stats...");
       const [{ count: usersCount }, { count: storiesCount }] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('stories').select('*', { count: 'exact', head: true }),
@@ -76,7 +93,7 @@ export default function AdminDashboard() {
   }
 
   // Handle authentication errors
-  if (sessionError || !session) {
+  if (!session) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
         <Header />
@@ -94,7 +111,8 @@ export default function AdminDashboard() {
   }
 
   // Handle profile errors or non-admin users
-  if (profileError || !profile?.is_admin) {
+  if (!profile?.is_admin) {
+    console.log("Access denied - User is not admin:", profile);
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
         <Header />
@@ -109,15 +127,6 @@ export default function AdminDashboard() {
         <Footer />
       </div>
     );
-  }
-
-  // Handle stats error
-  if (statsError) {
-    toast({
-      variant: "destructive",
-      title: "Error loading statistics",
-      description: "There was a problem loading the dashboard statistics.",
-    });
   }
 
   return (
