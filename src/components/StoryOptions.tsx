@@ -81,40 +81,44 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
 
             <div className="space-y-4 sm:space-y-6">
               <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-story-purple to-story-blue bg-clip-text text-transparent">
-                Welcome to the Future of Bedtime Stories! 🌟
+                Welcome to the Future of Bedtime Stories! ✨
               </p>
               
               <div className="space-y-4">
                 <p className="text-base sm:text-lg text-gray-800 max-w-3xl mx-auto leading-relaxed px-4">
-                  Transform bedtime into an <span className="font-bold text-story-purple">magical adventure</span> with our 
-                  <span className="bg-gradient-to-r from-story-purple to-story-blue bg-clip-text text-transparent font-bold"> AI-powered storytelling</span> that adapts perfectly to your child's world!
+                  Transform bedtime into a <span className="font-bold text-story-purple">magical adventure</span> with our{' '}
+                  <span className="bg-gradient-to-r from-story-purple to-story-blue bg-clip-text text-transparent font-bold">AI-powered storytelling</span>{' '}
+                  that adapts perfectly to your child's world!
                 </p>
                 
                 <div className="bg-blue-50 p-4 sm:p-6 rounded-xl shadow-sm max-w-3xl mx-auto">
                   <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                    <span className="font-bold text-story-blue">✨ How it works:</span> Simply choose your perfect story settings below - 
-                    <span className="font-semibold text-story-purple">age group</span>, 
-                    <span className="font-semibold text-story-orange">story duration</span>, 
-                    <span className="font-semibold text-story-blue">voice</span>, and 
-                    <span className="font-semibold text-story-purple">theme</span>. Our AI crafts a 
-                    <span className="italic font-medium"> unique, engaging narrative</span> complete with professional narration and optional atmospheric music.
+                    <span className="font-bold text-story-blue">✨ How it works:</span>{' '}
+                    Simply choose your perfect story settings below —{' '}
+                    <span className="font-semibold text-story-purple">age group</span>,{' '}
+                    <span className="font-semibold text-story-orange">story duration</span>,{' '}
+                    <span className="font-semibold text-story-blue">voice</span>, and{' '}
+                    <span className="font-semibold text-story-purple">theme</span>. Our AI crafts a{' '}
+                    <span className="italic font-medium">unique, engaging narrative</span> complete with professional narration and optional atmospheric music.
                   </p>
                 </div>
 
                 <div className="bg-purple-50 p-4 sm:p-6 rounded-xl shadow-sm max-w-3xl mx-auto">
                   <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                    <span className="font-bold text-story-purple">🎯 Interactive Features:</span> Each story comes with 
-                    <span className="font-medium"> highlighted text synchronization</span>, 
-                    <span className="text-story-blue font-medium">comprehension-boosting activities</span>, and 
+                    <span className="font-bold text-story-purple">🎯 Interactive Features:</span>{' '}
+                    Each story comes with{' '}
+                    <span className="font-medium">highlighted text synchronization</span>,{' '}
+                    <span className="text-story-blue font-medium">comprehension-boosting activities</span>, and{' '}
                     <span className="text-story-orange font-medium">educational elements</span> that make learning fun!
                   </p>
                 </div>
 
                 <div className="bg-orange-50 p-4 sm:p-6 rounded-xl shadow-sm max-w-3xl mx-auto">
                   <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                    <span className="font-bold text-story-orange">🌈 After the Story:</span> Engage with our 
-                    <span className="font-medium text-story-purple">AI-powered quiz</span> to check understanding, or use our 
-                    <span className="font-medium text-story-blue">chat feature</span> to explore the story's themes and characters. 
+                    <span className="font-bold text-story-orange">🌟 After the Story:</span>{' '}
+                    Engage with our{' '}
+                    <span className="font-medium text-story-purple">AI-powered quiz</span> to check understanding, or use our{' '}
+                    <span className="font-medium text-story-blue">chat feature</span> to explore the story's themes and characters.{' '}
                     <span className="font-medium italic">Save your favorites</span> to your personal library for endless storytelling magic!
                   </p>
                 </div>
