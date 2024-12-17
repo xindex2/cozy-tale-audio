@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { AgeGroupSelector } from "./story-options/AgeGroupSelector";
 import { ThemeSelector } from "./story-options/ThemeSelector";
 import { DurationSelector } from "./story-options/DurationSelector";
-import { MusicSelector } from "./story-options/MusicSelector";
 import { VoiceSelector } from "./story-options/VoiceSelector";
 import { LanguageSelector } from "./story-options/LanguageSelector";
 import { Play, BookOpen, Sparkles, MessageCircle } from "lucide-react";
@@ -26,7 +25,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
   const [settings, setSettings] = useState<StorySettings>({
     ageGroup: "6-8",
     duration: 5,
-    music: "no-music",
+    music: "no-music", // Default to no-music since selection is moved to player
     voice: "alloy",
     theme: "fantasy",
     language: "en"
@@ -166,14 +165,6 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
               <DurationSelector
                 selectedDuration={settings.duration}
                 onDurationSelect={(duration) => setSettings({ ...settings, duration })}
-              />
-            </div>
-
-            {/* Music Section */}
-            <div className="group transition-transform duration-200 ease-in-out hover:scale-[1.01]">
-              <MusicSelector
-                selectedMusic={settings.music}
-                onMusicSelect={(music) => setSettings({ ...settings, music })}
               />
             </div>
 
