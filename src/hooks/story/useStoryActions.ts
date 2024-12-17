@@ -16,6 +16,8 @@ export function useStoryActions(
     state.loading.setStage('text');
     state.story.setIsStreaming(true);
     state.story.setStreamedContent("");
+    state.story.setContent(""); // Reset content
+    state.story.setTitle(""); // Reset title
     
     try {
       console.log("Starting story generation with settings:", settings);
@@ -27,7 +29,8 @@ export function useStoryActions(
       CONTENT: [Story Content]`;
 
       const userPrompt = `Create an engaging ${settings.theme} story for ${settings.ageGroup} year olds.
-      The story should be appropriate for the age group and last ${settings.duration} minutes when read aloud.`;
+      The story should be appropriate for the age group and last ${settings.duration} minutes when read aloud.
+      Make it creative and engaging.`;
 
       let title = '';
       let content = '';
