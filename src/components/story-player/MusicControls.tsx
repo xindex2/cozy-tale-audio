@@ -4,6 +4,7 @@ import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useRef, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface MusicControlsProps {
   volume: number;
@@ -18,23 +19,23 @@ const MUSIC_OPTIONS = {
   "no-music": { label: "No Music", url: null },
   "sleeping-lullaby": { 
     label: "Sleeping Lullaby", 
-    url: "https://cdn.pixabay.com/download/audio/2022/02/22/audio_d0c6ff1bab.mp3"
+    url: "/assets/gentle-lullaby.mp3"
   },
   "water-dreams": { 
     label: "Ocean Waves", 
-    url: "https://cdn.pixabay.com/download/audio/2022/03/10/audio_1fb4ae1b0f.mp3"
+    url: "/assets/ocean-waves.mp3"
   },
   "forest-birds": { 
     label: "Nature Sounds", 
-    url: "https://cdn.pixabay.com/download/audio/2021/10/25/audio_ef6630f698.mp3"
+    url: "/assets/nature-sounds.mp3"
   },
   "relaxing-piano": { 
     label: "Soft Piano", 
-    url: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0c3b6e30d.mp3"
+    url: "/assets/soft-piano.mp3"
   },
   "gentle-dreams": { 
     label: "Peaceful Dreams", 
-    url: "https://cdn.pixabay.com/download/audio/2022/04/27/audio_2449659f49.mp3"
+    url: "/assets/peaceful-dreams.mp3"
   }
 };
 
@@ -48,6 +49,7 @@ export function MusicControls({
 }: MusicControlsProps) {
   const [previewingMusic, setPreviewingMusic] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     return () => {
@@ -64,7 +66,7 @@ export function MusicControls({
     }
   }, [volume, isMuted]);
 
-  const handlePreview = (musicKey: string) => {
+  const handlePreview = async (musicKey: string) => {
     const musicUrl = MUSIC_OPTIONS[musicKey as keyof typeof MUSIC_OPTIONS]?.url;
     
     if (!musicUrl) {
@@ -76,20 +78,49 @@ export function MusicControls({
       return;
     }
 
-    if (previewingMusic === musicKey && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-      setPreviewingMusic(null);
-    } else {
-      if (audioRef.current) {
+    try {
+      if (previewingMusic === musicKey && audioRef.current) {
         audioRef.current.pause();
+        audioRef.current = null;
+        setPreviewingMusic(null);
+      } else {
+        if (audioRef.current) {
+          audioRef.current.pause();
+        }
+        const audio = new Audio(musicUrl);
+        
+        // Add loading state feedback
+        toast({
+          title: "Loading music...",
+          description: "Please wait while we prepare your background music.",
+        });
+
+        // Wait for the audio to be loaded
+        await new Promise((resolve, reject) => {
+          audio.addEventListener('canplaythrough', resolve);
+          audio.addEventListener('error', reject);
+          audio.load();
+        });
+
+        audio.volume = isMuted ? 0 : volume;
+        audio.loop = true;
+        await audio.play();
+        
+        audioRef.current = audio;
+        setPreviewingMusic(musicKey);
+        
+        toast({
+          title: "Music ready!",
+          description: "Background music is now playing.",
+        });
       }
-      const audio = new Audio(musicUrl);
-      audio.volume = isMuted ? 0 : volume;
-      audio.loop = true;
-      audio.play().catch(console.error);
-      audioRef.current = audio;
-      setPreviewingMusic(musicKey);
+    } catch (error) {
+      console.error('Error playing music:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load music. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -115,7 +146,7 @@ export function MusicControls({
             <SelectValue placeholder="Select background music" />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(MUSIC_OPTIONS).map(([value, { label, url }]) => (
+            {Object.entries(MUSIC_OPTIONS).map(([value, { label }]) => (
               <SelectItem key={value} value={value} className="flex justify-between">
                 <span>{label}</span>
               </SelectItem>

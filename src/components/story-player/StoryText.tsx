@@ -39,7 +39,7 @@ export const StoryText = memo(function StoryText({
               scale: isHighlighted ? 1.02 : 1,
             }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
+            transition={{ duration: 0.21, delay: index * 0.07 }} // Made animations 30% faster
             className={`leading-relaxed p-2 rounded-md transition-all duration-300 ${
               isHighlighted 
                 ? "bg-indigo-50 font-medium" 
@@ -53,8 +53,8 @@ export const StoryText = memo(function StoryText({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ 
-                    duration: 0.05,
-                    delay: isStreaming ? charIndex * 0.02 : 0 // Only apply typing effect when streaming
+                    duration: 0.035, // Made character animation 30% faster
+                    delay: isStreaming ? charIndex * 0.014 : 0 // Made streaming delay 30% faster
                   }}
                 >
                   {char}
