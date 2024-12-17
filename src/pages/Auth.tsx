@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -7,7 +7,6 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -19,7 +18,16 @@ export default function Auth() {
   useEffect(() => {
     // Check if user is already logged in
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        toast({
+          variant: "destructive",
+          title: "Authentication Error",
+          description: "There was a problem checking your session. Please try again.",
+        });
+        return;
+      }
       if (session) {
         navigate('/');
       }
@@ -28,38 +36,69 @@ export default function Auth() {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
+      
       if (event === 'SIGNED_IN' && session) {
-        // Check if this is a new signup by checking if they have a subscription
-        const { data: existingSubscription, error } = await supabase
-          .from('user_subscriptions')
-          .select('id')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
-
-        if (!existingSubscription && !error) {
-          // This is likely a new user, get the free trial plan
-          const { data: freePlan } = await supabase
-            .from('subscription_plans')
+        try {
+          // Check if this is a new signup by checking if they have a subscription
+          const { data: existingSubscription, error } = await supabase
+            .from('user_subscriptions')
             .select('id')
-            .eq('name', 'Free Trial')
-            .single();
+            .eq('user_id', session.user.id)
+            .maybeSingle();
 
-          if (freePlan) {
-            // Assign free trial plan to new user
-            await supabase
-              .from('user_subscriptions')
-              .insert([{
-                user_id: session.user.id,
-                plan_id: freePlan.id,
-                status: 'active'
-              }]);
+          if (error) {
+            console.error("Error checking subscription:", error);
+            throw error;
           }
-        }
 
-        navigate('/');
+          if (!existingSubscription) {
+            // This is likely a new user, get the free trial plan
+            const { data: freePlan, error: planError } = await supabase
+              .from('subscription_plans')
+              .select('id')
+              .eq('name', 'Free Trial')
+              .single();
+
+            if (planError) {
+              console.error("Error fetching free plan:", planError);
+              throw planError;
+            }
+
+            if (freePlan) {
+              // Assign free trial plan to new user
+              const { error: subscriptionError } = await supabase
+                .from('user_subscriptions')
+                .insert([{
+                  user_id: session.user.id,
+                  plan_id: freePlan.id,
+                  status: 'active'
+                }]);
+
+              if (subscriptionError) {
+                console.error("Error creating subscription:", subscriptionError);
+                throw subscriptionError;
+              }
+            }
+          }
+
+          navigate('/');
+          toast({
+            title: "Welcome to Bedtimey!",
+            description: "You have successfully signed in.",
+          });
+        } catch (error) {
+          console.error("Error during sign in process:", error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "There was a problem setting up your account. Please try again.",
+          });
+        }
+      } else if (event === 'SIGNED_OUT') {
         toast({
-          title: "Welcome to Bedtimey!",
-          description: "You have successfully signed in.",
+          title: "Signed out",
+          description: "You have been signed out successfully.",
         });
       }
     });
