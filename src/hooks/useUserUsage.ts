@@ -28,15 +28,32 @@ export function useUserUsage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return null;
 
-      // First try to get existing usage
-      let { data, error } = await supabase
+      // First check if user has a profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', session.user.id)
+        .single();
+
+      if (!profile) {
+        console.error('No profile found for user:', session.user.id);
+        return null;
+      }
+
+      // Then try to get existing usage with maybeSingle() to avoid 406 errors
+      const { data: usage, error: usageError } = await supabase
         .from('user_usage')
         .select('*')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();
+
+      if (usageError) {
+        console.error('Error fetching user usage:', usageError);
+        throw usageError;
+      }
 
       // If no usage record exists, create one
-      if (error && error.message.includes('JSON object requested, multiple (or no) rows returned')) {
+      if (!usage) {
         console.log('Creating new user usage record for:', session.user.id);
         
         const { data: newData, error: insertError } = await supabase
@@ -58,13 +75,10 @@ export function useUserUsage() {
           throw insertError;
         }
 
-        data = newData;
-      } else if (error) {
-        console.error('Error fetching user usage:', error);
-        throw error;
+        return newData as UserUsage;
       }
 
-      return data as UserUsage;
+      return usage as UserUsage;
     },
     retry: 1,
   });
