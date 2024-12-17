@@ -46,39 +46,21 @@ export function Header() {
 
   const handleSignOut = async () => {
     try {
-      // First try to get the current session
-      const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+      // Attempt to sign out without checking session first
+      const { error: signOutError } = await supabase.auth.signOut();
       
-      if (sessionError) {
-        console.error('Session error:', sessionError);
-        // If there's an error getting the session, just redirect to auth
-        navigate('/auth');
-        return;
-      }
-
-      if (!currentSession) {
-        // No active session found, just redirect to auth
-        navigate('/auth');
-        return;
-      }
-
-      // Attempt to sign out
-      const { error: signOutError } = await supabase.auth.signOut({
-        scope: 'local' // Only clear the current tab's session
-      });
+      // Always clear local storage to ensure clean state
+      localStorage.removeItem('supabase.auth.token');
       
-      if (signOutError) {
+      // Show appropriate toast based on error type
+      if (signOutError && signOutError.message !== 'session_not_found') {
         console.error('Sign out error:', signOutError);
-        // Only show error toast for non-session_not_found errors
-        if (signOutError.message !== 'session_not_found') {
-          toast({
-            variant: "destructive",
-            title: "Error signing out",
-            description: "Please try again later",
-          });
-        }
+        toast({
+          variant: "destructive",
+          title: "Error signing out",
+          description: "Please try again later",
+        });
       } else {
-        // Show success toast only if sign out was successful
         toast({
           title: "Signed out successfully",
           description: "You have been logged out",
@@ -89,7 +71,6 @@ export function Header() {
       navigate('/auth');
     } catch (error) {
       console.error('Unexpected error during sign out:', error);
-      // For any unexpected errors, just redirect to auth
       navigate('/auth');
     }
   };
