@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<'profiles'>;
@@ -18,6 +20,8 @@ export default function Profile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -45,6 +49,7 @@ export default function Profile() {
         }
 
         setProfile(data);
+        setFullName(data.full_name || "");
       } catch (error) {
         console.error('Error:', error);
         toast({
@@ -110,6 +115,35 @@ export default function Profile() {
     }
   };
 
+  const handleSaveFullName = async () => {
+    if (!profile) return;
+    
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from('profiles')
+        .update({ full_name: fullName })
+        .eq('id', profile.id);
+
+      if (error) throw error;
+
+      setProfile(prev => prev ? { ...prev, full_name: fullName } : null);
+      
+      toast({
+        title: "Success",
+        description: "Full name updated successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
@@ -162,6 +196,30 @@ export default function Profile() {
                   </Button>
                 </div>
               </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="fullName"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Enter your full name"
+                  />
+                  <Button 
+                    onClick={handleSaveFullName}
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    Save
+                  </Button>
+                </div>
+              </div>
+
               <div>
                 <label className="text-sm font-medium text-gray-500">Email</label>
                 <p className="mt-1">{profile?.email}</p>
