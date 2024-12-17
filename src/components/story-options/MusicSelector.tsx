@@ -20,34 +20,34 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
   
   const musicOptions = [
     { 
-      id: "gentle-lullaby", 
-      name: "Gentle Lullaby", 
-      description: "Soft and calming melody perfect for bedtime", 
-      url: "/assets/gentle-lullaby.mp3"
-    },
-    { 
-      id: "peaceful-dreams", 
-      name: "Peaceful Dreams", 
-      description: "Soothing lullaby for sweet dreams", 
-      url: "/assets/peaceful-dreams.mp3"
-    },
-    { 
-      id: "ocean-waves", 
-      name: "Ocean Waves", 
-      description: "Gentle water sounds with soft music", 
-      url: "/assets/ocean-waves.mp3"
-    },
-    { 
-      id: "soft-piano", 
+      id: "relaxing-piano", 
       name: "Relaxing Piano", 
-      description: "Soothing piano melodies", 
-      url: "/assets/soft-piano.mp3"
+      description: "Gentle piano melody for bedtime", 
+      url: "https://cdn.pixabay.com/audio/2022/01/18/audio_d0a13f69d2.mp3"
+    },
+    { 
+      id: "sweet-dreams", 
+      name: "Sweet Dreams", 
+      description: "Soft lullaby for peaceful sleep", 
+      url: "https://cdn.pixabay.com/audio/2022/03/09/audio_c8c8a73467.mp3"
+    },
+    { 
+      id: "calm-night", 
+      name: "Calm Night", 
+      description: "Soothing ambient music", 
+      url: "https://cdn.pixabay.com/audio/2022/09/02/audio_8f2d8b795d.mp3"
+    },
+    { 
+      id: "meditation", 
+      name: "Meditation", 
+      description: "Peaceful meditation music", 
+      url: "https://cdn.pixabay.com/audio/2022/08/03/audio_2dde668d05.mp3"
     },
     { 
       id: "nature-sounds", 
-      name: "Forest Birds", 
-      description: "Peaceful forest ambiance with birds", 
-      url: "/assets/nature-sounds.mp3"
+      name: "Nature Sounds", 
+      description: "Calming nature ambiance", 
+      url: "https://cdn.pixabay.com/audio/2022/05/16/audio_946b0a5de1.mp3"
     },
   ];
 
