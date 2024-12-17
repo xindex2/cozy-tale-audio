@@ -9,6 +9,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState, useRef, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 interface MusicControlsProps {
   volume: number;
@@ -74,54 +77,48 @@ export function MusicControls({
   };
 
   return (
-    <div className="flex items-center space-x-4 bg-white/90 p-4 rounded-lg shadow-sm">
-      <div className="flex items-center min-w-[200px] space-x-2">
+    <Card className="p-4 space-y-4 bg-white/90 shadow-sm w-full max-w-md mx-auto">
+      <div className="flex items-center gap-2 mb-4">
         <Music className="h-4 w-4 text-blue-500" />
-        <Select
-          value={selectedMusic}
-          onValueChange={(value) => {
-            if (previewingMusic) {
-              handlePreview(previewingMusic); // Stop current preview
-            }
-            onMusicChange?.(value);
-          }}
-        >
-          <SelectTrigger className="w-[180px] h-8 text-sm">
-            <SelectValue placeholder="Select music" />
-          </SelectTrigger>
-          <SelectContent className="bg-white">
-            {Object.entries(MUSIC_OPTIONS).map(([value, { label }]) => (
-              <SelectItem
-                key={value}
-                value={value}
-                className="text-sm cursor-pointer hover:bg-blue-50 flex items-center justify-between pr-2"
-              >
-                <span>{label}</span>
-                {value !== "no-music" && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 ml-2"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handlePreview(value);
-                    }}
-                  >
-                    {previewingMusic === value ? (
-                      <Pause className="h-3 w-3" />
-                    ) : (
-                      <Play className="h-3 w-3" />
-                    )}
-                  </Button>
-                )}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <h3 className="text-sm font-medium">Background Music</h3>
       </div>
-      
-      <div className="flex items-center space-x-2">
+
+      <RadioGroup
+        value={selectedMusic}
+        onValueChange={(value) => {
+          if (previewingMusic) {
+            handlePreview(previewingMusic); // Stop current preview
+          }
+          onMusicChange?.(value);
+        }}
+        className="grid gap-3"
+      >
+        {Object.entries(MUSIC_OPTIONS).map(([value, { label, url }]) => (
+          <div key={value} className="flex items-center space-x-2">
+            <RadioGroupItem value={value} id={value} />
+            <Label htmlFor={value} className="flex-1">{label}</Label>
+            {url && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-1"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handlePreview(value);
+                }}
+              >
+                {previewingMusic === value ? (
+                  <Pause className="h-4 w-4" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
+              </Button>
+            )}
+          </div>
+        ))}
+      </RadioGroup>
+
+      <div className="flex items-center space-x-4 pt-4 border-t">
         <Button 
           variant="ghost" 
           size="icon" 
@@ -140,10 +137,10 @@ export function MusicControls({
               audioRef.current.volume = newVolume[0];
             }
           }}
-          className="w-24"
+          className="w-full"
           disabled={selectedMusic === "no-music"}
         />
       </div>
-    </div>
+    </Card>
   );
 }
