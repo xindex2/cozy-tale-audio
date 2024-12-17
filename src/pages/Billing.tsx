@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 export default function Billing() {
   const { toast } = useToast();
@@ -56,7 +57,11 @@ export default function Billing() {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
   }
 
   return (
@@ -75,6 +80,11 @@ export default function Billing() {
               <p className="text-gray-600">
                 {subscription?.subscribed ? "Active" : "No active subscription"}
               </p>
+              {subscription?.subscribed && (
+                <p className="text-gray-600">
+                  Current plan: {subscription.plan_name}
+                </p>
+              )}
             </div>
             <div className="flex gap-4">
               <Button onClick={handleManageSubscription}>

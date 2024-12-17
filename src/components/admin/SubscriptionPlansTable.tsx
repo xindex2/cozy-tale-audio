@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Edit2, Loader2 } from "lucide-react";
+import { Edit2, Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import { SubscriptionPlanDialog } from "./SubscriptionPlanDialog";
 
@@ -30,6 +30,7 @@ export function SubscriptionPlansTable() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const { data: plans, isLoading } = useQuery({
     queryKey: ['subscription-plans'],
@@ -75,6 +76,12 @@ export function SubscriptionPlansTable() {
 
   return (
     <>
+      <div className="flex justify-end mb-4">
+        <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Add Plan
+        </Button>
+      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -126,6 +133,10 @@ export function SubscriptionPlansTable() {
         open={!!editingPlan}
         onOpenChange={(open) => !open && setEditingPlan(null)}
         planToEdit={editingPlan || undefined}
+      />
+      <SubscriptionPlanDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
       />
     </>
   );
