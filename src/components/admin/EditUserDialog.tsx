@@ -17,6 +17,7 @@ interface EditUserDialogProps {
     is_admin: boolean | null;
   };
   subscription?: {
+    id?: string;
     plan_id: string;
     status: string;
   } | null;
@@ -41,17 +42,42 @@ export function EditUserDialog({ user, subscription, plans }: EditUserDialogProp
         .update({ is_admin: isAdmin })
         .eq('id', user.id);
 
-      // Update or create subscription
+      // Handle subscription update/creation
       if (selectedPlan) {
-        if (subscription) {
+        if (subscription?.id) {
+          // Update existing subscription
           await supabase
             .from('user_subscriptions')
-            .update({ plan_id: selectedPlan })
-            .eq('user_id', user.id);
+            .update({ 
+              plan_id: selectedPlan,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', subscription.id);
         } else {
-          await supabase
+          // Create new subscription
+          const { error: subscriptionError } = await supabase
             .from('user_subscriptions')
-            .insert([{ user_id: user.id, plan_id: selectedPlan }]);
+            .insert([{ 
+              user_id: user.id, 
+              plan_id: selectedPlan,
+              status: 'active'
+            }]);
+
+          if (subscriptionError) {
+            if (subscriptionError.code === '23505') { // Unique constraint violation
+              // If insert failed due to unique constraint, try updating instead
+              await supabase
+                .from('user_subscriptions')
+                .update({ 
+                  plan_id: selectedPlan,
+                  status: 'active',
+                  updated_at: new Date().toISOString()
+                })
+                .eq('user_id', user.id);
+            } else {
+              throw subscriptionError;
+            }
+          }
         }
       }
 
@@ -85,6 +111,7 @@ export function EditUserDialog({ user, subscription, plans }: EditUserDialogProp
       });
       
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      setOpen(false);
     } catch (error) {
       console.error('Error deleting user:', error);
       toast({
