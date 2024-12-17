@@ -35,10 +35,13 @@ export function UsersTable() {
     queryKey: ['admin-users'],
     queryFn: async () => {
       console.log('Fetching users...');
-      const { data, error } = await supabase
+      const { data: profiles, error } = await supabase
         .from('profiles')
         .select(`
-          *,
+          id,
+          email,
+          is_admin,
+          created_at,
           user_subscriptions (
             plan_id,
             status,
@@ -54,11 +57,12 @@ export function UsersTable() {
         throw error;
       }
       
-      console.log('Fetched users:', data);
-      return data;
+      console.log('Fetched profiles:', profiles);
+      return profiles;
     },
-    retry: 1,
+    retry: 2,
     refetchOnWindowFocus: true,
+    staleTime: 1000 * 60, // 1 minute
   });
 
   const { data: plans } = useQuery({
