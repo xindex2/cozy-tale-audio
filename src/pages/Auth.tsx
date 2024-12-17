@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useToast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 export default function Auth() {
@@ -14,6 +15,7 @@ export default function Auth() {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [fullName, setFullName] = useState("");
+  const [isSignUp, setIsSignUp] = useState(true);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -86,18 +88,21 @@ export default function Auth() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-center mb-2">Welcome to Bedtimey</h1>
           <p className="text-center text-gray-600 mb-6">
-            Sign in to your account or create a new one
+            {isSignUp ? "Create a new account" : "Sign in to your account"}
           </p>
-          <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name</Label>
-            <Input
-              id="fullName"
-              type="text"
-              placeholder="Enter your full name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-            />
-          </div>
+          
+          {isSignUp && (
+            <div className="space-y-2 mb-6">
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                type="text"
+                placeholder="Enter your full name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
+          )}
         </div>
 
         <SupabaseAuth
@@ -121,7 +126,7 @@ export default function Auth() {
           }}
           providers={[]}
           redirectTo={`${window.location.origin}/auth/callback`}
-          view="sign_up"
+          view={isSignUp ? "sign_up" : "sign_in"}
           localization={{
             variables: {
               sign_up: {
@@ -129,12 +134,24 @@ export default function Auth() {
                 password_label: "Password",
                 button_label: "Sign up",
               },
+              sign_in: {
+                email_label: "Email",
+                password_label: "Password",
+                button_label: "Sign in",
+              },
             },
           }}
-          additionalData={{
-            full_name: fullName,
-          }}
+          {...(isSignUp && { additionalData: { full_name: fullName } })}
         />
+
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
+            {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+          </button>
+        </div>
       </Card>
     </div>
   );
