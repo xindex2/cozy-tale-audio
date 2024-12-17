@@ -76,14 +76,40 @@ export function VoiceLanguageSelector({
   ];
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 bg-white shadow-md">
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Voice Selection */}
+        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Language and Voice</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Language Selection - Now on the left */}
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold mb-1">Select a Voice</h3>
-              <p className="text-sm text-gray-500">Choose the voice that will narrate your story</p>
+              <h3 className="text-lg font-semibold mb-2 text-gray-800">Select a Language</h3>
+              <p className="text-sm text-gray-600 mb-3">Choose the language for your story</p>
+            </div>
+            
+            <Select value={selectedLanguage} onValueChange={onLanguageSelect}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a language" />
+              </SelectTrigger>
+              <SelectContent>
+                {languages.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      <span>{lang.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Voice Selection - Now on the right */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2 text-gray-800">Select a Voice</h3>
+              <p className="text-sm text-gray-600 mb-3">Choose the voice that will narrate your story</p>
             </div>
             
             <Select 
@@ -109,7 +135,7 @@ export function VoiceLanguageSelector({
               </SelectContent>
             </Select>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 mt-3">
               <Checkbox
                 id="no-audio"
                 checked={selectedVoice === 'none'}
@@ -123,40 +149,16 @@ export function VoiceLanguageSelector({
               />
               <label
                 htmlFor="no-audio"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm font-medium text-gray-700 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 No audio narration
               </label>
             </div>
           </div>
-
-          {/* Language Selection */}
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-1">Select a Language</h3>
-              <p className="text-sm text-gray-500">Choose the language for your story</p>
-            </div>
-            
-            <Select value={selectedLanguage} onValueChange={onLanguageSelect}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a language" />
-              </SelectTrigger>
-              <SelectContent>
-                {languages.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code}>
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4" />
-                      <span>{lang.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
         {/* Combined Notes Section */}
-        <div className="space-y-4">
+        <div className="mt-6">
           <div className="bg-purple-50 p-4 rounded-xl shadow-sm">
             <p className="text-base text-gray-700 leading-relaxed">
               <span className="font-bold text-story-purple">🌍 Language Selection:</span> When you choose a language, 
