@@ -28,15 +28,45 @@ export function useUserUsage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return null;
 
-      const { data, error } = await supabase
+      // First try to get existing usage
+      let { data, error } = await supabase
         .from('user_usage')
         .select('*')
         .eq('user_id', session.user.id)
         .single();
 
-      if (error) throw error;
+      // If no usage record exists, create one
+      if (error && error.message.includes('JSON object requested, multiple (or no) rows returned')) {
+        console.log('Creating new user usage record for:', session.user.id);
+        
+        const { data: newData, error: insertError } = await supabase
+          .from('user_usage')
+          .insert([
+            { 
+              user_id: session.user.id,
+              stories_created: 0,
+              stories_read: 0,
+              chat_messages_sent: 0,
+              quiz_questions_answered: 0
+            }
+          ])
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating user usage:', insertError);
+          throw insertError;
+        }
+
+        data = newData;
+      } else if (error) {
+        console.error('Error fetching user usage:', error);
+        throw error;
+      }
+
       return data as UserUsage;
     },
+    retry: 1,
   });
 
   const updateUsage = useMutation({
