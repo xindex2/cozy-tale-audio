@@ -6,7 +6,6 @@ import { AudioManager } from "./story-player/AudioManager";
 import { StoryDisplay } from "./story-player/StoryDisplay";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { StoryHeader } from "./story-player/StoryHeader";
-import { PlayButton } from "./story-player/PlayButton";
 import { useStoryPlayer } from "@/hooks/useStoryPlayer";
 import { useEffect, useState } from "react";
 import { LoadingState } from "./story-player/LoadingState";
@@ -123,6 +122,8 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
               isMuted={isMuted}
               onVolumeChange={(newVolume) => setVolume(newVolume[0])}
               onToggleMute={() => setIsMuted(!isMuted)}
+              isPlaying={isPlaying}
+              onTogglePlay={() => setIsPlaying(!isPlaying)}
             />
 
             <AudioManager
@@ -146,11 +147,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
                 isFreeTrial={isFreeTrial}
               />
             </ErrorBoundary>
-
-            <PlayButton
-              isPlaying={isPlaying}
-              onTogglePlay={() => setIsPlaying(!isPlaying)}
-            />
 
             <MusicControls
               volume={musicVolume}
