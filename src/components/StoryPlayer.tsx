@@ -9,7 +9,8 @@ import { StoryHeader } from "./story-player/StoryHeader";
 import { PlayButton } from "./story-player/PlayButton";
 import { useStoryPlayer } from "@/hooks/useStoryPlayer";
 import { useEffect } from "react";
-import { Loader } from "lucide-react";
+import { LoadingState } from "./story-player/LoadingState";
+import { useToast } from "@/hooks/use-toast";
 
 interface StoryPlayerProps {
   settings: StorySettings;
@@ -24,6 +25,7 @@ interface StoryPlayerProps {
 }
 
 export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: StoryPlayerProps) {
+  const { toast } = useToast();
   const {
     isPlaying,
     setIsPlaying,
@@ -71,27 +73,28 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
   useEffect(() => {
     if (currentAudioUrl) {
       console.log("Audio URL available:", currentAudioUrl);
+      toast({
+        title: "Audio Ready",
+        description: "Your bedtime story's narration is ready to play",
+      });
     }
   }, [currentAudioUrl]);
 
-  const handleMusicChange = (newMusic: string) => {
-    if (settings) {
-      settings.music = newMusic;
+  // Handle music changes
+  useEffect(() => {
+    if (currentMusicUrl) {
+      toast({
+        title: "Background Music Ready",
+        description: "Peaceful background music has been added to your story",
+      });
     }
-  };
+  }, [currentMusicUrl]);
 
   if (isLoading) {
     return (
       <div className="w-full max-w-7xl mx-auto p-4 lg:p-6">
-        <Card className="p-8 flex items-center justify-center min-h-[400px]">
-          <div className="text-center space-y-4">
-            <Loader className="h-8 w-8 animate-spin mx-auto text-blue-500" />
-            <p className="text-blue-600 font-medium">
-              {loadingStage === 'text' && "Creating your story..."}
-              {loadingStage === 'audio' && "Generating audio..."}
-              {loadingStage === 'music' && "Adding music..."}
-            </p>
-          </div>
+        <Card className="p-8">
+          <LoadingState stage={loadingStage} />
         </Card>
       </div>
     );
@@ -118,7 +121,11 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
                 onVolumeChange={(newVolume) => setMusicVolume(newVolume[0])}
                 onToggleMute={() => setIsMusicMuted(!isMusicMuted)}
                 selectedMusic={settings?.music}
-                onMusicChange={handleMusicChange}
+                onMusicChange={(music) => {
+                  if (settings) {
+                    settings.music = music;
+                  }
+                }}
               />
             </div>
 
