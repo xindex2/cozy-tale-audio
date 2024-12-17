@@ -3,6 +3,7 @@ import type { StorySettings } from "@/components/StoryOptions";
 import { useStoryState } from "./story/useStoryState";
 import { useStoryActions } from "./story/useStoryActions";
 import { uploadAudioToStorage } from "@/utils/audioStorage";
+import { toast } from "@/hooks/use-toast";
 
 export function useStoryPlayer(
   settings: StorySettings,
