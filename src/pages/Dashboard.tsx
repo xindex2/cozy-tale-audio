@@ -6,9 +6,23 @@ import { Footer } from "@/components/layout/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   const { data: stories, isLoading, error, refetch } = useQuery({
     queryKey: ['stories'],
@@ -25,9 +39,17 @@ export default function Dashboard() {
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Error loading stories",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
+        throw error;
+      }
       return data;
     },
+    retry: 1,
   });
 
   const handleCreateNew = () => {
@@ -64,6 +86,7 @@ export default function Dashboard() {
           {isLoading ? (
             <div className="flex justify-center items-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <span className="ml-2 text-gray-600">Loading your stories...</span>
             </div>
           ) : stories && stories.length > 0 ? (
             <StoriesTable stories={stories} onRefresh={refetch} />
