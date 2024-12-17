@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -7,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { GradientButton } from "@/components/ui/gradient-button";
 
 export default function Billing() {
   const { toast } = useToast();
@@ -95,13 +95,13 @@ export default function Billing() {
                 )}
               </div>
               <div className="flex gap-4">
-                <Button onClick={handleManageSubscription}>
+                <GradientButton onClick={handleManageSubscription}>
                   Manage Subscription
-                </Button>
+                </GradientButton>
                 {!subscription?.subscribed && (
-                  <Button variant="outline" onClick={() => navigate('/pricing')}>
+                  <GradientButton variant="outline" onClick={() => navigate('/pricing')}>
                     View Plans
-                  </Button>
+                  </GradientButton>
                 )}
               </div>
             </div>
