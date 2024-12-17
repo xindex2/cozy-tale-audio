@@ -1,10 +1,47 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, LogIn, LogOut } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
 
 export function Header() {
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsLoggedIn(!!session);
+    };
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account.",
+      });
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Error signing out",
+        description: "There was a problem signing out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -19,6 +56,25 @@ export function Header() {
 
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
           <nav className="flex items-center space-x-2">
+            {isLoggedIn ? (
+              <Button
+                variant="ghost"
+                onClick={handleSignOut}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="hidden sm:inline">Sign Out</span>
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/auth')}
+                className="flex items-center gap-2"
+              >
+                <LogIn className="h-5 w-5" />
+                <span className="hidden sm:inline">Sign In</span>
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"

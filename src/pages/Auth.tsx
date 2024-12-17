@@ -12,61 +12,39 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    // Check if user is already logged in
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/');
+      }
+    };
+    checkAuth();
+
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN") {
-        navigate("/dashboard");
+        navigate('/');
         toast({
-          title: "Welcome back!",
+          title: "Welcome to Bedtimey!",
           description: "You have successfully signed in.",
-        });
-      } else if (event === "PASSWORD_RECOVERY") {
-        toast({
-          title: "Check your email",
-          description: "We've sent you a password reset link.",
-        });
-      } else if (event === "USER_UPDATED") {
-        toast({
-          title: "Profile updated",
-          description: "Your profile has been updated successfully.",
-        });
-      } else if (event === "SIGNED_OUT") {
-        toast({
-          title: "Signed out",
-          description: "You have been signed out successfully.",
         });
       }
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, [navigate, toast]);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/dashboard");
-      }
-    };
-    checkAuth();
-  }, [navigate]);
-
+  // Handle any auth errors from URL parameters
   useEffect(() => {
     const error = searchParams.get("error");
     const error_description = searchParams.get("error_description");
 
-    if (error === "invalid_credentials") {
-      toast({
-        variant: "destructive",
-        title: "Invalid Credentials",
-        description: "The email or password you entered is incorrect. Please try again.",
-      });
-    } else if (error && error_description) {
+    if (error) {
       toast({
         variant: "destructive",
         title: "Authentication Error",
-        description: error_description,
+        description: error_description || "There was a problem with authentication.",
       });
     }
   }, [searchParams, toast]);
@@ -75,7 +53,7 @@ export default function Auth() {
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-center mb-2">Welcome to Story Time</h1>
+          <h1 className="text-2xl font-bold text-center mb-2">Welcome to Bedtimey</h1>
           <p className="text-center text-gray-600">
             Sign in to your account or create a new one
           </p>
@@ -101,7 +79,6 @@ export default function Auth() {
           }}
           providers={[]}
           redirectTo={`${window.location.origin}/auth/callback`}
-          showLinks={true}
         />
       </Card>
     </div>
