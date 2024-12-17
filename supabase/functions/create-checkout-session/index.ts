@@ -34,6 +34,13 @@ serve(async (req) => {
 
     const { priceId } = await req.json();
 
+    // Validate that priceId starts with 'price_'
+    if (!priceId.startsWith('price_')) {
+      console.error('Invalid price ID format:', priceId);
+      throw new Error('Invalid price ID format. Price IDs should start with "price_"');
+    }
+
+    console.log('Looking up customer for email:', email);
     const customers = await stripe.customers.list({
       email: email,
       limit: 1
@@ -42,6 +49,15 @@ serve(async (req) => {
     let customer_id = undefined;
     if (customers.data.length > 0) {
       customer_id = customers.data[0].id;
+      console.log('Found existing customer:', customer_id);
+    }
+
+    // Verify the price exists before creating the session
+    try {
+      await stripe.prices.retrieve(priceId);
+    } catch (error) {
+      console.error('Price lookup failed:', error);
+      throw new Error(`Invalid price ID: ${priceId}`);
     }
 
     console.log('Creating payment session...');
