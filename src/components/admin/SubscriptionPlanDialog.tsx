@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface SubscriptionPlanDialogProps {
   open: boolean;
@@ -36,12 +36,32 @@ export function SubscriptionPlanDialog({
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: planToEdit?.name || "",
-    description: planToEdit?.description || "",
-    price_amount: planToEdit?.price_amount || 0,
-    stripe_price_id: planToEdit?.stripe_price_id || "",
-    features: planToEdit?.features ? planToEdit.features.join("\n") : "",
+    name: "",
+    description: "",
+    price_amount: 0,
+    stripe_price_id: "",
+    features: "",
   });
+
+  useEffect(() => {
+    if (planToEdit) {
+      setFormData({
+        name: planToEdit.name,
+        description: planToEdit.description || "",
+        price_amount: planToEdit.price_amount,
+        stripe_price_id: planToEdit.stripe_price_id,
+        features: planToEdit.features ? planToEdit.features.join("\n") : "",
+      });
+    } else {
+      setFormData({
+        name: "",
+        description: "",
+        price_amount: 0,
+        stripe_price_id: "",
+        features: "",
+      });
+    }
+  }, [planToEdit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,6 +165,7 @@ export function SubscriptionPlanDialog({
               value={formData.features}
               onChange={(e) => setFormData(prev => ({ ...prev, features: e.target.value }))}
               placeholder="Unlimited stories&#10;Priority support&#10;Custom themes"
+              rows={5}
             />
           </div>
           <DialogFooter>

@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Edit2, Loader2, Plus } from "lucide-react";
+import { Edit2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { SubscriptionPlanDialog } from "./SubscriptionPlanDialog";
 
@@ -76,12 +76,6 @@ export function SubscriptionPlansTable() {
 
   return (
     <>
-      <div className="flex justify-end mb-4">
-        <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Plan
-        </Button>
-      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -104,8 +98,8 @@ export function SubscriptionPlansTable() {
                 </TableCell>
                 <TableCell>
                   <ul className="list-disc list-inside">
-                    {Array.isArray(plan.features) && plan.features?.map((feature: string, index: number) => (
-                      <li key={index}>{feature}</li>
+                    {plan.features?.map((feature, index) => (
+                      <li key={index} className="text-sm text-gray-600">{feature}</li>
                     ))}
                   </ul>
                 </TableCell>
