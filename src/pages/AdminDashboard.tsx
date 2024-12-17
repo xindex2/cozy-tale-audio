@@ -2,22 +2,12 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Users, BookOpen, Loader2, Plus } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { SubscriptionPlanDialog } from "@/components/admin/SubscriptionPlanDialog";
-import { SubscriptionPlansTable } from "@/components/admin/SubscriptionPlansTable";
+import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UsersTable } from "@/components/admin/UsersTable";
-import { ApiKeysTable } from "@/components/admin/ApiKeysTable";
-import { useToast } from "@/hooks/use-toast";
+import { StatsCards } from "@/components/admin/dashboard/StatsCards";
+import { AdminHeader } from "@/components/admin/dashboard/AdminHeader";
 
 export default function AdminDashboard() {
-  const [showPlanDialog, setShowPlanDialog] = useState(false);
-  const { toast } = useToast();
-
   // Check if user is authenticated
   const { data: session, isLoading: isLoadingSession } = useQuery({
     queryKey: ['session'],
@@ -133,74 +123,20 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
       <Header />
       <main className="container py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <Shield className="h-8 w-8 text-blue-600" />
-          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        </div>
-
+        <AdminHeader />
         {isLoadingStats ? (
           <div className="flex justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-blue-600" />
-                  Total Users
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{stats?.users}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-blue-600" />
-                  Total Stories
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{stats?.stories}</p>
-              </CardContent>
-            </Card>
-          </div>
+          <StatsCards 
+            usersCount={stats?.users || 0}
+            storiesCount={stats?.stories || 0}
+            isLoading={isLoadingStats}
+          />
         )}
-
-        <Tabs defaultValue="users" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="api-keys">API Keys</TabsTrigger>
-            <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="users">
-            <UsersTable />
-          </TabsContent>
-
-          <TabsContent value="api-keys">
-            <ApiKeysTable />
-          </TabsContent>
-
-          <TabsContent value="plans" className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Subscription Plans</h2>
-              <Button onClick={() => setShowPlanDialog(true)} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Add Plan
-              </Button>
-            </div>
-            <SubscriptionPlansTable />
-          </TabsContent>
-        </Tabs>
       </main>
       <Footer />
-      <SubscriptionPlanDialog 
-        open={showPlanDialog} 
-        onOpenChange={setShowPlanDialog} 
-      />
     </div>
   );
 }
