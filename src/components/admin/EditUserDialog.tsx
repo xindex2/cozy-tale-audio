@@ -36,6 +36,9 @@ export function EditUserDialog({ user, subscription, plans }: EditUserDialogProp
 
   const handleSave = async () => {
     try {
+      console.log('Updating user:', user.id);
+      console.log('Selected plan:', selectedPlan);
+      
       // Update admin status
       await supabase
         .from('profiles')
@@ -44,14 +47,8 @@ export function EditUserDialog({ user, subscription, plans }: EditUserDialogProp
 
       // Handle subscription update/creation
       if (selectedPlan) {
-        // First check if user already has a subscription
-        const { data: existingSubscription } = await supabase
-          .from('user_subscriptions')
-          .select('id')
-          .eq('user_id', user.id)
-          .single();
-
-        if (existingSubscription) {
+        if (subscription?.id) {
+          console.log('Updating existing subscription:', subscription.id);
           // Update existing subscription
           await supabase
             .from('user_subscriptions')
@@ -60,8 +57,9 @@ export function EditUserDialog({ user, subscription, plans }: EditUserDialogProp
               status: 'active',
               updated_at: new Date().toISOString()
             })
-            .eq('id', existingSubscription.id);
+            .eq('id', subscription.id);
         } else {
+          console.log('Creating new subscription for user:', user.id);
           // Create new subscription
           await supabase
             .from('user_subscriptions')
@@ -73,12 +71,15 @@ export function EditUserDialog({ user, subscription, plans }: EditUserDialogProp
         }
       }
 
+      // Invalidate all relevant queries
+      await queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      await queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      
       toast({
         title: "Success",
         description: "User updated successfully",
       });
       
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setOpen(false);
     } catch (error) {
       console.error('Error updating user:', error);
@@ -97,12 +98,15 @@ export function EditUserDialog({ user, subscription, plans }: EditUserDialogProp
         .delete()
         .eq('id', user.id);
 
+      // Invalidate all relevant queries
+      await queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      await queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      
       toast({
         title: "Success",
         description: "User deleted successfully",
       });
       
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       setOpen(false);
     } catch (error) {
       console.error('Error deleting user:', error);
