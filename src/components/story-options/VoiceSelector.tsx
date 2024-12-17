@@ -52,7 +52,7 @@ export function VoiceSelector({ selectedVoice, onVoiceSelect }: VoiceSelectorPro
   ];
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 h-[250px]">
       <div className="space-y-4">
         <div>
           <h3 className="text-lg font-semibold mb-1">Select a Voice</h3>
