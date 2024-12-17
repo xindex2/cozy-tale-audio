@@ -57,7 +57,7 @@ export function ChatPanel({
   };
 
   return (
-    <Card className="h-[calc(100vh-24rem)] md:h-[800px] flex flex-col bg-gradient-to-r from-blue-50 to-blue-100">
+    <Card className="h-[calc(100vh-24rem)] md:h-[calc(100vh-16rem)] mb-24 flex flex-col bg-gradient-to-r from-blue-50 to-blue-100">
       <Tabs defaultValue="chat" className="flex-1 flex flex-col h-full">
         <div className="p-4 border-b border-blue-100">
           <TabsList className="w-full bg-white/50">

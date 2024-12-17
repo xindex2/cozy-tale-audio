@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export function Footer() {
   return (
-    <footer className="border-t bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <footer className="border-t bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 mt-auto">
       <div className="container py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-3">
