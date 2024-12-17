@@ -46,24 +46,22 @@ export function Header() {
 
   const handleSignOut = async () => {
     try {
-      // First, clear all Supabase-related items from localStorage
+      // Get current session
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+
+      // Clear all Supabase-related items from localStorage first
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith('supabase.auth.')) {
           localStorage.removeItem(key);
         }
       });
 
-      // Clear any potential cookies
-      document.cookie.split(";").forEach(cookie => {
-        document.cookie = cookie
-          .replace(/^ +/, "")
-          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-      });
-
-      // Attempt to sign out (but don't wait for it)
-      supabase.auth.signOut().catch(error => {
-        console.log('Sign out attempt error (expected):', error);
-      });
+      // Only attempt to sign out if there's an active session
+      if (currentSession) {
+        await supabase.auth.signOut({
+          scope: 'local'
+        });
+      }
 
       // Show success message
       toast({
@@ -71,11 +69,16 @@ export function Header() {
         description: "You have been logged out",
       });
 
-      // Always navigate to auth page
+      // Navigate to auth page
       navigate('/auth');
     } catch (error) {
-      console.log('Cleanup error:', error);
-      // Still navigate to auth page
+      console.error('Sign out error:', error);
+      // Clear storage and navigate anyway
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('supabase.auth.')) {
+          localStorage.removeItem(key);
+        }
+      });
       navigate('/auth');
     }
   };
