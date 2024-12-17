@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "@/pages/Index";
-import Auth from "@/pages/Auth";
+import Login from "@/pages/auth/Login";
+import Register from "@/pages/auth/Register";
 import Dashboard from "@/pages/Dashboard";
 import CreateStory from "@/pages/CreateStory";
 import Stories from "@/pages/Stories";
@@ -27,7 +28,8 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<Auth />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/create" element={<CreateStory />} />
         <Route path="/stories" element={<Stories />} />
