@@ -170,13 +170,15 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
         </div>
 
         <div className="lg:h-[800px] space-y-4">
-          <MusicControls
-            volume={musicVolume}
-            isMuted={isMusicMuted}
-            onVolumeChange={(newVolume) => setMusicVolume(newVolume[0])}
-            onToggleMute={() => setIsMusicMuted(!isMusicMuted)}
-            selectedMusic={settings?.music}
-          />
+          <Card className="p-4">
+            <MusicControls
+              volume={musicVolume}
+              isMuted={isMusicMuted}
+              onVolumeChange={(newVolume) => setMusicVolume(newVolume[0])}
+              onToggleMute={() => setIsMusicMuted(!isMusicMuted)}
+              selectedMusic={settings?.music}
+            />
+          </Card>
 
           <ChatPanel
             messages={messages}
