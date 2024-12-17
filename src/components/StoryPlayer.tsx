@@ -110,6 +110,31 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     );
   }
 
+  // Add state for persisted audio URLs
+  const [persistedAudioUrl, setPersistedAudioUrl] = useState<string | null>(null);
+  const [persistedMusicUrl, setPersistedMusicUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialStoryData?.audioUrl) {
+      setPersistedAudioUrl(initialStoryData.audioUrl);
+    }
+    if (initialStoryData?.backgroundMusicUrl) {
+      setPersistedMusicUrl(initialStoryData.backgroundMusicUrl);
+    }
+  }, [initialStoryData]);
+
+  // Modify the existing useEffect for audio persistence
+  useEffect(() => {
+    if (currentAudioUrl && onSave) {
+      onSave(
+        storyTitle,
+        storyContent,
+        currentAudioUrl,
+        currentMusicUrl || ""
+      );
+    }
+  }, [currentAudioUrl, currentMusicUrl, storyTitle, storyContent, onSave]);
+
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-4 lg:gap-6">
@@ -127,8 +152,8 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
             />
 
             <AudioManager
-              voiceUrl={currentAudioUrl || initialStoryData?.audioUrl || ''}
-              backgroundMusicUrl={currentMusicUrl || initialStoryData?.backgroundMusicUrl || ''}
+              voiceUrl={persistedAudioUrl || currentAudioUrl || initialStoryData?.audioUrl || ''}
+              backgroundMusicUrl={persistedMusicUrl || currentMusicUrl || initialStoryData?.backgroundMusicUrl || ''}
               isPlaying={isPlaying}
               volume={volume}
               isMuted={isMuted}
@@ -136,17 +161,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
               isMusicMuted={isMusicMuted}
               onTimeUpdate={setCurrentTime}
             />
-
-            <ErrorBoundary>
-              <StoryDisplay
-                text={displayContent || initialStoryData?.content || ""}
-                audioUrl={currentAudioUrl || initialStoryData?.audioUrl}
-                isPlaying={isPlaying}
-                currentTime={currentTime}
-                duration={settings.duration * 60}
-                isFreeTrial={isFreeTrial}
-              />
-            </ErrorBoundary>
 
             <MusicControls
               volume={musicVolume}
@@ -160,6 +174,17 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
                 }
               }}
             />
+
+            <ErrorBoundary>
+              <StoryDisplay
+                text={displayContent || initialStoryData?.content || ""}
+                audioUrl={persistedAudioUrl || currentAudioUrl || initialStoryData?.audioUrl}
+                isPlaying={isPlaying}
+                currentTime={currentTime}
+                duration={settings.duration * 60}
+                isFreeTrial={isFreeTrial}
+              />
+            </ErrorBoundary>
           </Card>
         </div>
 
