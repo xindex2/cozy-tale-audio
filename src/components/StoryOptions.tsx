@@ -17,7 +17,7 @@ export interface StorySettings {
   ageGroup: string;
   duration: number;
   music: string;
-  voice: string;
+  voice: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
   theme: string;
   language: string;
 }
@@ -27,7 +27,7 @@ export function StoryOptions({ onStart }: StoryOptionsProps) {
     ageGroup: "6-8",
     duration: 5,
     music: "no-music",
-    voice: "EXAVITQu4vr4xnSDxMaL",
+    voice: "alloy",
     theme: "fantasy",
     language: "en"
   });
