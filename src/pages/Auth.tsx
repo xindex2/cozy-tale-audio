@@ -40,6 +40,18 @@ export default function Auth() {
       
       if (event === 'SIGNED_IN' && session) {
         try {
+          // Verify profile creation
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profileError) {
+            console.error("Error checking profile:", profileError);
+            throw profileError;
+          }
+
           // Check if this is a new signup by checking if they have a subscription
           const { data: existingSubscription, error } = await supabase
             .from('user_subscriptions')
@@ -138,6 +150,7 @@ export default function Auth() {
                 placeholder="Enter your full name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
+                required
               />
             </div>
           )}
