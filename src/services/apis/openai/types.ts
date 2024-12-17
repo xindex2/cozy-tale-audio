@@ -3,7 +3,7 @@ export interface StoryGenerationSettings {
   ageGroup: string;
   theme: string;
   language: string;
-  voice?: string;
+  voice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
   music?: string;
   audio?: boolean;
 }

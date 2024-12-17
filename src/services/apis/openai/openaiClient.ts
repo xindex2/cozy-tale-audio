@@ -82,6 +82,48 @@ class OpenAIClient {
     throw lastError;
   }
 
+  async generateSpeech(text: string, voice: string = 'alloy'): Promise<string> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    try {
+      console.log("Generating speech for text:", text.substring(0, 100) + "...");
+      
+      const response = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'tts-1',
+          input: text,
+          voice: voice,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("OpenAI TTS API error:", error);
+        throw new Error(error.error?.message || 'Failed to generate speech');
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      console.log("Speech generated successfully");
+      return audioUrl;
+    } catch (error: any) {
+      console.error("Error generating speech:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate speech. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  }
+
   async generateContent(prompt: string, systemPrompt?: string, onStream?: (chunk: string) => void) {
     if (!this.isInitialized) {
       await this.initialize();

@@ -1,7 +1,6 @@
 import { openaiClient } from "./openaiClient";
 import type { StoryGenerationSettings, StoryResponse } from "./types";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 export const openaiService = {
   async generateStory(settings: StoryGenerationSettings): Promise<StoryResponse> {
@@ -69,44 +68,8 @@ export const openaiService = {
           description: "Please wait while we create the audio narration...",
         });
 
-        // Get the ElevenLabs API key
-        const { data: apiKeyData, error: apiKeyError } = await supabase
-          .from('api_keys')
-          .select('key_value')
-          .eq('key_name', 'ELEVEN_LABS_API_KEY')
-          .eq('is_active', true)
-          .single();
-
-        if (apiKeyError || !apiKeyData) {
-          console.error("Error fetching ElevenLabs API key:", apiKeyError);
-          throw new Error("ElevenLabs API key not found");
-        }
-
-        // Generate audio using ElevenLabs
-        const voiceId = settings.voice || "21m00Tcm4TlvDq8ikWAM";
-        const audioResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-          method: 'POST',
-          headers: {
-            'Accept': 'audio/mpeg',
-            'Content-Type': 'application/json',
-            'xi-api-key': apiKeyData.key_value
-          },
-          body: JSON.stringify({
-            text: content,
-            model_id: "eleven_multilingual_v2",
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.5
-            }
-          })
-        });
-
-        if (!audioResponse.ok) {
-          throw new Error(`ElevenLabs API error: ${audioResponse.statusText}`);
-        }
-
-        const audioBlob = await audioResponse.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
+        // Generate audio using OpenAI TTS
+        const audioUrl = await openaiClient.generateSpeech(content, settings.voice || 'alloy');
         console.log("Audio generated successfully:", audioUrl);
 
         toast({
