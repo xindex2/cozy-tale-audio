@@ -36,9 +36,10 @@ export function EditUserDialog({ user, subscription, plans }: EditUserDialogProp
 
   const handleSave = async () => {
     try {
-      console.log('Updating user:', user.id);
+      console.log('Starting update for user:', user.id);
+      console.log('Current subscription:', subscription);
       console.log('Selected plan:', selectedPlan);
-      
+
       // Update admin status
       await supabase
         .from('profiles')
@@ -50,7 +51,7 @@ export function EditUserDialog({ user, subscription, plans }: EditUserDialogProp
         if (subscription?.id) {
           console.log('Updating existing subscription:', subscription.id);
           // Update existing subscription
-          await supabase
+          const { error: updateError } = await supabase
             .from('user_subscriptions')
             .update({ 
               plan_id: selectedPlan,
@@ -58,20 +59,58 @@ export function EditUserDialog({ user, subscription, plans }: EditUserDialogProp
               updated_at: new Date().toISOString()
             })
             .eq('id', subscription.id);
+
+          if (updateError) {
+            console.error('Error updating subscription:', updateError);
+            throw updateError;
+          }
         } else {
           console.log('Creating new subscription for user:', user.id);
-          // Create new subscription
-          await supabase
+          // First, ensure there are no existing subscriptions for this user
+          const { data: existingSubs, error: checkError } = await supabase
             .from('user_subscriptions')
-            .insert([{ 
-              user_id: user.id, 
-              plan_id: selectedPlan,
-              status: 'active'
-            }]);
+            .select('id')
+            .eq('user_id', user.id);
+
+          if (checkError) {
+            console.error('Error checking existing subscriptions:', checkError);
+            throw checkError;
+          }
+
+          if (existingSubs && existingSubs.length > 0) {
+            // Update the existing subscription instead of creating a new one
+            const { error: updateError } = await supabase
+              .from('user_subscriptions')
+              .update({ 
+                plan_id: selectedPlan,
+                status: 'active',
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', existingSubs[0].id);
+
+            if (updateError) {
+              console.error('Error updating existing subscription:', updateError);
+              throw updateError;
+            }
+          } else {
+            // Create new subscription only if none exists
+            const { error: insertError } = await supabase
+              .from('user_subscriptions')
+              .insert([{ 
+                user_id: user.id, 
+                plan_id: selectedPlan,
+                status: 'active'
+              }]);
+
+            if (insertError) {
+              console.error('Error creating new subscription:', insertError);
+              throw insertError;
+            }
+          }
         }
       }
 
-      // Invalidate all relevant queries
+      // Invalidate queries to refresh the data
       await queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       await queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
       
@@ -98,7 +137,7 @@ export function EditUserDialog({ user, subscription, plans }: EditUserDialogProp
         .delete()
         .eq('id', user.id);
 
-      // Invalidate all relevant queries
+      // Invalidate queries to refresh the data
       await queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       await queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
       
