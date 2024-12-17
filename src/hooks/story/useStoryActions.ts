@@ -3,7 +3,6 @@ import { openaiService } from "@/services/apis/openai/storyGenerator";
 import { audioService } from "@/services/apis/audioService";
 import type { StorySettings } from "@/components/StoryOptions";
 import type { Message, QuizQuestion } from "@/types/story";
-import { streamContent } from "@/services/apis/openai/streamingClient";
 
 export function useStoryActions(
   state: ReturnType<typeof import("./useStoryState").useStoryState>,
@@ -14,10 +13,8 @@ export function useStoryActions(
   const startStory = async (settings: StorySettings) => {
     state.loading.setIsLoading(true);
     state.loading.setStage('text');
-    state.story.setIsStreaming(true);
-    state.story.setStreamedContent("");
-    state.story.setContent(""); // Reset content
-    state.story.setTitle(""); // Reset title
+    state.story.setContent(""); 
+    state.story.setTitle("");
     
     try {
       console.log("Starting story generation with settings:", settings);
@@ -32,75 +29,73 @@ export function useStoryActions(
       The story should be appropriate for the age group and last ${settings.duration} minutes when read aloud.
       Make it creative and engaging.`;
 
-      let title = '';
-      let content = '';
-      let buffer = '';
+      toast({
+        title: "Generating Story",
+        description: "Creating your story...",
+      });
 
-      await streamContent(
-        [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        (chunk) => {
-          buffer += chunk;
-          state.story.setStreamedContent(buffer);
-          
-          // Try to extract title and content from the buffer
-          const titleMatch = buffer.match(/TITLE:\s*(.*?)(?=\s*\n+\s*CONTENT:)/s);
-          const contentMatch = buffer.match(/CONTENT:\s*([\s\S]*$)/s);
-          
-          if (titleMatch && !title) {
-            title = titleMatch[1].trim();
-            state.story.setTitle(title);
-            console.log("Title extracted:", title);
-          }
-          
-          if (contentMatch) {
-            content = contentMatch[1].trim();
-            state.story.setContent(content);
+      const response = await openaiService.generateContent(userPrompt, systemPrompt);
+      
+      // Extract title and content
+      const titleMatch = response.match(/TITLE:\s*(.*?)(?=\s*\n+\s*CONTENT:)/s);
+      const contentMatch = response.match(/CONTENT:\s*([\s\S]*$)/s);
+      
+      if (titleMatch && contentMatch) {
+        const title = titleMatch[1].trim();
+        const content = contentMatch[1].trim();
+        
+        state.story.setTitle(title);
+        state.story.setContent(content);
+        
+        toast({
+          title: "Story Created",
+          description: "Generating audio narration...",
+        });
+
+        // Generate audio if voice is enabled
+        if (settings.voice !== 'none') {
+          state.loading.setStage('audio');
+          const audioUrl = await audioService.generateSpeech(content, settings.voice);
+          state.audio.setCurrentAudioUrl(audioUrl);
+        }
+
+        // Set background music if specified
+        if (settings.music && settings.music !== 'no-music') {
+          state.loading.setStage('music');
+          const musicUrl = audioService.getBackgroundMusicUrl(settings.music);
+          if (musicUrl) {
+            state.audio.setCurrentMusicUrl(musicUrl);
           }
         }
-      );
 
-      // Generate audio if voice is enabled
-      if (settings.voice !== 'none') {
-        state.loading.setStage('audio');
-        const audioUrl = await audioService.generateSpeech(content, settings.voice);
-        state.audio.setCurrentAudioUrl(audioUrl);
+        // Start playing automatically after generation
+        state.playback.setIsPlaying(true);
+
+        if (onSave) {
+          onSave(
+            title,
+            content,
+            state.audio.currentAudioUrl || "",
+            state.audio.currentMusicUrl || ""
+          );
+        }
+
+        toast({
+          title: "Story Ready",
+          description: "Your story is ready to play!",
+        });
+      } else {
+        throw new Error("Failed to parse story response");
       }
-
-      // Set background music if specified
-      if (settings.music) {
-        state.loading.setStage('music');
-        state.audio.setCurrentMusicUrl(`/assets/${settings.music}.mp3`);
-      }
-
-      // Start playing automatically after generation
-      state.playback.setIsPlaying(true);
-
-      if (onSave) {
-        onSave(
-          title,
-          content,
-          state.audio.currentAudioUrl || "",
-          state.audio.currentMusicUrl || ""
-        );
-      }
-
-      toast({
-        title: "Story Generated",
-        description: "Your story is ready to play!",
-      });
     } catch (error) {
       console.error("Error starting story:", error);
       toast({
-        title: "Story Generation Error",
-        description: error instanceof Error ? error.message : "Failed to generate story. Please try again.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to generate story",
         variant: "destructive",
       });
     } finally {
       state.loading.setIsLoading(false);
-      state.story.setIsStreaming(false);
     }
   };
 

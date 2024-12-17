@@ -1,80 +1,75 @@
-import { useRef, useEffect } from "react";
-import { useContainerHeight } from "@/hooks/useContainerHeight";
-import { StoryText } from "./StoryText";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Progress } from "@/components/ui/progress";
 
 interface StoryDisplayProps {
-  text: string | undefined;
+  text: string;
   audioUrl: string | null;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
-  isStreaming?: boolean;
-  streamedContent?: string;
 }
 
 export function StoryDisplay({ 
-  text = "", 
+  text, 
   audioUrl, 
-  isPlaying, 
-  currentTime, 
-  duration,
-  isStreaming,
-  streamedContent
+  isPlaying,
+  currentTime,
+  duration
 }: StoryDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const height = useContainerHeight(containerRef);
   
-  // Use streamed content if available, otherwise use the final text
-  const displayText = isStreaming ? streamedContent : text;
-  
-  // Split text into natural phrases using spaces and line breaks
-  const phrases = displayText?.split(/\n+/).flatMap(paragraph => 
-    paragraph.split(/(?<=[.!?])\s+/).filter(phrase => phrase.trim().length > 0)
-  ) || [];
-  
-  // Calculate the time per phrase based on total duration
-  const timePerPhrase = duration > 0 ? duration / phrases.length : 0;
+  // Split text into phrases for highlighting
+  const phrases = text.split(/(?<=[.!?])\s+/).filter(phrase => phrase.trim().length > 0);
+  const timePerPhrase = duration / phrases.length;
   const currentPhraseIndex = Math.floor(currentTime / timePerPhrase);
+  
+  // Calculate progress percentage
+  const progress = (currentTime / duration) * 100;
 
-  // Auto-scroll to bottom when new content arrives
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    if (containerRef.current && currentPhraseIndex >= 0) {
+      const phrases = containerRef.current.children;
+      const currentPhrase = phrases[currentPhraseIndex];
+      
+      if (currentPhrase) {
+        currentPhrase.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center'
+        });
+      }
     }
-  }, [displayText]);
+  }, [currentPhraseIndex]);
 
   return (
-    <div 
-      ref={containerRef}
-      style={{ height: height ? `${height}px` : 'auto', minHeight: '50vh' }}
-      className="prose prose-lg max-w-none space-y-4 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto scroll-smooth"
-    >
-      <AnimatePresence mode="wait">
-        {displayText ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <StoryText 
-              phrases={phrases}
-              currentPhraseIndex={currentPhraseIndex}
-              isStreaming={isStreaming}
-            />
-          </motion.div>
-        ) : (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="text-gray-500 italic"
-          >
-            Story text will appear here...
-          </motion.p>
-        )}
-      </AnimatePresence>
+    <div className="space-y-4">
+      <Progress value={progress} className="w-full" />
+      
+      <div 
+        ref={containerRef}
+        className="prose prose-lg max-w-none space-y-2 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto max-h-[60vh]"
+      >
+        <AnimatePresence mode="wait">
+          {phrases.map((phrase, index) => (
+            <motion.p
+              key={index}
+              initial={{ opacity: 0.7 }}
+              animate={{ 
+                opacity: 1,
+                color: index === currentPhraseIndex ? "#4F46E5" : 
+                       index < currentPhraseIndex ? "#6B7280" : "#1F2937",
+                scale: index === currentPhraseIndex ? 1.02 : 1,
+              }}
+              transition={{ duration: 0.3 }}
+              className={`leading-relaxed transition-all duration-300 ${
+                index === currentPhraseIndex ? "bg-indigo-50 font-medium p-2 rounded-md" : ""
+              }`}
+            >
+              {phrase}
+            </motion.p>
+          ))}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
