@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { GradientButton } from "@/components/ui/gradient-button";
 
 interface DashboardActionsProps {
   onCreateNew: () => void;
@@ -12,13 +12,10 @@ export function DashboardActions({ onCreateNew, onSubscribe, isLoading }: Dashbo
     <div className="flex justify-between items-center">
       <h1 className="text-2xl font-bold">My Stories</h1>
       <div className="flex gap-4">
-        <Button onClick={onSubscribe} disabled={isLoading} className="bg-purple-600 hover:bg-purple-700">
-          {isLoading ? "Loading..." : "Upgrade to Pro"}
-        </Button>
-        <Button onClick={onCreateNew} className="bg-blue-600 hover:bg-blue-700">
+        <GradientButton onClick={onCreateNew}>
           <Plus className="h-4 w-4 mr-2" />
           Create New Story
-        </Button>
+        </GradientButton>
       </div>
     </div>
   );
