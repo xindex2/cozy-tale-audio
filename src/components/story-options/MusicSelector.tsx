@@ -16,6 +16,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
   const [useMusic, setUseMusic] = useState(selectedMusic !== "no-music");
   const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
   const [validMusicOptions, setValidMusicOptions] = useState<string[]>([]);
+  const { handlePreview } = useAudioPreview();
   
   const musicOptions = [
     { 
@@ -122,20 +123,17 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
             disabled={!useMusic}
           >
-            {musicOptions.map((option) => {
-              const { handlePreview } = useAudioPreview(option.url);
-              return (
-                <MusicOption
-                  key={option.id}
-                  id={option.id}
-                  name={option.name}
-                  description={option.description}
-                  isLoading={loadingStates[option.id]}
-                  isValid={validMusicOptions.includes(option.id)}
-                  onPreview={handlePreview}
-                />
-              );
-            })}
+            {musicOptions.map((option) => (
+              <MusicOption
+                key={option.id}
+                id={option.id}
+                name={option.name}
+                description={option.description}
+                isLoading={loadingStates[option.id]}
+                isValid={validMusicOptions.includes(option.id)}
+                onPreview={() => handlePreview(option.url)}
+              />
+            ))}
           </RadioGroup>
         )}
       </div>
