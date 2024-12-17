@@ -1,14 +1,16 @@
 import { memo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface StoryTextProps {
+export interface StoryTextProps {
   phrases: string[];
   currentPhraseIndex: number;
+  isStreaming?: boolean;
 }
 
 export const StoryText = memo(function StoryText({ 
   phrases, 
-  currentPhraseIndex 
+  currentPhraseIndex,
+  isStreaming = false
 }: StoryTextProps) {
   const activeRef = useRef<HTMLParagraphElement>(null);
 
@@ -52,7 +54,7 @@ export const StoryText = memo(function StoryText({
                   animate={{ opacity: 1 }}
                   transition={{ 
                     duration: 0.05,
-                    delay: charIndex * 0.02 // This creates the typing effect
+                    delay: isStreaming ? charIndex * 0.02 : 0 // Only apply typing effect when streaming
                   }}
                 >
                   {char}
