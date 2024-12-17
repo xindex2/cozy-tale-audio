@@ -49,7 +49,9 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     startStory,
     generateQuiz,
     handleSendMessage,
-    loadingStage
+    loadingStage,
+    isStreaming,
+    streamedContent
   } = useStoryPlayer(settings, onSave, initialStoryData);
 
   // Parse the content if it's a JSON string
@@ -132,6 +134,8 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
                 isPlaying={isPlaying}
                 currentTime={currentTime}
                 duration={settings.duration * 60}
+                isStreaming={isStreaming}
+                streamedContent={streamedContent}
               />
             </ErrorBoundary>
 

@@ -14,6 +14,8 @@ export function useStoryState() {
   const [isSending, setIsSending] = useState(false);
   const [storyTitle, setStoryTitle] = useState("");
   const [storyContent, setStoryContent] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamedContent, setStreamedContent] = useState("");
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
   const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -46,7 +48,11 @@ export function useStoryState() {
       content: storyContent,
       setContent: setStoryContent,
       messages,
-      setMessages
+      setMessages,
+      isStreaming,
+      setIsStreaming,
+      streamedContent,
+      setStreamedContent
     },
     loading: {
       isLoading,

@@ -9,6 +9,8 @@ interface StoryDisplayProps {
   isPlaying: boolean;
   currentTime: number;
   duration: number;
+  isStreaming?: boolean;
+  streamedContent?: string;
 }
 
 export function StoryDisplay({ 
@@ -16,13 +18,18 @@ export function StoryDisplay({
   audioUrl, 
   isPlaying, 
   currentTime, 
-  duration 
+  duration,
+  isStreaming,
+  streamedContent
 }: StoryDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const height = useContainerHeight(containerRef);
   
+  // Use streamed content if available, otherwise use the final text
+  const displayText = isStreaming ? streamedContent : text;
+  
   // Split text into natural phrases using spaces and line breaks
-  const phrases = text?.split(/\n+/).flatMap(paragraph => 
+  const phrases = displayText?.split(/\n+/).flatMap(paragraph => 
     paragraph.split(/(?<=[.!?])\s+/).filter(phrase => phrase.trim().length > 0)
   ) || [];
   
@@ -35,7 +42,7 @@ export function StoryDisplay({
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, [text]);
+  }, [displayText]);
 
   return (
     <div 
@@ -44,7 +51,7 @@ export function StoryDisplay({
       className="prose prose-lg max-w-none space-y-4 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto scroll-smooth"
     >
       <AnimatePresence mode="wait">
-        {text ? (
+        {displayText ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -54,6 +61,7 @@ export function StoryDisplay({
             <StoryText 
               phrases={phrases}
               currentPhraseIndex={currentPhraseIndex}
+              isStreaming={isStreaming}
             />
           </motion.div>
         ) : (

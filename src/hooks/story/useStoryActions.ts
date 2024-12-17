@@ -3,6 +3,7 @@ import { openaiService } from "@/services/apis/openai/storyGenerator";
 import { audioService } from "@/services/apis/audioService";
 import type { StorySettings } from "@/components/StoryOptions";
 import type { Message, QuizQuestion } from "@/types/story";
+import { streamContent } from "@/services/apis/openai/streamingClient";
 
 export function useStoryActions(
   state: ReturnType<typeof import("./useStoryState").useStoryState>,
@@ -13,29 +14,64 @@ export function useStoryActions(
   const startStory = async (settings: StorySettings) => {
     state.loading.setIsLoading(true);
     state.loading.setStage('text');
+    state.story.setIsStreaming(true);
+    state.story.setStreamedContent("");
+    
     try {
       console.log("Starting story generation with settings:", settings);
       
-      // Convert settings to match StoryGenerationSettings
-      const generationSettings = {
-        ...settings,
-        audio: settings.voice !== 'none',
-        voice: settings.voice === 'none' ? undefined : settings.voice
-      };
+      const systemPrompt = `You are a professional storyteller. 
+      Create a story that is exactly ${settings.duration} minutes long when read aloud.
+      Format your response exactly as:
+      TITLE: [Story Title]
+      CONTENT: [Story Content]`;
 
-      const { title, content, audioUrl, backgroundMusicUrl } = await openaiService.generateStory(generationSettings);
-      
-      state.story.setTitle(title);
-      state.story.setContent(content);
-      
-      if (audioUrl) {
+      const userPrompt = `Create an engaging ${settings.theme} story for ${settings.ageGroup} year olds.
+      The story should be appropriate for the age group and last ${settings.duration} minutes when read aloud.`;
+
+      let title = '';
+      let content = '';
+      let buffer = '';
+
+      await streamContent(
+        [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        (chunk) => {
+          buffer += chunk;
+          state.story.setStreamedContent(buffer);
+          
+          // Try to extract title and content from the buffer
+          const titleMatch = buffer.match(/TITLE:\s*(.*?)(?=\s*\n+\s*CONTENT:)/s);
+          const contentMatch = buffer.match(/CONTENT:\s*([\s\S]*$)/s);
+          
+          if (titleMatch && !title) {
+            title = titleMatch[1].trim();
+            state.story.setTitle(title);
+            console.log("Title extracted:", title);
+          }
+          
+          if (contentMatch) {
+            content = contentMatch[1].trim();
+            state.story.setContent(content);
+          }
+        }
+      );
+
+      // Generate audio if voice is enabled
+      if (settings.voice !== 'none') {
+        state.loading.setStage('audio');
+        const audioUrl = await audioService.generateSpeech(content, settings.voice);
         state.audio.setCurrentAudioUrl(audioUrl);
       }
-      
-      if (backgroundMusicUrl) {
-        state.audio.setCurrentMusicUrl(backgroundMusicUrl);
+
+      // Set background music if specified
+      if (settings.music) {
+        state.loading.setStage('music');
+        state.audio.setCurrentMusicUrl(`/assets/${settings.music}.mp3`);
       }
-      
+
       // Start playing automatically after generation
       state.playback.setIsPlaying(true);
 
@@ -43,8 +79,8 @@ export function useStoryActions(
         onSave(
           title,
           content,
-          audioUrl || "",
-          backgroundMusicUrl || ""
+          state.audio.currentAudioUrl || "",
+          state.audio.currentMusicUrl || ""
         );
       }
 
@@ -61,6 +97,7 @@ export function useStoryActions(
       });
     } finally {
       state.loading.setIsLoading(false);
+      state.story.setIsStreaming(false);
     }
   };
 
