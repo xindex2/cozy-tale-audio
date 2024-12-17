@@ -24,7 +24,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Index />,
-    errorElement: <ErrorBoundary />,
+    errorElement: <ErrorBoundary><div>Something went wrong</div></ErrorBoundary>,
   },
   {
     path: "/auth",
@@ -83,7 +83,9 @@ const router = createBrowserRouter([
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ErrorBoundary>
+        <RouterProvider router={router} />
+      </ErrorBoundary>
       <Toaster />
     </QueryClientProvider>
   );
