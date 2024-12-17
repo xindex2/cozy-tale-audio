@@ -4,7 +4,7 @@ import { GradientButton } from "@/components/ui/gradient-button";
 interface DashboardActionsProps {
   onCreateNew: () => void;
   onSubscribe: () => void;
-  isLoading: boolean;
+  isLoading?: boolean;
 }
 
 export function DashboardActions({ onCreateNew, onSubscribe, isLoading }: DashboardActionsProps) {

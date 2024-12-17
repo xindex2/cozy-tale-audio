@@ -12,6 +12,9 @@ import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
 import Billing from "@/pages/Billing";
 import AdminDashboard from "@/pages/AdminDashboard";
+import BedtimeStoriesForKids from "@/pages/landing/BedtimeStoriesForKids";
+import ShortBedtimeStories from "@/pages/landing/ShortBedtimeStories";
+import SleepStoriesForAdults from "@/pages/landing/SleepStoriesForAdults";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 
@@ -32,6 +35,9 @@ export default function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/billing" element={<Billing />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/bedtime-stories-for-kids" element={<BedtimeStoriesForKids />} />
+        <Route path="/short-bedtime-stories" element={<ShortBedtimeStories />} />
+        <Route path="/sleep-stories-for-adults" element={<SleepStoriesForAdults />} />
       </Routes>
       <Toaster />
       <Sonner />
