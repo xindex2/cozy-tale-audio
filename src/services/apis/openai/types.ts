@@ -1,15 +1,16 @@
 export interface StoryGenerationSettings {
-  ageGroup: string;
   duration: number;
+  ageGroup: string;
   theme: string;
   language: string;
+  voice?: string;
   music?: string;
-  voice?: string;  // Added voice property
+  audio?: boolean;
 }
 
 export interface StoryResponse {
   title: string;
   content: string;
-  audioUrl?: string;
-  backgroundMusicUrl?: string | null;
+  audioUrl: string | null;
+  backgroundMusicUrl: string | null;
 }

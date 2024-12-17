@@ -8,7 +8,6 @@ export const openaiService = {
     try {
       console.log("Starting story generation with settings:", settings);
       
-      // Enhanced language-specific system prompt
       const systemPrompt = `You are a professional storyteller who writes ONLY in ${settings.language}. 
       Important rules:
       1. Write EVERYTHING in ${settings.language} only, including numbers and measurements
@@ -36,70 +35,100 @@ export const openaiService = {
       TITLE: [Story Title]
       CONTENT: [Story Content]`;
 
-      const response = await openaiClient.generateContent(userPrompt, systemPrompt);
-      console.log("Raw OpenAI response:", response);
-      
-      // Enhanced parsing logic for multilingual content
-      const titleMatch = response.match(/TITLE:\s*(.*?)(?=\s*\n+\s*CONTENT:)/s);
-      const contentMatch = response.match(/CONTENT:\s*([\s\S]*$)/s);
-      
-      if (!titleMatch || !contentMatch) {
-        console.error("Failed to parse story format. Response:", response);
-        throw new Error("Failed to parse story format");
-      }
+      let title = '';
+      let content = '';
+      let isParsingTitle = false;
+      let buffer = '';
 
-      const title = titleMatch[1].trim();
-      const content = contentMatch[1].trim();
-
-      console.log("Parsed story:", { title, content });
-
-      // Get the ElevenLabs API key
-      const { data: apiKeyData, error: apiKeyError } = await supabase
-        .from('api_keys')
-        .select('key_value')
-        .eq('key_name', 'ELEVEN_LABS_API_KEY')
-        .eq('is_active', true)
-        .single();
-
-      if (apiKeyError || !apiKeyData) {
-        console.error("Error fetching ElevenLabs API key:", apiKeyError);
-        throw new Error("ElevenLabs API key not found");
-      }
-
-      // Generate audio using ElevenLabs with the correct language model
-      const voiceId = settings.voice || "21m00Tcm4TlvDq8ikWAM";
-      const audioResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'audio/mpeg',
-          'Content-Type': 'application/json',
-          'xi-api-key': apiKeyData.key_value
-        },
-        body: JSON.stringify({
-          text: content,
-          model_id: "eleven_multilingual_v2",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.5
+      const response = await openaiClient.generateContent(
+        userPrompt, 
+        systemPrompt,
+        (chunk) => {
+          buffer += chunk;
+          
+          // Try to extract title and content from the buffer
+          const titleMatch = buffer.match(/TITLE:\s*(.*?)(?=\s*\n+\s*CONTENT:)/s);
+          const contentMatch = buffer.match(/CONTENT:\s*([\s\S]*$)/s);
+          
+          if (titleMatch && !title) {
+            title = titleMatch[1].trim();
+            console.log("Title extracted:", title);
           }
-        })
-      });
+          
+          if (contentMatch) {
+            content = contentMatch[1].trim();
+          }
+        }
+      );
 
-      if (!audioResponse.ok) {
-        throw new Error(`ElevenLabs API error: ${audioResponse.statusText}`);
+      console.log("Story generation completed");
+
+      // Only proceed with audio generation if audio is enabled
+      if (settings.audio) {
+        toast({
+          title: "Generating Audio",
+          description: "Please wait while we create the audio narration...",
+        });
+
+        // Get the ElevenLabs API key
+        const { data: apiKeyData, error: apiKeyError } = await supabase
+          .from('api_keys')
+          .select('key_value')
+          .eq('key_name', 'ELEVEN_LABS_API_KEY')
+          .eq('is_active', true)
+          .single();
+
+        if (apiKeyError || !apiKeyData) {
+          console.error("Error fetching ElevenLabs API key:", apiKeyError);
+          throw new Error("ElevenLabs API key not found");
+        }
+
+        // Generate audio using ElevenLabs
+        const voiceId = settings.voice || "21m00Tcm4TlvDq8ikWAM";
+        const audioResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'audio/mpeg',
+            'Content-Type': 'application/json',
+            'xi-api-key': apiKeyData.key_value
+          },
+          body: JSON.stringify({
+            text: content,
+            model_id: "eleven_multilingual_v2",
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.5
+            }
+          })
+        });
+
+        if (!audioResponse.ok) {
+          throw new Error(`ElevenLabs API error: ${audioResponse.statusText}`);
+        }
+
+        const audioBlob = await audioResponse.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        console.log("Audio generated successfully:", audioUrl);
+
+        toast({
+          title: "Audio Ready",
+          description: "Your story's audio narration is ready to play!",
+        });
+
+        return {
+          title,
+          content,
+          audioUrl,
+          backgroundMusicUrl: settings.music ? `/assets/${settings.music}.mp3` : null
+        };
       }
 
-      const audioBlob = await audioResponse.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      console.log("Audio generated successfully:", audioUrl);
-
-      const backgroundMusicUrl = settings.music ? `/assets/${settings.music}.mp3` : null;
-      
+      // Return without audio if audio is disabled
       return {
         title,
         content,
-        audioUrl,
-        backgroundMusicUrl
+        audioUrl: null,
+        backgroundMusicUrl: settings.music ? `/assets/${settings.music}.mp3` : null
       };
     } catch (error) {
       console.error("Error generating story:", error);
