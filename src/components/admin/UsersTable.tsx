@@ -31,6 +31,7 @@ export function UsersTable() {
   const { data: users, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
+      console.log('Fetching users...');
       const { data, error } = await supabase
         .from('profiles')
         .select(`
@@ -45,7 +46,11 @@ export function UsersTable() {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+      }
+      console.log('Fetched users:', data);
       return data;
     },
   });

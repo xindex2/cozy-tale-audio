@@ -66,6 +66,7 @@ export function SubscriptionPlanDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log('Submitting plan data:', formData);
 
     try {
       const features = formData.features
@@ -81,24 +82,41 @@ export function SubscriptionPlanDialog({
         features,
       };
 
+      console.log('Processed plan data:', planData);
+
       if (planToEdit) {
-        await supabase
+        console.log('Updating plan:', planToEdit.id);
+        const { error: updateError } = await supabase
           .from('subscription_plans')
           .update(planData)
           .eq('id', planToEdit.id);
+
+        if (updateError) {
+          console.error('Error updating plan:', updateError);
+          throw updateError;
+        }
       } else {
-        await supabase
+        console.log('Creating new plan');
+        const { error: insertError } = await supabase
           .from('subscription_plans')
           .insert([planData]);
+
+        if (insertError) {
+          console.error('Error creating plan:', insertError);
+          throw insertError;
+        }
       }
 
-      queryClient.invalidateQueries({ queryKey: ['subscription-plans'] });
+      await queryClient.invalidateQueries({ queryKey: ['subscription-plans'] });
+      
       toast({
         title: `Plan ${planToEdit ? 'updated' : 'created'} successfully`,
         description: `The subscription plan "${formData.name}" has been ${planToEdit ? 'updated' : 'created'}.`,
       });
+      
       onOpenChange(false);
     } catch (error) {
+      console.error('Error saving plan:', error);
       toast({
         title: "Error",
         description: "Failed to save the subscription plan. Please try again.",
