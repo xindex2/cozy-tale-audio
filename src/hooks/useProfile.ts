@@ -55,7 +55,7 @@ export const useProfile = () => {
       }
 
       // If both approaches fail, try with RPC call
-      const { data: rpcProfile, error: rpcError } = await supabase.rpc<Profile, RPCParams>(
+      const { data: rpcProfile, error: rpcError } = await supabase.rpc(
         'get_profile_by_id',
         { user_id: user.id }
       );
