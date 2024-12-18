@@ -110,11 +110,17 @@ export function PlyrPlayer({
 
   useEffect(() => {
     if (!isLoading && playerRef.current) {
-      if (isPlaying) {
-        playerRef.current.play().catch((error) => {
+      const handlePlay = async () => {
+        try {
+          await playerRef.current?.play();
+        } catch (error) {
           console.error("Error playing audio:", error);
           onError?.();
-        });
+        }
+      };
+
+      if (isPlaying) {
+        handlePlay();
       } else {
         playerRef.current.pause();
       }

@@ -68,8 +68,8 @@ class AIService {
     }
   }
 
-  async startChat(settings: StorySettings): Promise<StoryResponse> {
-    console.log("Starting chat with settings:", settings);
+  async generateStory(settings: StorySettings): Promise<StoryResponse> {
+    console.log("Starting story generation with settings:", settings);
     
     this.ensureInitialized();
 
@@ -79,7 +79,7 @@ class AIService {
         model: "gemini-pro",
         generationConfig: {
           ...generationConfig,
-          temperature: 1, // Increase creativity
+          temperature: 1,
         },
       });
 
@@ -131,7 +131,7 @@ class AIService {
         title: cleanTitle,
         text: content,
         audioUrl: null,
-        backgroundMusicUrl: audioService.getBackgroundMusicUrl(settings.music) || null
+        backgroundMusicUrl: null
       };
     } catch (error) {
       console.error("Error generating story with Gemini:", error);
