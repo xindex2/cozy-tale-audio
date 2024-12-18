@@ -51,7 +51,7 @@ export const useProfile = () => {
       }
 
       // If both approaches fail, try with RPC call
-      const { data: rpcProfile, error: rpcError } = await supabase.rpc(
+      const { data: rpcProfile, error: rpcError } = await supabase.rpc<Profile>(
         'get_profile_by_id',
         { user_id: user.id }
       );
@@ -63,7 +63,7 @@ export const useProfile = () => {
       }
 
       // If all attempts fail, create a minimal profile
-      const minimalProfile = {
+      const minimalProfile: Profile = {
         id: user.id,
         email: user.email,
         full_name: user.user_metadata?.full_name,
@@ -82,7 +82,7 @@ export const useProfile = () => {
       });
       
       // Return minimal profile on error
-      const fallbackProfile = {
+      const fallbackProfile: Profile = {
         id: user.id,
         email: user.email,
       };
