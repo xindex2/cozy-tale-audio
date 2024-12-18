@@ -77,16 +77,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     if (isSigningOut) return;
     
+    setIsSigningOut(true);
     try {
-      setIsSigningOut(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
+      // Clear all data immediately
       queryClient.clear();
       setUser(null);
       setProfile(null);
       
-      navigate('/auth');
     } catch (error) {
       console.error('Sign out error:', error);
       throw error;

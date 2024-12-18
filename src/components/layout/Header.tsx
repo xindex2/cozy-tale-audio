@@ -33,7 +33,6 @@ export function Header() {
         title: "Logged out successfully",
         description: "You have been signed out of your account",
       });
-      navigate('/auth');
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
