@@ -1,58 +1,101 @@
 import { Routes as RouterRoutes, Route, Navigate } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
-import Dashboard from "@/pages/Dashboard";
-import CreateStory from "@/pages/CreateStory";
-import StoryView from "@/pages/StoryView";
-import Profile from "@/pages/Profile";
-import Settings from "@/pages/Settings";
-import Stories from "@/pages/Stories";
-import Index from "@/pages/Index";
-import Login from "@/pages/auth/Login";
-import Register from "@/pages/auth/Register";
-import AdminDashboard from "@/pages/AdminDashboard";
-import Billing from "@/pages/Billing";
-import Contact from "@/pages/Contact";
-import Privacy from "@/pages/Privacy";
-import Terms from "@/pages/Terms";
+import { LoadingScreen } from "@/components/ui/loading-screen";
+
+// Lazy load components for better performance
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const CreateStory = lazy(() => import("@/pages/CreateStory"));
+const StoryView = lazy(() => import("@/pages/StoryView"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const Stories = lazy(() => import("@/pages/Stories"));
+const Index = lazy(() => import("@/pages/Index"));
+const Login = lazy(() => import("@/pages/auth/Login"));
+const Register = lazy(() => import("@/pages/auth/Register"));
+const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
+const Billing = lazy(() => import("@/pages/Billing"));
+const Contact = lazy(() => import("@/pages/Contact"));
+const Privacy = lazy(() => import("@/pages/Privacy"));
+const Terms = lazy(() => import("@/pages/Terms"));
 
 // SEO Landing Pages
-import BedtimeStoriesForKids from "@/pages/landing/BedtimeStoriesForKids";
-import ShortBedtimeStories from "@/pages/landing/ShortBedtimeStories";
-import SleepStoriesForAdults from "@/pages/landing/SleepStoriesForAdults";
-import FairyTalesForKids from "@/pages/landing/FairyTalesForKids";
-import DreamtimeStories from "@/pages/landing/DreamtimeStories";
-import NightTimeStories from "@/pages/landing/NightTimeStories";
-import StoriesForToddlers from "@/pages/landing/StoriesForToddlers";
+const BedtimeStoriesForKids = lazy(() => import("@/pages/landing/BedtimeStoriesForKids"));
+const ShortBedtimeStories = lazy(() => import("@/pages/landing/ShortBedtimeStories"));
+const SleepStoriesForAdults = lazy(() => import("@/pages/landing/SleepStoriesForAdults"));
+const FairyTalesForKids = lazy(() => import("@/pages/landing/FairyTalesForKids"));
+const DreamtimeStories = lazy(() => import("@/pages/landing/DreamtimeStories"));
+const NightTimeStories = lazy(() => import("@/pages/landing/NightTimeStories"));
+const StoriesForToddlers = lazy(() => import("@/pages/landing/StoriesForToddlers"));
+
+// Wrapper component for lazy-loaded routes
+const LazyRoute = ({ children }: { children: React.ReactNode }) => (
+  <Suspense fallback={<LoadingScreen />}>
+    {children}
+  </Suspense>
+);
 
 export function Routes() {
   return (
     <RouterRoutes>
       {/* Public Routes */}
-      <Route path="/" element={<Index />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/terms" element={<Terms />} />
+      <Route path="/" element={<LazyRoute><Index /></LazyRoute>} />
+      <Route path="/login" element={<LazyRoute><Login /></LazyRoute>} />
+      <Route path="/register" element={<LazyRoute><Register /></LazyRoute>} />
+      <Route path="/contact" element={<LazyRoute><Contact /></LazyRoute>} />
+      <Route path="/privacy" element={<LazyRoute><Privacy /></LazyRoute>} />
+      <Route path="/terms" element={<LazyRoute><Terms /></LazyRoute>} />
       
       {/* SEO Landing Pages */}
-      <Route path="/bedtime-stories-for-kids" element={<BedtimeStoriesForKids />} />
-      <Route path="/short-bedtime-stories" element={<ShortBedtimeStories />} />
-      <Route path="/sleep-stories-for-adults" element={<SleepStoriesForAdults />} />
-      <Route path="/fairy-tales-for-kids" element={<FairyTalesForKids />} />
-      <Route path="/dreamtime-stories" element={<DreamtimeStories />} />
-      <Route path="/night-time-stories" element={<NightTimeStories />} />
-      <Route path="/stories-for-toddlers" element={<StoriesForToddlers />} />
+      <Route path="/bedtime-stories-for-kids" element={<LazyRoute><BedtimeStoriesForKids /></LazyRoute>} />
+      <Route path="/short-bedtime-stories" element={<LazyRoute><ShortBedtimeStories /></LazyRoute>} />
+      <Route path="/sleep-stories-for-adults" element={<LazyRoute><SleepStoriesForAdults /></LazyRoute>} />
+      <Route path="/fairy-tales-for-kids" element={<LazyRoute><FairyTalesForKids /></LazyRoute>} />
+      <Route path="/dreamtime-stories" element={<LazyRoute><DreamtimeStories /></LazyRoute>} />
+      <Route path="/night-time-stories" element={<LazyRoute><NightTimeStories /></LazyRoute>} />
+      <Route path="/stories-for-toddlers" element={<LazyRoute><StoriesForToddlers /></LazyRoute>} />
 
       {/* Protected Routes */}
-      <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
-      <Route path="/create" element={<AuthGuard><CreateStory /></AuthGuard>} />
-      <Route path="/story/:id" element={<AuthGuard><StoryView /></AuthGuard>} />
-      <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
-      <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />
-      <Route path="/stories" element={<AuthGuard><Stories /></AuthGuard>} />
-      <Route path="/billing" element={<AuthGuard><Billing /></AuthGuard>} />
-      <Route path="/admin" element={<AuthGuard><AdminDashboard /></AuthGuard>} />
+      <Route path="/dashboard" element={
+        <AuthGuard>
+          <LazyRoute><Dashboard /></LazyRoute>
+        </AuthGuard>
+      } />
+      <Route path="/create" element={
+        <AuthGuard>
+          <LazyRoute><CreateStory /></LazyRoute>
+        </AuthGuard>
+      } />
+      <Route path="/story/:id" element={
+        <AuthGuard>
+          <LazyRoute><StoryView /></LazyRoute>
+        </AuthGuard>
+      } />
+      <Route path="/profile" element={
+        <AuthGuard>
+          <LazyRoute><Profile /></LazyRoute>
+        </AuthGuard>
+      } />
+      <Route path="/settings" element={
+        <AuthGuard>
+          <LazyRoute><Settings /></LazyRoute>
+        </AuthGuard>
+      } />
+      <Route path="/stories" element={
+        <AuthGuard>
+          <LazyRoute><Stories /></LazyRoute>
+        </AuthGuard>
+      } />
+      <Route path="/billing" element={
+        <AuthGuard>
+          <LazyRoute><Billing /></LazyRoute>
+        </AuthGuard>
+      } />
+      <Route path="/admin" element={
+        <AuthGuard>
+          <LazyRoute><AdminDashboard /></LazyRoute>
+        </AuthGuard>
+      } />
 
       {/* Fallback for unknown routes */}
       <Route path="*" element={<Navigate to="/" replace />} />
