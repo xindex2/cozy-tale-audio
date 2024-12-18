@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { 
   BookOpen, 
   Brain, 
@@ -11,14 +13,35 @@ import {
   Music, 
   Sparkles, 
   Star, 
-  Users 
+  Users,
+  Wand2
 } from "lucide-react";
 
 export default function Home() {
   const { user } = useAuth();
 
+  const storySteps = [
+    {
+      icon: <Users className="w-6 h-6 text-blue-500" />,
+      title: "Choose Age Group",
+      description: "Select the appropriate age range for your story"
+    },
+    {
+      icon: <Wand2 className="w-6 h-6 text-purple-500" />,
+      title: "Pick a Theme",
+      description: "Choose from various themes or create your own"
+    },
+    {
+      icon: <Clock className="w-6 h-6 text-green-500" />,
+      title: "Set Duration",
+      description: "Select how long you want your story to be"
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-50">
+      <Header />
+      
       {/* Hero Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
@@ -57,6 +80,32 @@ export default function Home() {
               </Button>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Story Creation Steps */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white/50">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-12">
+            Create Your Story in 3 Simple Steps
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {storySteps.map((step, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.2 }}
+                className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <div className="w-12 h-12 mx-auto bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                  {step.icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
+                <p className="text-gray-600">{step.description}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -117,56 +166,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-12">
-            Explore Story Categories
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                icon: <Moon className="w-6 h-6" />,
-                title: "Bedtime Stories",
-                description: "Perfect for peaceful nights",
-                link: "/bedtime-stories-for-kids"
-              },
-              {
-                icon: <BookOpen className="w-6 h-6" />,
-                title: "Short Stories",
-                description: "Quick and engaging tales",
-                link: "/short-bedtime-stories"
-              },
-              {
-                icon: <Users className="w-6 h-6" />,
-                title: "Stories for Adults",
-                description: "Relaxing stories for grown-ups",
-                link: "/sleep-stories-for-adults"
-              }
-            ].map((category, index) => (
-              <Link
-                key={index}
-                to={category.link}
-                className="block group"
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-white p-6 rounded-2xl shadow-md group-hover:shadow-lg transition-all"
-                >
-                  <div className="flex items-center mb-4 text-blue-600">
-                    {category.icon}
-                    <h3 className="text-xl font-semibold ml-3">{category.title}</h3>
-                  </div>
-                  <p className="text-gray-600">{category.description}</p>
-                </motion.div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
@@ -188,6 +187,8 @@ export default function Home() {
           </Button>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
