@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import Shikwasa from "shikwasa/dist/shikwasa";
+import Shikwasa from "shikwasa/dist/shikwasa.js";
 import "shikwasa/dist/style.css";
 
 interface ShikwasaPlayerProps {
@@ -12,6 +12,36 @@ interface ShikwasaPlayerProps {
   text?: string;
 }
 
+// Add type declaration for Shikwasa
+declare class Shikwasa {
+  constructor(config: {
+    container: HTMLElement;
+    audio: {
+      title: string;
+      artist: string;
+      cover: string;
+      src: string;
+      lyrics?: { text: string }[];
+    };
+    fixed: {
+      type: string;
+    };
+    themeColor: string;
+    autoplay: boolean;
+    muted: boolean;
+    volume: number;
+    download: boolean;
+  });
+  on(event: string, callback: (...args: any[]) => void): void;
+  play(): Promise<void>;
+  pause(): void;
+  destroy(): void;
+  volume: number;
+  audio: {
+    currentTime: number;
+  };
+}
+
 export function ShikwasaPlayer({
   url,
   volume,
@@ -22,7 +52,7 @@ export function ShikwasaPlayer({
   text,
 }: ShikwasaPlayerProps) {
   const playerRef = useRef<Shikwasa | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!url || !containerRef.current) {
