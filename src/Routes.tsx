@@ -6,6 +6,7 @@ import StoryView from "./pages/StoryView";
 import { AuthGuard } from "./components/auth/AuthGuard";
 import { AdminGuard } from "./components/admin/AdminGuard";
 import Home from "./pages/landing/Home";
+import AdminDashboard from "./pages/AdminDashboard";
 
 export default function AppRoutes() {
   return (
@@ -14,6 +15,13 @@ export default function AppRoutes() {
       <Route path="/create" element={<CreateStory />} />
       <Route path="/story/:id" element={<Story />} />
       <Route path="/story/view" element={<StoryView />} />
+      <Route path="/admin" element={
+        <AuthGuard>
+          <AdminGuard>
+            <AdminDashboard />
+          </AdminGuard>
+        </AuthGuard>
+      } />
       <Route path="/admin/music" element={
         <AuthGuard>
           <AdminGuard>
