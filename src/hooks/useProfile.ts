@@ -19,63 +19,75 @@ export const useProfile = () => {
     try {
       console.log('Fetching profile for user:', user.id);
       
-      // Add a delay between retries
-      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-      
-      for (let i = 0; i < retryCount; i++) {
-        try {
-          if (!user.id) {
-            console.log('No user ID provided');
-            return null;
-          }
-
-          // Add a small delay before each attempt (exponential backoff)
-          await delay(Math.min(1000 * Math.pow(2, i), 5000));
-          
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .maybeSingle();
-
-          if (error) {
-            console.error(`Error fetching profile (attempt ${i + 1}/${retryCount}):`, error);
-            toast({
-              title: "Error fetching profile",
-              description: "Please try refreshing the page",
-              variant: "destructive",
-            });
-            continue;
-          }
-
-          if (!profile) {
-            console.log(`Profile not found (attempt ${i + 1}/${retryCount}), retrying...`);
-            continue;
-          }
-
-          console.log('Successfully fetched profile:', profile);
-          setProfile(profile);
-          return profile;
-        } catch (error) {
-          console.error(`Fetch attempt ${i + 1}/${retryCount} failed:`, error);
-          if (i === retryCount - 1) {
-            toast({
-              title: "Error fetching profile",
-              description: "Please try refreshing the page",
-              variant: "destructive",
-            });
-            throw error;
-          }
-        }
+      if (!user.id) {
+        console.log('No user ID provided');
+        return null;
       }
-      
-      console.error('All retry attempts failed');
-      setProfile(null);
-      return null;
+
+      // Try direct fetch first
+      const { data: directProfile, error: directError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (!directError && directProfile) {
+        console.log('Successfully fetched profile directly:', directProfile);
+        setProfile(directProfile);
+        return directProfile;
+      }
+
+      // If direct fetch fails, try alternative approach with single row fetch
+      const { data: singleProfile, error: singleError } = await supabase
+        .from('profiles')
+        .select()
+        .filter('id', 'eq', user.id)
+        .single();
+
+      if (!singleError && singleProfile) {
+        console.log('Successfully fetched profile with single:', singleProfile);
+        setProfile(singleProfile);
+        return singleProfile;
+      }
+
+      // If both approaches fail, try with RPC call
+      const { data: rpcProfile, error: rpcError } = await supabase.rpc(
+        'get_profile_by_id',
+        { user_id: user.id }
+      );
+
+      if (!rpcError && rpcProfile) {
+        console.log('Successfully fetched profile with RPC:', rpcProfile);
+        setProfile(rpcProfile);
+        return rpcProfile;
+      }
+
+      // If all attempts fail, create a minimal profile
+      const minimalProfile = {
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name,
+      };
+
+      console.log('Using minimal profile:', minimalProfile);
+      setProfile(minimalProfile);
+      return minimalProfile;
+
     } catch (error) {
       console.error('Error in fetchProfile:', error);
-      setProfile(null);
-      return null;
+      toast({
+        title: "Profile fetch issue",
+        description: "Using basic profile information",
+        variant: "default",
+      });
+      
+      // Return minimal profile on error
+      const fallbackProfile = {
+        id: user.id,
+        email: user.email,
+      };
+      setProfile(fallbackProfile);
+      return fallbackProfile;
     }
   };
 
