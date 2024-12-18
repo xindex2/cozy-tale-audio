@@ -1,30 +1,52 @@
 import { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import { LoadingScreen } from '@/components/ui/loading-screen';
-import AuthGuard from '@/components/auth/AuthGuard';
-import Home from '@/pages/Home';
-import Login from '@/pages/Login';
-import Register from '@/pages/Register';
-import Dashboard from '@/pages/Dashboard';
-import Stories from '@/pages/Stories';
-import Story from '@/pages/Story';
-import CreateStory from '@/pages/CreateStory';
-import Chat from '@/pages/Chat';
-import Quiz from '@/pages/Quiz';
-import Pricing from '@/pages/Pricing';
-import Settings from '@/pages/Settings';
-import NotFound from '@/pages/NotFound';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 
-// Lazy load the Billing page
+// Lazy load all pages for better performance
+const Home = lazy(() => import('@/pages/landing/Home'));
+const Login = lazy(() => import('@/pages/auth/Login'));
+const Register = lazy(() => import('@/pages/auth/Register'));
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Stories = lazy(() => import('@/pages/Stories'));
+const Story = lazy(() => import('@/pages/Story'));
+const CreateStory = lazy(() => import('@/pages/CreateStory'));
+const Chat = lazy(() => import('@/pages/Chat'));
+const Quiz = lazy(() => import('@/pages/Quiz'));
+const Pricing = lazy(() => import('@/pages/Pricing'));
+const Settings = lazy(() => import('@/pages/Settings'));
 const Billing = lazy(() => import('@/pages/Billing'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
+
+// SEO Landing Pages
+const BedtimeStoriesForKids = lazy(() => import('@/pages/landing/BedtimeStoriesForKids'));
+const ShortBedtimeStories = lazy(() => import('@/pages/landing/ShortBedtimeStories'));
+const SleepStoriesForAdults = lazy(() => import('@/pages/landing/SleepStoriesForAdults'));
+const FairyTalesForKids = lazy(() => import('@/pages/landing/FairyTalesForKids'));
+const DreamtimeStories = lazy(() => import('@/pages/landing/DreamtimeStories'));
+const NightTimeStories = lazy(() => import('@/pages/landing/NightTimeStories'));
+const StoriesForToddlers = lazy(() => import('@/pages/landing/StoriesForToddlers'));
 
 export default function Routes() {
   return (
     <Suspense fallback={<LoadingScreen />}>
       <RouterRoutes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/pricing" element={<Pricing />} />
+
+        {/* SEO Landing Pages */}
+        <Route path="/bedtime-stories-for-kids" element={<BedtimeStoriesForKids />} />
+        <Route path="/short-bedtime-stories" element={<ShortBedtimeStories />} />
+        <Route path="/sleep-stories-for-adults" element={<SleepStoriesForAdults />} />
+        <Route path="/fairy-tales-for-kids" element={<FairyTalesForKids />} />
+        <Route path="/dreamtime-stories" element={<DreamtimeStories />} />
+        <Route path="/night-time-stories" element={<NightTimeStories />} />
+        <Route path="/stories-for-toddlers" element={<StoriesForToddlers />} />
+
+        {/* Protected Routes */}
         <Route
           path="/dashboard"
           element={
@@ -73,7 +95,6 @@ export default function Routes() {
             </AuthGuard>
           }
         />
-        <Route path="/pricing" element={<Pricing />} />
         <Route
           path="/settings"
           element={
@@ -90,6 +111,8 @@ export default function Routes() {
             </AuthGuard>
           }
         />
+
+        {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
       </RouterRoutes>
     </Suspense>
