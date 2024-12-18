@@ -15,6 +15,16 @@ import Stories from "./pages/Stories";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import BedtimeStoriesForKids from "./pages/landing/BedtimeStoriesForKids";
+import ShortBedtimeStories from "./pages/landing/ShortBedtimeStories";
+import SleepStoriesForAdults from "./pages/landing/SleepStoriesForAdults";
+import FairyTalesForKids from "./pages/landing/FairyTalesForKids";
+import DreamtimeStories from "./pages/landing/DreamtimeStories";
+import NightTimeStories from "./pages/landing/NightTimeStories";
+import StoriesForToddlers from "./pages/landing/StoriesForToddlers";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import Contact from "./pages/Contact";
 
 export default function AppRoutes() {
   return (
@@ -24,6 +34,20 @@ export default function AppRoutes() {
       <Route path="/auth" element={<Auth />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      
+      {/* SEO Landing Pages */}
+      <Route path="/bedtime-stories-for-kids" element={<BedtimeStoriesForKids />} />
+      <Route path="/short-bedtime-stories" element={<ShortBedtimeStories />} />
+      <Route path="/sleep-stories-for-adults" element={<SleepStoriesForAdults />} />
+      <Route path="/fairy-tales-for-kids" element={<FairyTalesForKids />} />
+      <Route path="/dreamtime-stories" element={<DreamtimeStories />} />
+      <Route path="/night-time-stories" element={<NightTimeStories />} />
+      <Route path="/stories-for-toddlers" element={<StoriesForToddlers />} />
+
+      {/* Legal and Info Pages */}
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/contact" element={<Contact />} />
       
       {/* Protected routes */}
       <Route path="/dashboard" element={
