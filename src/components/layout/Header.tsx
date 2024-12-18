@@ -126,9 +126,14 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button variant="ghost" onClick={() => navigate('/auth')}>
-                Sign In
-              </Button>
+              <div className="space-x-2">
+                <Button variant="ghost" onClick={() => navigate('/login')}>
+                  Sign In
+                </Button>
+                <Button onClick={() => navigate('/register')}>
+                  Sign Up
+                </Button>
+              </div>
             )}
           </nav>
         </div>

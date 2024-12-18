@@ -1,4 +1,5 @@
-import { Routes as RouterRoutes, Route } from "react-router-dom";
+import { Routes as RouterRoutes, Route, Navigate } from "react-router-dom";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import Dashboard from "@/pages/Dashboard";
 import CreateStory from "@/pages/CreateStory";
 import StoryView from "@/pages/StoryView";
@@ -26,17 +27,10 @@ import StoriesForToddlers from "@/pages/landing/StoriesForToddlers";
 export function Routes() {
   return (
     <RouterRoutes>
+      {/* Public Routes */}
       <Route path="/" element={<Index />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/create" element={<CreateStory />} />
-      <Route path="/story/:id" element={<StoryView />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/stories" element={<Stories />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/billing" element={<Billing />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
@@ -49,6 +43,19 @@ export function Routes() {
       <Route path="/dreamtime-stories" element={<DreamtimeStories />} />
       <Route path="/night-time-stories" element={<NightTimeStories />} />
       <Route path="/stories-for-toddlers" element={<StoriesForToddlers />} />
+
+      {/* Protected Routes */}
+      <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
+      <Route path="/create" element={<AuthGuard><CreateStory /></AuthGuard>} />
+      <Route path="/story/:id" element={<AuthGuard><StoryView /></AuthGuard>} />
+      <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
+      <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />
+      <Route path="/stories" element={<AuthGuard><Stories /></AuthGuard>} />
+      <Route path="/billing" element={<AuthGuard><Billing /></AuthGuard>} />
+      <Route path="/admin" element={<AuthGuard><AdminDashboard /></AuthGuard>} />
+
+      {/* Fallback for unknown routes */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </RouterRoutes>
   );
 }
