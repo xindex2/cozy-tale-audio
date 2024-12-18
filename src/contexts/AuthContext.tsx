@@ -23,34 +23,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Current session:', session);
-        if (session?.user) {
-          setUser(session.user);
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-          setProfile(profile);
-        } else {
-          setUser(null);
-          setProfile(null);
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-      } finally {
-        setIsLoading(false);
+  const checkSession = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Current session:', session);
+      
+      if (session?.user) {
+        setUser(session.user);
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        setProfile(profile);
+      } else {
+        setUser(null);
+        setProfile(null);
       }
-    };
+    } catch (error) {
+      console.error('Error checking session:', error);
+      setUser(null);
+      setProfile(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session);
+      setIsLoading(true);
       
       if (event === 'SIGNED_IN' && session) {
         console.log('Setting user and profile for SIGNED_IN');
@@ -65,13 +69,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await queryClient.invalidateQueries({ queryKey: ['session'] });
         await queryClient.invalidateQueries({ queryKey: ['profile'] });
         
+        setIsLoading(false);
         navigate('/dashboard');
       } else if (event === 'SIGNED_OUT') {
         console.log('Handling SIGNED_OUT event');
         setUser(null);
         setProfile(null);
         queryClient.clear();
+        setIsLoading(false);
         navigate('/auth');
+      } else {
+        setIsLoading(false);
       }
     });
 
@@ -87,7 +95,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     
-    console.log('Starting sign out process');
     setIsSigningOut(true);
     try {
       console.log('Calling supabase.auth.signOut()');
@@ -103,8 +110,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Sign out error:', error);
       throw error;
     } finally {
-      console.log('Sign out process complete');
       setIsSigningOut(false);
+      setIsLoading(false);
     }
   };
 
