@@ -1,6 +1,7 @@
 import { OPENAI_CONFIG } from './config';
 import { ApiKeyManager } from './apiKeyManager';
 import { toast } from "@/hooks/use-toast";
+import { chunkText } from "@/utils/textChunker";
 
 class OpenAIClient {
   private apiKeyManager: ApiKeyManager;
@@ -22,25 +23,41 @@ class OpenAIClient {
     try {
       console.log("Generating speech for text:", text.substring(0, 100) + "...");
       
-      const headers = await this.getHeaders();
-      const response = await fetch(`${OPENAI_CONFIG.baseUrl}/audio/speech`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          model: 'tts-1',
-          input: text,
-          voice: voice,
-        }),
-      });
+      // Split text into chunks that fit within OpenAI's limit (4096 characters)
+      const chunks = chunkText(text, 4000); // Leave some margin
+      console.log(`Split text into ${chunks.length} chunks for TTS`);
+      
+      const audioBlobs: Blob[] = [];
 
-      if (!response.ok) {
-        const error = await response.json();
-        console.error("OpenAI TTS API error:", error);
-        throw new Error(error.error?.message || 'Failed to generate speech');
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        console.log(`Processing TTS chunk ${i + 1}/${chunks.length}, length: ${chunk.length}`);
+
+        const headers = await this.getHeaders();
+        const response = await fetch(`${OPENAI_CONFIG.baseUrl}/audio/speech`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            model: 'tts-1',
+            input: chunk,
+            voice: voice,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          console.error("OpenAI TTS API error:", error);
+          throw new Error(error);
+        }
+
+        const audioBlob = await response.blob();
+        audioBlobs.push(audioBlob);
+        console.log(`Successfully generated audio for chunk ${i + 1}`);
       }
 
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
+      // Combine all audio blobs
+      const combinedBlob = new Blob(audioBlobs, { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(combinedBlob);
       console.log("Speech generated successfully");
       return audioUrl;
     } catch (error: any) {

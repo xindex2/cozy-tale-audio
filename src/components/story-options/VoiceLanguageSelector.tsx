@@ -1,9 +1,8 @@
-import { Card } from "@/components/ui/card";
-import { Globe, Volume2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 
-type Voice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' | 'none';
+type Voice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
 
 interface VoiceLanguageSelectorProps {
   selectedVoice: Voice;
@@ -12,140 +11,99 @@ interface VoiceLanguageSelectorProps {
   onLanguageSelect: (language: string) => void;
 }
 
-export function VoiceLanguageSelector({ 
-  selectedVoice, 
+export function VoiceLanguageSelector({
+  selectedVoice,
   selectedLanguage,
   onVoiceSelect,
-  onLanguageSelect 
+  onLanguageSelect
 }: VoiceLanguageSelectorProps) {
-  const voices: { id: Voice; name: string; icon?: React.ReactNode }[] = [
-    {
-      id: 'alloy',
-      name: 'Alloy',
-      icon: <Volume2 className="h-4 w-4" />
-    },
-    {
-      id: 'echo',
-      name: 'Echo',
-      icon: <Volume2 className="h-4 w-4" />
-    },
-    {
-      id: 'fable',
-      name: 'Fable',
-      icon: <Volume2 className="h-4 w-4" />
-    },
-    {
-      id: 'onyx',
-      name: 'Onyx',
-      icon: <Volume2 className="h-4 w-4" />
-    },
-    {
-      id: 'nova',
-      name: 'Nova',
-      icon: <Volume2 className="h-4 w-4" />
-    },
-    {
-      id: 'shimmer',
-      name: 'Shimmer',
-      icon: <Volume2 className="h-4 w-4" />
-    }
-  ];
-
-  const languages = [
-    { code: "en", name: "English" },
-    { code: "es", name: "Spanish" },
-    { code: "fr", name: "French" },
-    { code: "de", name: "German" },
-    { code: "it", name: "Italian" },
-    { code: "pt", name: "Portuguese" },
-    { code: "nl", name: "Dutch" },
-    { code: "pl", name: "Polish" },
-    { code: "hi", name: "Hindi" },
-    { code: "ja", name: "Japanese" },
-    { code: "ko", name: "Korean" },
-    { code: "zh", name: "Chinese" },
-    { code: "ru", name: "Russian" },
-    { code: "ar", name: "Arabic" },
-    { code: "tr", name: "Turkish" }
-  ];
-
   return (
-    <Card className="p-6 bg-white shadow-md">
-      <div className="space-y-6">
-        <h2 className="text-2xl font-semibold text-story-blue mb-6">Language and Voice</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Language Selection */}
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-800">Select a Language</h3>
-            </div>
-            
-            <Select value={selectedLanguage} onValueChange={onLanguageSelect}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a language" />
-              </SelectTrigger>
-              <SelectContent>
-                {languages.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code}>
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4" />
-                      <span>{lang.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Voice Selection */}
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-800">Select a Voice</h3>
-            </div>
-            
-            <Select 
-              value={selectedVoice === 'none' ? voices[0].id : selectedVoice} 
-              onValueChange={(value) => onVoiceSelect(value as Voice)}
-              disabled={selectedVoice === 'none'}
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <Label>Select Voice</Label>
+        <RadioGroup
+          value={selectedVoice}
+          onValueChange={(value) => onVoiceSelect(value as Voice)}
+          className="grid grid-cols-2 sm:grid-cols-3 gap-4"
+        >
+          <div>
+            <RadioGroupItem value="alloy" id="alloy" className="peer sr-only" />
+            <Label
+              htmlFor="alloy"
+              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
             >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a voice" />
-              </SelectTrigger>
-              <SelectContent>
-                {voices.map((voice) => (
-                  <SelectItem key={voice.id} value={voice.id}>
-                    <div className="flex items-center gap-2">
-                      {voice.icon}
-                      <span>{voice.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <div className="flex items-center space-x-2 mt-3">
-              <Checkbox
-                id="no-audio"
-                checked={selectedVoice === 'none'}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    onVoiceSelect('none');
-                  } else {
-                    onVoiceSelect('alloy');
-                  }
-                }}
-              />
-              <label
-                htmlFor="no-audio"
-                className="text-sm font-medium text-gray-700 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                No audio narration
-              </label>
-            </div>
+              <span>Alloy</span>
+            </Label>
           </div>
-        </div>
+          <div>
+            <RadioGroupItem value="echo" id="echo" className="peer sr-only" />
+            <Label
+              htmlFor="echo"
+              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+            >
+              <span>Echo</span>
+            </Label>
+          </div>
+          <div>
+            <RadioGroupItem value="fable" id="fable" className="peer sr-only" />
+            <Label
+              htmlFor="fable"
+              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+            >
+              <span>Fable</span>
+            </Label>
+          </div>
+          <div>
+            <RadioGroupItem value="onyx" id="onyx" className="peer sr-only" />
+            <Label
+              htmlFor="onyx"
+              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+            >
+              <span>Onyx</span>
+            </Label>
+          </div>
+          <div>
+            <RadioGroupItem value="nova" id="nova" className="peer sr-only" />
+            <Label
+              htmlFor="nova"
+              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+            >
+              <span>Nova</span>
+            </Label>
+          </div>
+          <div>
+            <RadioGroupItem value="shimmer" id="shimmer" className="peer sr-only" />
+            <Label
+              htmlFor="shimmer"
+              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+            >
+              <span>Shimmer</span>
+            </Label>
+          </div>
+        </RadioGroup>
       </div>
-    </Card>
+
+      <div className="space-y-4">
+        <Label>Select Language</Label>
+        <Select value={selectedLanguage} onValueChange={onLanguageSelect}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select language" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="en">English</SelectItem>
+            <SelectItem value="es">Spanish</SelectItem>
+            <SelectItem value="fr">French</SelectItem>
+            <SelectItem value="de">German</SelectItem>
+            <SelectItem value="it">Italian</SelectItem>
+            <SelectItem value="pt">Portuguese</SelectItem>
+            <SelectItem value="nl">Dutch</SelectItem>
+            <SelectItem value="pl">Polish</SelectItem>
+            <SelectItem value="ja">Japanese</SelectItem>
+            <SelectItem value="ko">Korean</SelectItem>
+            <SelectItem value="zh">Chinese</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
   );
 }
