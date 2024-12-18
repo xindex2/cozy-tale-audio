@@ -4,6 +4,7 @@ import { toast } from "@/hooks/use-toast";
 
 class OpenAIClient {
   private apiKeyManager: ApiKeyManager;
+  private controller: AbortController | null = null;
 
   constructor() {
     this.apiKeyManager = ApiKeyManager.getInstance();
@@ -53,7 +54,18 @@ class OpenAIClient {
     }
   }
 
+  cancelCurrentRequest() {
+    if (this.controller) {
+      this.controller.abort();
+      this.controller = null;
+    }
+  }
+
   async generateContent(prompt: string, systemPrompt?: string, onStream?: (chunk: string) => void) {
+    // Cancel any existing request
+    this.cancelCurrentRequest();
+    this.controller = new AbortController();
+
     try {
       console.log("Generating content with prompt:", prompt);
       
@@ -69,10 +81,13 @@ class OpenAIClient {
       const response = await fetch(`${OPENAI_CONFIG.baseUrl}/chat/completions`, {
         method: 'POST',
         headers,
+        signal: this.controller.signal,
         body: JSON.stringify({
           model: OPENAI_CONFIG.defaultModel,
           messages,
           ...OPENAI_CONFIG.generationConfig,
+          max_tokens: 2000, // Limit tokens for faster response
+          temperature: 0.7, // Slightly reduce randomness for faster generation
         }),
       });
 
@@ -85,6 +100,8 @@ class OpenAIClient {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let fullContent = '';
+      let startTime = Date.now();
+      let lastProgressUpdate = startTime;
 
       while (reader) {
         const { done, value } = await reader.read();
@@ -105,6 +122,14 @@ class OpenAIClient {
               if (onStream) {
                 onStream(content);
               }
+
+              // Update progress every second
+              const now = Date.now();
+              if (now - lastProgressUpdate > 1000) {
+                const elapsedSeconds = Math.floor((now - startTime) / 1000);
+                console.log(`Generation in progress... ${elapsedSeconds}s elapsed`);
+                lastProgressUpdate = now;
+              }
             }
           } catch (e) {
             console.error('Error parsing streaming response:', e);
@@ -112,9 +137,14 @@ class OpenAIClient {
         }
       }
 
-      console.log("Content generated successfully");
+      const totalTime = (Date.now() - startTime) / 1000;
+      console.log(`Content generated successfully in ${totalTime}s`);
       return fullContent;
     } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('Request was cancelled');
+        return '';
+      }
       console.error("Error generating content:", error);
       toast({
         title: "Error",
@@ -122,6 +152,8 @@ class OpenAIClient {
         variant: "destructive",
       });
       throw error;
+    } finally {
+      this.controller = null;
     }
   }
 }
