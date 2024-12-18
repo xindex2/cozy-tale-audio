@@ -5,6 +5,7 @@ import { VoiceLanguageSelector } from "./VoiceLanguageSelector";
 import { AgeGroupSelector } from "./AgeGroupSelector";
 import { ThemeSelector } from "./ThemeSelector";
 import { DurationSelector } from "./DurationSelector";
+import { MusicSelector } from "./MusicSelector";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { StorySettings } from "../StoryOptions";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,7 +28,6 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
   };
 
   const handleStart = () => {
-    onSettingsChange({ music: 'gentle-lullaby' }); // Set default music
     onStart(settings);
   };
 
@@ -126,12 +126,16 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
             <Card className="p-6 sm:p-8 bg-gradient-to-br from-purple-50 to-indigo-50 border-0 shadow-lg rounded-3xl">
               <div className="space-y-8">
                 <div className="text-center">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-indigo-800 mb-4">Story Duration</h2>
-                  <p className="text-gray-600">How long would you like your story to be?</p>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-indigo-800 mb-4">Final Settings</h2>
+                  <p className="text-gray-600">Choose the duration and background music</p>
                 </div>
                 <DurationSelector 
                   selectedDuration={settings.duration} 
                   onDurationSelect={(value) => onSettingsChange({ duration: value })} 
+                />
+                <MusicSelector
+                  selectedMusic={settings.music}
+                  onMusicSelect={(value) => onSettingsChange({ music: value })}
                 />
               </div>
             </Card>
