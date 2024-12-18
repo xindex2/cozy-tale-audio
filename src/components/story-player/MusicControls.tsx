@@ -81,7 +81,7 @@ export function MusicControls({
         )}
 
         {currentMusic?.url && (
-          <div className="mt-2">
+          <div className="mt-4">
             <PlyrPlayer
               url={currentMusic.url}
               volume={volume}

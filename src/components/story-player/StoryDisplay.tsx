@@ -23,12 +23,14 @@ export function StoryDisplay({
   onAudioGenerated
 }: StoryDisplayProps) {
   const isMobile = useIsMobile();
-  const cleanTitle = text.split('\n')[0].replace(/\*/g, '');
-  const content = text.split('\n').slice(1).join('\n').replace(/\*\*(.*?)\*\*/g, '$1');
+  // Remove asterisks from title and clean up formatting
+  const titleMatch = text.match(/^[*\s]*(.+?)[*\s]*$/m);
+  const title = titleMatch ? titleMatch[1].trim() : "";
+  const content = text.split('\n').slice(1).join('\n').replace(/\*\*/g, '');
 
   return (
     <Card className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">{cleanTitle}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-4">{title}</h1>
       
       {audioUrl && (
         <div className="w-full mb-6">
