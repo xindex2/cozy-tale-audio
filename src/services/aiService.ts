@@ -2,16 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { audioService } from './audioService';
 import { generateQuiz } from './quizService';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import type { StorySettings } from "@/components/StoryOptions";
 import { toast } from "@/hooks/use-toast";
-
-export interface StoryResponse {
-  text: string;
-  audioUrl: string | null;
-  backgroundMusicUrl: string | null;
-  title: string;
-  content: string;
-}
 
 const AUDIO_URLS = {
   "gentle-lullaby": "https://cdn.pixabay.com/download/audio/2023/09/05/audio_168a3e0caa.mp3",
@@ -34,45 +25,54 @@ class AIService {
   private genAI: GoogleGenerativeAI | null = null;
   private chatSession: any = null;
   private isInitialized: boolean = false;
+  private initializationPromise: Promise<void> | null = null;
+  private retryCount: number = 0;
+  private maxRetries: number = 3;
 
   constructor() {
     this.initializeFromEnvironment();
   }
 
   private async initializeFromEnvironment() {
-    try {
-      console.log("Fetching Gemini API key...");
-      const { data: apiKeys, error } = await supabase
-        .from('api_keys')
-        .select('*')
-        .eq('key_name', 'GEMINI_API_KEY')
-        .eq('is_active', true)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching API key:", error);
-        throw error;
-      }
-      
-      if (!apiKeys) {
-        console.warn("No active Gemini API key found");
-        toast({
-          title: "Configuration Required",
-          description: "Please add a Gemini API key in the admin settings.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      await this.initializeGemini(apiKeys.key_value);
-    } catch (error) {
-      console.error("Error initializing AI service:", error);
-      toast({
-        title: "Error",
-        description: "Failed to initialize AI service. Please check your configuration.",
-        variant: "destructive",
-      });
+    if (this.initializationPromise) {
+      return this.initializationPromise;
     }
+
+    this.initializationPromise = new Promise(async (resolve, reject) => {
+      try {
+        console.log("Fetching Gemini API key...");
+        const { data: apiKeys, error } = await supabase
+          .from('api_keys')
+          .select('*')
+          .eq('key_name', 'GEMINI_API_KEY')
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error fetching API key:", error);
+          throw error;
+        }
+        
+        if (!apiKeys) {
+          console.warn("No active Gemini API key found");
+          toast({
+            title: "Configuration Required",
+            description: "Please add a Gemini API key in the admin settings.",
+            variant: "destructive",
+          });
+          reject(new Error("No active Gemini API key found"));
+          return;
+        }
+        
+        await this.initializeGemini(apiKeys.key_value);
+        resolve();
+      } catch (error) {
+        console.error("Error initializing AI service:", error);
+        reject(error);
+      }
+    });
+
+    return this.initializationPromise;
   }
 
   setApiKey(key: string) {
@@ -80,7 +80,7 @@ class AIService {
     console.log("ElevenLabs API key set successfully");
   }
 
-  async initializeGemini(key: string) {
+  private async initializeGemini(key: string) {
     if (!key) {
       console.error("Empty Gemini API key provided");
       throw new Error("Invalid Gemini API key");
@@ -99,25 +99,32 @@ class AIService {
     }
   }
 
-  setGeminiApiKey(key: string) {
-    return this.initializeGemini(key);
-  }
+  private async ensureInitialized() {
+    if (this.isInitialized) return;
 
-  private ensureInitialized() {
-    if (!this.isInitialized || !this.genAI) {
-      console.error("Gemini API not initialized");
+    if (this.retryCount >= this.maxRetries) {
+      throw new Error("Failed to initialize after multiple attempts");
+    }
+
+    try {
+      this.retryCount++;
+      await this.initializeFromEnvironment();
+    } catch (error) {
+      console.error(`Initialization attempt ${this.retryCount} failed:`, error);
       throw new Error("Story generation service not properly initialized. Please try again in a few moments.");
     }
   }
 
-  async generateStory(settings: StorySettings): Promise<StoryResponse> {
-    console.log("Starting story generation with settings:", settings);
+  async generateStory(settings: any): Promise<any> {
+    await this.ensureInitialized();
     
-    this.ensureInitialized();
+    if (!this.genAI) {
+      throw new Error("Gemini API not initialized");
+    }
 
     try {
       console.log("Creating Gemini model...");
-      const model = this.genAI!.getGenerativeModel({ 
+      const model = this.genAI.getGenerativeModel({ 
         model: "gemini-pro",
         generationConfig: {
           ...generationConfig,
@@ -157,8 +164,8 @@ class AIService {
       
       // Clean and parse the response
       const cleanedResponse = response
-        .replace(/```[^`]*```/g, '') // Remove code blocks
-        .replace(/\n{3,}/g, '\n\n')  // Normalize multiple line breaks
+        .replace(/```[^`]*```/g, '')
+        .replace(/\n{3,}/g, '\n\n')
         .trim();
       
       const [title, ...contentParts] = cleanedResponse.split('\n\n');
@@ -182,8 +189,8 @@ class AIService {
     }
   }
 
-  async continueStory(message: string, language: string = 'en'): Promise<StoryResponse> {
-    this.ensureInitialized();
+  async continueStory(message: string): Promise<any> {
+    await this.ensureInitialized();
 
     if (!this.chatSession) {
       throw new Error("Chat session not initialized");
