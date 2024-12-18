@@ -21,15 +21,21 @@ export function useStoryPlayer(
 
   // Save playback position when it changes
   useEffect(() => {
-    const savePlaybackPosition = async () => {
-      const storyId = window.location.pathname.split('/').pop();
-      if (!storyId) return;
+    const pathSegments = window.location.pathname.split('/');
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    
+    // Only save playback position if we're viewing an existing story (not creating)
+    // and if the ID looks like a UUID
+    const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(lastSegment);
+    
+    if (!isValidUUID) return;
 
+    const savePlaybackPosition = async () => {
       try {
         await supabase
           .from('stories')
           .update({ playback_position: state.playback.currentTime })
-          .eq('id', storyId);
+          .eq('id', lastSegment);
       } catch (error) {
         console.error('Error saving playback position:', error);
       }
@@ -42,16 +48,22 @@ export function useStoryPlayer(
 
   // Load initial playback position
   useEffect(() => {
-    const loadPlaybackPosition = async () => {
-      const storyId = window.location.pathname.split('/').pop();
-      if (!storyId) return;
+    const pathSegments = window.location.pathname.split('/');
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    
+    // Only load playback position if we're viewing an existing story (not creating)
+    // and if the ID looks like a UUID
+    const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(lastSegment);
+    
+    if (!isValidUUID) return;
 
+    const loadPlaybackPosition = async () => {
       try {
         const { data, error } = await supabase
           .from('stories')
           .select('playback_position')
-          .eq('id', storyId)
-          .single();
+          .eq('id', lastSegment)
+          .maybeSingle();
 
         if (error) throw error;
         if (data?.playback_position) {
