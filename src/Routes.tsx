@@ -25,6 +25,8 @@ import StoriesForToddlers from "./pages/landing/StoriesForToddlers";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Contact from "./pages/Contact";
+import Billing from "./pages/Billing";
+import Pricing from "./pages/Pricing";
 
 export default function AppRoutes() {
   return (
@@ -34,6 +36,7 @@ export default function AppRoutes() {
       <Route path="/auth" element={<Auth />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/pricing" element={<Pricing />} />
       
       {/* SEO Landing Pages */}
       <Route path="/bedtime-stories-for-kids" element={<BedtimeStoriesForKids />} />
@@ -83,6 +86,11 @@ export default function AppRoutes() {
       <Route path="/settings" element={
         <AuthGuard>
           <Settings />
+        </AuthGuard>
+      } />
+      <Route path="/billing" element={
+        <AuthGuard>
+          <Billing />
         </AuthGuard>
       } />
 
