@@ -1,13 +1,18 @@
 import { Card } from "@/components/ui/card";
-import { Music, Play, Pause, Loader2 } from "lucide-react";
+import { Music, Play, Pause, Loader2, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PlyrPlayer } from "./PlyrPlayer";
 import { AudioControls } from "./AudioControls";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface MusicControlsProps {
   volume: number;
@@ -75,45 +80,35 @@ export function MusicControls({
         <p className="text-sm text-red-500">{error}</p>
       )}
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead className="w-24">Play</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {musicTracks?.map((track) => (
-              <TableRow 
-                key={track.id}
-                className={selectedMusic === track.id ? "bg-blue-50" : undefined}
-              >
-                <TableCell className="font-medium">{track.name}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="capitalize">
-                    {track.category}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleMusicChange(track.id)}
-                  >
-                    {selectedMusic === track.id ? (
-                      <Pause className="h-4 w-4" />
-                    ) : (
-                      <Play className="h-4 w-4" />
-                    )}
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="w-full justify-between">
+            <span>{currentMusic?.name || "Select music"}</span>
+            <ChevronDown className="h-4 w-4 opacity-50" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-full min-w-[240px] bg-white">
+          {musicTracks?.map((track) => (
+            <DropdownMenuItem
+              key={track.id}
+              onClick={() => handleMusicChange(track.id)}
+              className="flex items-center justify-between"
+            >
+              <span>{track.name}</span>
+              <div className="flex items-center space-x-2">
+                <Badge variant="secondary" className="capitalize">
+                  {track.category}
+                </Badge>
+                {selectedMusic === track.id && (
+                  <div className="text-blue-500">
+                    {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                  </div>
+                )}
+              </div>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {currentMusic?.url && (
         <div className="space-y-4">
@@ -135,5 +130,3 @@ export function MusicControls({
         </div>
       )}
     </Card>
-  );
-}
