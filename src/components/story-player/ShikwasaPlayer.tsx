@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import Shikwasa from "shikwasa";
+import { Shikwasa } from "shikwasa";
 import "shikwasa/dist/style.css";
 
 interface ShikwasaPlayerProps {
@@ -38,6 +38,7 @@ export function ShikwasaPlayer({
         artist: isMusic ? "Background" : "Narrator",
         cover: "/placeholder.svg",
         src: url,
+        lyrics: text ? [{ text: text }] : undefined,
       },
       fixed: {
         type: 'static',
@@ -68,7 +69,7 @@ export function ShikwasaPlayer({
         playerRef.current = null;
       }
     };
-  }, [url, isMusic, onTimeUpdate]);
+  }, [url, isMusic, onTimeUpdate, text]);
 
   useEffect(() => {
     if (playerRef.current) {
