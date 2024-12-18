@@ -1,13 +1,10 @@
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
-import { Music, Volume2, VolumeX, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Loader2, Music } from "lucide-react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PlyrPlayer } from "./PlyrPlayer";
-import 'plyr/dist/plyr.css';
 
 interface MusicControlsProps {
   volume: number;
@@ -27,8 +24,6 @@ interface MusicTrack {
 export function MusicControls({
   volume,
   isMuted,
-  onVolumeChange,
-  onToggleMute,
   selectedMusic,
 }: MusicControlsProps) {
   const [error, setError] = useState<string | null>(null);
@@ -49,38 +44,6 @@ export function MusicControls({
   });
 
   const currentMusic = musicTracks?.find(track => track.id === selectedMusic);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (selectedMusic && currentMusic?.url) {
-      setIsLoading(true);
-      setError(null);
-      
-      const audio = new Audio();
-      audio.src = currentMusic.url;
-      
-      const handleCanPlay = () => {
-        setIsLoading(false);
-        setIsPlaying(true);
-      };
-      
-      const handleError = () => {
-        setIsLoading(false);
-        setError("Failed to load music");
-      };
-      
-      audio.addEventListener('canplay', handleCanPlay);
-      audio.addEventListener('error', handleError);
-      
-      return () => {
-        audio.removeEventListener('canplay', handleCanPlay);
-        audio.removeEventListener('error', handleError);
-      };
-    } else {
-      setIsLoading(false);
-      setIsPlaying(false);
-    }
-  }, [selectedMusic, currentMusic?.url]);
 
   return (
     <Card className="p-4 relative">
@@ -90,14 +53,14 @@ export function MusicControls({
             <Music className="h-4 w-4 text-blue-500" />
             <h3 className="text-sm font-medium">Background Music</h3>
           </div>
-          {(isLoading || isLoadingTracks) && (
+          {isLoadingTracks && (
             <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
           )}
         </div>
 
         <Select 
           value={selectedMusic || "no-music"}
-          disabled={isLoading || isLoadingTracks}
+          disabled={isLoadingTracks}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select music">
@@ -117,33 +80,8 @@ export function MusicControls({
           <p className="text-sm text-red-500">{error}</p>
         )}
 
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="p-0 hover:bg-transparent"
-            onClick={onToggleMute}
-            disabled={isLoading}
-          >
-            {isMuted ? (
-              <VolumeX className="h-4 w-4" />
-            ) : (
-              <Volume2 className="h-4 w-4" />
-            )}
-          </Button>
-          <Slider
-            value={[isMuted ? 0 : volume]}
-            min={0}
-            max={1}
-            step={0.1}
-            className="w-full"
-            onValueChange={(value) => onVolumeChange(value[0])}
-            disabled={isLoading}
-          />
-        </div>
-
         {currentMusic?.url && (
-          <div className="hidden">
+          <div className="mt-2">
             <PlyrPlayer
               url={currentMusic.url}
               volume={volume}

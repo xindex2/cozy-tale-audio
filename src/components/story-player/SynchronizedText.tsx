@@ -11,7 +11,7 @@ interface SynchronizedTextProps {
 }
 
 export function SynchronizedText({ 
-  text, 
+  text,
   audioUrl,
   isPlaying, 
   currentTime, 
@@ -39,18 +39,31 @@ export function SynchronizedText({
     }
   }, [text, currentTime, duration, isPlaying]);
 
+  const sections = text.split(/\n\n+/);
+
   return (
     <div 
       ref={containerRef}
-      className="text-left text-lg leading-relaxed p-4 bg-white/90 rounded-lg shadow-sm"
+      className="prose prose-lg max-w-none text-left leading-relaxed space-y-6"
     >
-      {text.split(" ").map((word, index) => (
-        <span
-          key={index}
-          className="transition-colors duration-200 ease-in-out"
-        >
-          {word + " "}
-        </span>
+      {sections.map((section, sectionIndex) => (
+        <div key={sectionIndex} className="space-y-4">
+          {section.split('\n').map((paragraph, paragraphIndex) => (
+            <p 
+              key={`${sectionIndex}-${paragraphIndex}`}
+              className="text-gray-800 leading-relaxed"
+            >
+              {paragraph.split(" ").map((word, wordIndex) => (
+                <span
+                  key={`${sectionIndex}-${paragraphIndex}-${wordIndex}`}
+                  className="transition-colors duration-200 ease-in-out"
+                >
+                  {word + " "}
+                </span>
+              ))}
+            </p>
+          ))}
+        </div>
       ))}
     </div>
   );
