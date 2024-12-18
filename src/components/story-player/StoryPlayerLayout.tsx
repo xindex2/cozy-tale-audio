@@ -81,8 +81,6 @@ export function StoryPlayerLayout({
               onToggleMute={onToggleMute}
               isPlaying={isPlaying}
               onTogglePlay={onTogglePlay}
-              audioUrl={audioUrl}
-              text={content}
             />
 
             <AudioManager

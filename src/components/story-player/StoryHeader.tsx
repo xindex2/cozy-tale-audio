@@ -1,18 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { SkipBack } from "lucide-react";
-import { ShikwasaPlayer } from "./ShikwasaPlayer";
+import { ChevronLeft, Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 
 interface StoryHeaderProps {
   onBack: () => void;
   title: string;
   volume: number;
   isMuted: boolean;
-  onVolumeChange: (newVolume: number[]) => void;
+  onVolumeChange: (volume: number) => void;
   onToggleMute: () => void;
   isPlaying: boolean;
   onTogglePlay: () => void;
-  audioUrl?: string | null;
-  text?: string;
 }
 
 export function StoryHeader({
@@ -24,31 +22,58 @@ export function StoryHeader({
   onToggleMute,
   isPlaying,
   onTogglePlay,
-  audioUrl,
-  text,
 }: StoryHeaderProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6">
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          <Button variant="outline" size="icon" onClick={onBack} className="shrink-0">
-            <SkipBack className="h-4 w-4" />
-          </Button>
-          <h1 className="text-lg sm:text-xl font-bold text-blue-800 truncate">{title}</h1>
-        </div>
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          onClick={onBack}
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </Button>
+        <h2 className="text-xl font-semibold">{title}</h2>
       </div>
-      {audioUrl && (
-        <div className="w-full">
-          <ShikwasaPlayer
-            url={audioUrl}
-            volume={volume}
-            isMuted={isMuted}
-            isPlaying={isPlaying}
-            isMusic={false}
-            text={text}
+
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+            onClick={onToggleMute}
+          >
+            {isMuted ? (
+              <VolumeX className="h-6 w-6" />
+            ) : (
+              <Volume2 className="h-6 w-6" />
+            )}
+          </Button>
+          <Slider
+            value={[isMuted ? 0 : volume]}
+            min={0}
+            max={1}
+            step={0.1}
+            className="w-24"
+            onValueChange={(value) => onVolumeChange(value[0])}
           />
         </div>
-      )}
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          onClick={onTogglePlay}
+        >
+          {isPlaying ? (
+            <Pause className="h-6 w-6" />
+          ) : (
+            <Play className="h-6 w-6" />
+          )}
+        </Button>
+      </div>
     </div>
   );
 }
