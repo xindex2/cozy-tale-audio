@@ -62,6 +62,15 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
   } = useStoryPlayer(settings, onSave, initialStoryData);
 
   useEffect(() => {
+    if (initialStoryData?.audioUrl) {
+      setPersistedAudioUrl(initialStoryData.audioUrl);
+    }
+    if (initialStoryData?.backgroundMusicUrl) {
+      setPersistedMusicUrl(initialStoryData.backgroundMusicUrl);
+    }
+  }, [initialStoryData]);
+
+  useEffect(() => {
     if (usage && !initialStoryData) {
       setIsFreeTrial(usage.stories_created >= 1);
     }
@@ -136,6 +145,8 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     );
   }
 
+  const currentDisplayAudioUrl = persistedAudioUrl || currentAudioUrl || initialStoryData?.audioUrl;
+
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-4 lg:gap-6">
@@ -150,23 +161,13 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
               onToggleMute={() => setIsMuted(!isMuted)}
               isPlaying={isPlaying}
               onTogglePlay={() => setIsPlaying(!isPlaying)}
-            />
-
-            <AudioManager
-              voiceUrl={persistedAudioUrl || currentAudioUrl || initialStoryData?.audioUrl || ''}
-              backgroundMusicUrl={persistedMusicUrl || currentMusicUrl || initialStoryData?.backgroundMusicUrl || ''}
-              isPlaying={isPlaying}
-              volume={volume}
-              isMuted={isMuted}
-              musicVolume={musicVolume}
-              isMusicMuted={isMusicMuted}
-              onTimeUpdate={setCurrentTime}
+              audioUrl={currentDisplayAudioUrl}
             />
 
             <ErrorBoundary>
               <StoryDisplay
                 text={displayContent || initialStoryData?.content || ""}
-                audioUrl={persistedAudioUrl || currentAudioUrl || initialStoryData?.audioUrl}
+                audioUrl={currentDisplayAudioUrl}
                 isPlaying={isPlaying}
                 currentTime={currentTime}
                 duration={settings.duration * 60}

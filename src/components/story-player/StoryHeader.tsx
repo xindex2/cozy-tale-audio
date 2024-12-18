@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { SkipBack } from "lucide-react";
-import { NarrationControls } from "./NarrationControls";
+import { PlyrPlayer } from "./PlyrPlayer";
 
 interface StoryHeaderProps {
   onBack: () => void;
@@ -11,6 +11,7 @@ interface StoryHeaderProps {
   onToggleMute: () => void;
   isPlaying: boolean;
   onTogglePlay: () => void;
+  audioUrl?: string | null;
 }
 
 export function StoryHeader({
@@ -22,6 +23,7 @@ export function StoryHeader({
   onToggleMute,
   isPlaying,
   onTogglePlay,
+  audioUrl,
 }: StoryHeaderProps) {
   return (
     <div className="space-y-4">
@@ -33,17 +35,17 @@ export function StoryHeader({
           <h1 className="text-lg sm:text-xl font-bold text-blue-800 truncate">{title}</h1>
         </div>
       </div>
-      <div className="flex items-center justify-between bg-story-orange/10 border border-story-orange/20 rounded-lg p-3 text-sm text-gray-800 dark:text-gray-200">
-        <span>Click play to listen to the story narration</span>
-        <NarrationControls
-          isPlaying={isPlaying}
-          onTogglePlay={onTogglePlay}
-          volume={volume}
-          isMuted={isMuted}
-          onVolumeChange={onVolumeChange}
-          onToggleMute={onToggleMute}
-        />
-      </div>
+      {audioUrl && (
+        <div className="w-full">
+          <PlyrPlayer
+            url={audioUrl}
+            volume={volume}
+            isMuted={isMuted}
+            isPlaying={isPlaying}
+            isMusic={false}
+          />
+        </div>
+      )}
     </div>
   );
 }
