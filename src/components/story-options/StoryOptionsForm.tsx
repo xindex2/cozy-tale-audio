@@ -10,11 +10,14 @@ interface StoryOptionsFormProps {
 
 export function StoryOptionsForm({ settings, onSettingsChange, onStart }: StoryOptionsFormProps) {
   return (
-    <form onSubmit={(e) => {
-      e.preventDefault();
-      onStart(settings);
-    }} className="space-y-6 mb-8">
-      <Card className="p-6">
+    <form 
+      onSubmit={(e) => {
+        e.preventDefault();
+        onStart(settings);
+      }} 
+      className="min-h-[100dvh] md:min-h-0 space-y-6 mb-8"
+    >
+      <Card className="p-0 md:p-6 h-full">
         <StoryCreationFlow 
           settings={settings}
           onSettingsChange={onSettingsChange}
