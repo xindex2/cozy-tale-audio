@@ -67,6 +67,14 @@ export function StoryPlayerLayout({
   showUpgradePrompt,
   onUpgradePromptChange,
 }: StoryPlayerLayoutProps) {
+  const handleVolumeChange = (values: number[]) => {
+    onVolumeChange(values[0]);
+  };
+
+  const handleMusicVolumeChange = (values: number[]) => {
+    onMusicVolumeChange(values[0]);
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-4 lg:gap-6">
@@ -77,7 +85,7 @@ export function StoryPlayerLayout({
               title={title}
               volume={volume}
               isMuted={isMuted}
-              onVolumeChange={onVolumeChange}
+              onVolumeChange={handleVolumeChange}
               onToggleMute={onToggleMute}
               isPlaying={isPlaying}
               onTogglePlay={onTogglePlay}
@@ -112,7 +120,7 @@ export function StoryPlayerLayout({
           <MusicControls
             volume={musicVolume}
             isMuted={isMusicMuted}
-            onVolumeChange={onMusicVolumeChange}
+            onVolumeChange={handleMusicVolumeChange}
             onToggleMute={onMusicToggleMute}
             selectedMusic={selectedMusic}
           />
