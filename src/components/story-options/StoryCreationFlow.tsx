@@ -45,7 +45,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4 sm:px-6">
+    <div className="w-full max-w-2xl mx-auto px-0 sm:px-6">
       {/* Progress Bar */}
       <div className="mb-8">
         <div className="flex justify-between text-sm font-medium text-gray-500">
