@@ -1,11 +1,22 @@
 import { Loader } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useEffect, useState } from "react";
 
 interface LoadingStateProps {
   stage?: 'text' | 'audio' | 'music';
 }
 
 export function LoadingState({ stage = 'text' }: LoadingStateProps) {
+  const [dots, setDots] = useState('');
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots(prev => prev.length >= 3 ? '' : prev + '.');
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const getLoadingProgress = () => {
     switch (stage) {
       case 'text':
@@ -20,15 +31,25 @@ export function LoadingState({ stage = 'text' }: LoadingStateProps) {
   };
 
   const getLoadingMessage = () => {
+    const baseMsgs = {
+      text: "Creating your bedtime story",
+      audio: "Generating soothing narration",
+      music: "Adding peaceful background music"
+    };
+    
+    return `${baseMsgs[stage]}${dots}`;
+  };
+
+  const getDetailedMessage = () => {
     switch (stage) {
       case 'text':
-        return "Creating your bedtime story... This may take a minute";
+        return "Our AI is crafting a unique story just for you. This usually takes about a minute...";
       case 'audio':
-        return "Generating soothing narration...";
+        return "Converting the story into spoken words with natural voice...";
       case 'music':
-        return "Adding peaceful background music...";
+        return "Adding background music to enhance the experience...";
       default:
-        return "Loading...";
+        return "Processing...";
     }
   };
 
@@ -41,9 +62,14 @@ export function LoadingState({ stage = 'text' }: LoadingStateProps) {
       
       <Loader className="h-8 w-8 animate-spin text-blue-500" />
       
-      <p className="text-blue-600 font-medium text-lg">
-        {getLoadingMessage()}
-      </p>
+      <div className="text-center space-y-2">
+        <p className="text-blue-600 font-medium text-lg">
+          {getLoadingMessage()}
+        </p>
+        <p className="text-sm text-gray-500">
+          {getDetailedMessage()}
+        </p>
+      </div>
       
       <div className="w-full max-w-md space-y-2">
         <Progress value={getLoadingProgress()} className="h-3" />
