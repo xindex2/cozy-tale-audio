@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import Shikwasa from "shikwasa/dist/shikwasa.es.js";
+import Shikwasa from "shikwasa/dist/shikwasa";
 import "shikwasa/dist/style.css";
 
 interface ShikwasaPlayerProps {
