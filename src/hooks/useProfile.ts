@@ -11,15 +11,11 @@ interface Profile {
   is_admin?: boolean;
 }
 
-interface RPCParams {
-  user_id: string;
-}
-
 export const useProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const { toast } = useToast();
 
-  const fetchProfile = async (user: User, retryCount = 3) => {
+  const fetchProfile = async (user: User) => {
     try {
       console.log('Fetching profile for user:', user.id);
       
@@ -38,7 +34,7 @@ export const useProfile = () => {
       if (!directError && directProfile) {
         console.log('Successfully fetched profile directly:', directProfile);
         setProfile(directProfile as Profile);
-        return directProfile;
+        return directProfile as Profile;
       }
 
       // If direct fetch fails, try alternative approach with single row fetch
@@ -51,7 +47,7 @@ export const useProfile = () => {
       if (!singleError && singleProfile) {
         console.log('Successfully fetched profile with single:', singleProfile);
         setProfile(singleProfile as Profile);
-        return singleProfile;
+        return singleProfile as Profile;
       }
 
       // If both approaches fail, try with RPC call
@@ -62,8 +58,9 @@ export const useProfile = () => {
 
       if (!rpcError && rpcProfile) {
         console.log('Successfully fetched profile with RPC:', rpcProfile);
-        setProfile(rpcProfile as Profile);
-        return rpcProfile;
+        const typedProfile = rpcProfile as Profile;
+        setProfile(typedProfile);
+        return typedProfile;
       }
 
       // If all attempts fail, create a minimal profile
