@@ -24,12 +24,16 @@ export function AudioManager({
 }: AudioManagerProps) {
   const { toast } = useToast();
 
-  if (!voiceUrl && !backgroundMusicUrl) {
-    return null;
-  }
+  const handleError = (type: 'voice' | 'music') => {
+    toast({
+      title: "Audio Error",
+      description: `Failed to load ${type} audio. Please try again.`,
+      variant: "destructive",
+    });
+  };
 
   return (
-    <>
+    <div className="hidden">
       {voiceUrl && (
         <PlyrPlayer
           url={voiceUrl}
@@ -37,6 +41,7 @@ export function AudioManager({
           isMuted={isMuted}
           isPlaying={isPlaying}
           onTimeUpdate={onTimeUpdate}
+          onError={() => handleError('voice')}
         />
       )}
       {backgroundMusicUrl && (
@@ -46,8 +51,9 @@ export function AudioManager({
           isMuted={isMusicMuted}
           isPlaying={isPlaying}
           isMusic={true}
+          onError={() => handleError('music')}
         />
       )}
-    </>
+    </div>
   );
 }
