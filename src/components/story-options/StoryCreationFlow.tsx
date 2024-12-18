@@ -45,7 +45,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-0 sm:px-6">
+    <div className="w-full mx-auto px-0 md:max-w-2xl md:px-6">
       {/* Progress Bar */}
       <div className="mb-8">
         <div className="flex justify-between text-sm font-medium text-gray-500">
@@ -85,7 +85,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
           className="space-y-6"
         >
           {step === 1 && (
-            <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-blue-50 border-0 shadow-lg rounded-3xl">
+            <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-blue-50 border-0 shadow-lg rounded-none sm:rounded-3xl">
               <div className="space-y-6">
                 <div className="text-center">
                   <h2 className="text-xl sm:text-2xl font-bold text-purple-800 mb-2">Choose Your Story Settings</h2>
@@ -102,7 +102,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
           )}
 
           {step === 2 && (
-            <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-purple-50 border-0 shadow-lg rounded-3xl">
+            <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-purple-50 border-0 shadow-lg rounded-none sm:rounded-3xl">
               <div className="space-y-6">
                 <div className="text-center">
                   <h2 className="text-xl sm:text-2xl font-bold text-blue-800 mb-2">Customize Your Story</h2>
@@ -123,7 +123,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
           )}
 
           {step === 3 && (
-            <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-indigo-50 border-0 shadow-lg rounded-3xl">
+            <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-indigo-50 border-0 shadow-lg rounded-none sm:rounded-3xl">
               <div className="space-y-6">
                 <div className="text-center">
                   <h2 className="text-xl sm:text-2xl font-bold text-indigo-800 mb-2">Story Duration</h2>
