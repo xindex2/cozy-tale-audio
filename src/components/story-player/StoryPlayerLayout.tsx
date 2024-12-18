@@ -32,7 +32,7 @@ interface StoryPlayerLayoutProps {
   currentTime: number;
   duration: number;
   isFreeTrial: boolean;
-  onAudioGenerated: (blob: Blob) => void;
+  onAudioGenerated: (blob: Blob) => Promise<void>;
   showUpgradePrompt: boolean;
   onUpgradePromptChange: (show: boolean) => void;
 }
