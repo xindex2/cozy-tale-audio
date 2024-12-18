@@ -24,11 +24,17 @@ export function Header() {
   const { toast } = useToast();
 
   const handleSignOut = async () => {
-    if (isLoggingOut) return;
+    if (isLoggingOut) {
+      console.log('Already logging out, returning');
+      return;
+    }
     
+    console.log('Starting logout process in Header');
     setIsLoggingOut(true);
     try {
+      console.log('Calling signOut function');
       await signOut();
+      console.log('SignOut successful, showing toast');
       toast({
         title: "Logged out successfully",
         description: "You have been signed out of your account",
@@ -41,6 +47,7 @@ export function Header() {
         description: "Please try again",
       });
     } finally {
+      console.log('Logout process complete in Header');
       setIsLoggingOut(false);
     }
   };

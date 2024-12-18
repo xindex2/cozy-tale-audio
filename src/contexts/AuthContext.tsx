@@ -27,6 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('Current session:', session);
         if (session?.user) {
           setUser(session.user);
           const { data: profile } = await supabase
@@ -49,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Auth state changed:', event, session);
       
       if (event === 'SIGNED_IN' && session) {
+        console.log('Setting user and profile for SIGNED_IN');
         setUser(session.user);
         const { data: profile } = await supabase
           .from('profiles')
@@ -62,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         navigate('/dashboard');
       } else if (event === 'SIGNED_OUT') {
+        console.log('Handling SIGNED_OUT event');
         setUser(null);
         setProfile(null);
         queryClient.clear();
@@ -70,19 +73,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      console.log('Cleaning up auth subscription');
       subscription.unsubscribe();
     };
   }, [navigate, queryClient]);
 
   const signOut = async () => {
-    if (isSigningOut) return;
+    if (isSigningOut) {
+      console.log('Already signing out, returning');
+      return;
+    }
     
+    console.log('Starting sign out process');
     setIsSigningOut(true);
     try {
+      console.log('Calling supabase.auth.signOut()');
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      // Clear all data immediately
+      console.log('Sign out successful, clearing data');
       queryClient.clear();
       setUser(null);
       setProfile(null);
@@ -91,6 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Sign out error:', error);
       throw error;
     } finally {
+      console.log('Sign out process complete');
       setIsSigningOut(false);
     }
   };
