@@ -4,11 +4,15 @@ import { toast } from "@/hooks/use-toast";
 
 const AUDIO_URLS = {
   "no-music": null,
-  "sleeping-lullaby": "/assets/gentle-lullaby.mp3",
-  "water-dreams": "/assets/ocean-waves.mp3",
-  "forest-birds": "/assets/nature-sounds.mp3",
-  "relaxing-piano": "/assets/soft-piano.mp3",
-  "gentle-dreams": "/assets/peaceful-dreams.mp3"
+  "gentle-lullaby": "https://cdn.pixabay.com/download/audio/2023/09/05/audio_168a3e0caa.mp3",
+  "peaceful-dreams": "https://cdn.pixabay.com/download/audio/2023/05/16/audio_166b9c7242.mp3",
+  "ocean-waves": "https://cdn.pixabay.com/download/audio/2022/02/23/audio_ea70ad08e3.mp3",
+  "soft-piano": "https://cdn.pixabay.com/download/audio/2024/11/04/audio_4956b4edd1.mp3",
+  "nature-sounds": "https://cdn.pixabay.com/download/audio/2024/09/10/audio_6e5d7d1912.mp3",
+  "waves-tears": "https://cdn.pixabay.com/download/audio/2021/09/09/audio_478f62eb43.mp3",
+  "forest-birds": "https://cdn.pixabay.com/download/audio/2022/02/12/audio_8ca49a7f20.mp3",
+  "sleep-music": "https://cdn.pixabay.com/download/audio/2023/10/30/audio_66f4e26e42.mp3",
+  "guided-sleep": "https://cdn.pixabay.com/download/audio/2024/03/11/audio_2412defc6f.mp3"
 };
 
 async function getOpenAIKey() {
@@ -48,7 +52,7 @@ export const audioService = {
       const apiKey = await getOpenAIKey();
 
       // Split text into chunks that fit within OpenAI's limit
-      const chunks = chunkText(text, 3000); // Using 3000 to be safe
+      const chunks = chunkText(text, 3000);
       console.log(`Split text into ${chunks.length} chunks`);
       
       const audioBlobs: Blob[] = [];
@@ -85,9 +89,24 @@ export const audioService = {
       // Combine all audio blobs
       console.log("Combining audio chunks...");
       const combinedBlob = new Blob(audioBlobs, { type: 'audio/mpeg' });
-      const audioUrl = URL.createObjectURL(combinedBlob);
-      console.log("Audio generation completed successfully");
-      return audioUrl;
+      
+      // Upload to Supabase storage
+      const fileName = `story-audio-${Date.now()}.mp3`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('story-audio')
+        .upload(fileName, combinedBlob);
+
+      if (uploadError) {
+        throw new Error(`Failed to upload audio: ${uploadError.message}`);
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('story-audio')
+        .getPublicUrl(fileName);
+
+      console.log("Audio generation and upload completed successfully");
+      return publicUrl;
     } catch (error) {
       console.error('Error generating audio:', error);
       toast({

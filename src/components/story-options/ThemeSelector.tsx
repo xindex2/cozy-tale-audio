@@ -17,8 +17,7 @@ export function ThemeSelector({ selectedTheme, onThemeSelect }: ThemeSelectorPro
   const themes = [
     "fantasy", "adventure", "animals", "space", "underwater", "fairy tales",
     "nature", "magic school", "mystery", "science fiction", "historical",
-    "romance", "horror", "comedy", "drama", "thriller", "western", "mythology",
-    "superhero", "dystopian", "steampunk", "cyberpunk", "time travel", "custom"
+    "superhero", "mythology", "custom"
   ];
 
   const handleThemeSelect = (theme: string) => {
@@ -39,11 +38,12 @@ export function ThemeSelector({ selectedTheme, onThemeSelect }: ThemeSelectorPro
   };
 
   return (
-    <Card className="p-8 space-y-6 bg-white shadow-lg rounded-3xl border-0">
-      <div className="flex items-center space-x-3">
-        <Sparkles className="h-8 w-8 text-blue-500" />
-        <h2 className="text-2xl font-semibold text-blue-500">Theme</h2>
+    <div className="space-y-4">
+      <div className="flex items-center gap-3 mb-6">
+        <Sparkles className="h-6 w-6 text-primary" />
+        <h3 className="text-lg font-semibold text-gray-900">Story Theme</h3>
       </div>
+
       {isCustom && (
         <div className="mb-4">
           <Input
@@ -54,17 +54,18 @@ export function ThemeSelector({ selectedTheme, onThemeSelect }: ThemeSelectorPro
           />
         </div>
       )}
-      <ScrollArea className="h-[400px] w-full rounded-xl pr-4">
-        <div className="grid grid-cols-2 gap-4">
+
+      <ScrollArea className="h-[300px] w-full rounded-xl pr-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {themes.map((theme) => (
             <Button
               key={theme}
               variant={selectedTheme === theme || (theme === "custom" && isCustom) ? "default" : "outline"}
               onClick={() => handleThemeSelect(theme)}
-              className={`h-14 text-base font-medium rounded-2xl capitalize transition-all duration-200 ${
+              className={`h-12 text-base font-medium rounded-xl capitalize transition-all duration-200 ${
                 (selectedTheme === theme || (theme === "custom" && isCustom))
-                  ? "bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg"
-                  : "hover:bg-blue-50 border-2 border-blue-100"
+                  ? "bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg"
+                  : "hover:bg-primary/10 border-2"
               }`}
             >
               {theme}
@@ -72,6 +73,6 @@ export function ThemeSelector({ selectedTheme, onThemeSelect }: ThemeSelectorPro
           ))}
         </div>
       </ScrollArea>
-    </Card>
+    </div>
   );
 }

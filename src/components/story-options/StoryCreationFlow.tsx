@@ -5,6 +5,7 @@ import { VoiceLanguageSelector } from "./VoiceLanguageSelector";
 import { AgeGroupSelector } from "./AgeGroupSelector";
 import { ThemeSelector } from "./ThemeSelector";
 import { DurationSelector } from "./DurationSelector";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { StorySettings } from "../StoryOptions";
 
 interface StoryCreationFlowProps {
@@ -25,103 +26,142 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
   };
 
   const handleStart = () => {
-    // Set default music to none, it can be changed in the player
-    onSettingsChange({ music: 'no-music' });
+    onSettingsChange({ music: 'gentle-lullaby' }); // Set default music
     onStart(settings);
   };
 
+  const isStepComplete = () => {
+    switch (step) {
+      case 1:
+        return settings.voice && settings.language;
+      case 2:
+        return settings.ageGroup && settings.theme;
+      case 3:
+        return settings.duration > 0;
+      default:
+        return false;
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {step === 1 && (
-        <Card className="p-8 bg-gradient-to-br from-purple-50 to-blue-50 border-0 shadow-lg rounded-3xl">
-          <div className="space-y-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-purple-800 mb-2">Step 1: Choose Your Story Settings</h2>
-              <p className="text-gray-600">Select the language and voice for your story</p>
+    <div className="w-full max-w-2xl mx-auto px-4 sm:px-6">
+      {/* Progress Bar */}
+      <div className="mb-8">
+        <div className="flex justify-between text-sm font-medium text-gray-500">
+          {['Language & Voice', 'Age & Theme', 'Duration'].map((label, idx) => (
+            <div 
+              key={label} 
+              className={`flex items-center ${idx + 1 === step ? 'text-primary' : ''}`}
+            >
+              <span className={`w-8 h-8 flex items-center justify-center rounded-full ${
+                idx + 1 === step 
+                  ? 'bg-primary text-white' 
+                  : idx + 1 < step 
+                    ? 'bg-green-500 text-white' 
+                    : 'bg-gray-200'
+              }`}>
+                {idx + 1}
+              </span>
+              <span className="ml-2 hidden sm:inline">{label}</span>
             </div>
-            <VoiceLanguageSelector 
-              selectedVoice={settings.voice}
-              selectedLanguage={settings.language}
-              onVoiceSelect={(value) => onSettingsChange({ voice: value })}
-              onLanguageSelect={(value) => onSettingsChange({ language: value })} 
-            />
-            <div className="flex justify-end">
-              <Button 
-                onClick={handleNext}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-2 rounded-full"
-              >
-                Next Step
-              </Button>
-            </div>
-          </div>
-        </Card>
-      )}
+          ))}
+        </div>
+        <div className="mt-2 h-2 bg-gray-200 rounded-full">
+          <div 
+            className="h-full bg-primary rounded-full transition-all duration-300"
+            style={{ width: `${((step - 1) / 2) * 100}%` }}
+          />
+        </div>
+      </div>
 
-      {step === 2 && (
-        <Card className="p-8 bg-gradient-to-br from-blue-50 to-purple-50 border-0 shadow-lg rounded-3xl">
-          <div className="space-y-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-blue-800 mb-2">Step 2: Customize Your Story</h2>
-              <p className="text-gray-600">Choose the age group and theme</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <AgeGroupSelector 
-                selectedAge={settings.ageGroup} 
-                onAgeSelect={(value) => onSettingsChange({ ageGroup: value })} 
-              />
-              <ThemeSelector 
-                selectedTheme={settings.theme} 
-                onThemeSelect={(value) => onSettingsChange({ theme: value })} 
+      <div className="space-y-6">
+        {step === 1 && (
+          <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-blue-50 border-0 shadow-lg rounded-3xl">
+            <div className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-xl sm:text-2xl font-bold text-purple-800 mb-2">Choose Your Story Settings</h2>
+                <p className="text-gray-600">Select the language and voice for your story</p>
+              </div>
+              <VoiceLanguageSelector 
+                selectedVoice={settings.voice}
+                selectedLanguage={settings.language}
+                onVoiceSelect={(value) => onSettingsChange({ voice: value })}
+                onLanguageSelect={(value) => onSettingsChange({ language: value })} 
               />
             </div>
-            <div className="flex justify-between">
-              <Button 
-                variant="outline" 
-                onClick={handleBack}
-                className="px-8 py-2 rounded-full"
-              >
-                Back
-              </Button>
-              <Button 
-                onClick={handleNext}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded-full"
-              >
-                Next Step
-              </Button>
-            </div>
-          </div>
-        </Card>
-      )}
+          </Card>
+        )}
 
-      {step === 3 && (
-        <Card className="p-8 bg-gradient-to-br from-purple-50 to-indigo-50 border-0 shadow-lg rounded-3xl">
-          <div className="space-y-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-indigo-800 mb-2">Final Step: Story Duration</h2>
-              <p className="text-gray-600">How long would you like your story to be?</p>
+        {step === 2 && (
+          <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-purple-50 border-0 shadow-lg rounded-3xl">
+            <div className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-xl sm:text-2xl font-bold text-blue-800 mb-2">Customize Your Story</h2>
+                <p className="text-gray-600">Choose the age group and theme</p>
+              </div>
+              <div className="grid grid-cols-1 gap-6">
+                <AgeGroupSelector 
+                  selectedAge={settings.ageGroup} 
+                  onAgeSelect={(value) => onSettingsChange({ ageGroup: value })} 
+                />
+                <ThemeSelector 
+                  selectedTheme={settings.theme} 
+                  onThemeSelect={(value) => onSettingsChange({ theme: value })} 
+                />
+              </div>
             </div>
-            <DurationSelector 
-              selectedDuration={settings.duration} 
-              onDurationSelect={(value) => onSettingsChange({ duration: value })} 
-            />
-            <div className="flex justify-between">
-              <Button 
-                variant="outline" 
-                onClick={handleBack}
-                className="px-8 py-2 rounded-full"
-              >
-                Back
-              </Button>
-              <Button 
-                onClick={handleStart}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-2 rounded-full"
-              >
-                Create Story
-              </Button>
+          </Card>
+        )}
+
+        {step === 3 && (
+          <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-indigo-50 border-0 shadow-lg rounded-3xl">
+            <div className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-xl sm:text-2xl font-bold text-indigo-800 mb-2">Story Duration</h2>
+                <p className="text-gray-600">How long would you like your story to be?</p>
+              </div>
+              <DurationSelector 
+                selectedDuration={settings.duration} 
+                onDurationSelect={(value) => onSettingsChange({ duration: value })} 
+              />
             </div>
-          </div>
-        </Card>
-      )}
+          </Card>
+        )}
+
+        <div className="flex justify-between mt-8">
+          {step > 1 ? (
+            <Button 
+              variant="outline" 
+              onClick={handleBack}
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </Button>
+          ) : (
+            <div></div>
+          )}
+          
+          {step < 3 ? (
+            <Button 
+              onClick={handleNext}
+              disabled={!isStepComplete()}
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+            >
+              Next
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          ) : (
+            <Button 
+              onClick={handleStart}
+              disabled={!isStepComplete()}
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+            >
+              Create Story
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
