@@ -9,6 +9,7 @@ interface PlyrPlayerProps {
   isPlaying: boolean;
   onTimeUpdate?: (time: number) => void;
   isMusic?: boolean;
+  onError?: () => void;
 }
 
 export function PlyrPlayer({
@@ -18,6 +19,7 @@ export function PlyrPlayer({
   isPlaying,
   onTimeUpdate,
   isMusic = false,
+  onError,
 }: PlyrPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playerRef = useRef<Plyr | null>(null);
@@ -50,9 +52,7 @@ export function PlyrPlayer({
     // Initialize Plyr
     if (audioRef.current) {
       playerRef.current = new Plyr(audioRef.current, {
-        controls: isMusic 
-          ? ['play', 'progress', 'current-time', 'mute', 'volume']
-          : ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume'],
+        controls: [],
         hideControls: false,
         resetOnEnd: true,
       });
@@ -64,6 +64,7 @@ export function PlyrPlayer({
 
       const handleError = (e: Event) => {
         console.error(`${isMusic ? 'Music' : 'Voice'} audio error:`, e);
+        onError?.();
       };
 
       const handleTimeUpdate = () => {
@@ -89,7 +90,7 @@ export function PlyrPlayer({
         audioRef.current = null;
       };
     }
-  }, [url, isMusic, onTimeUpdate]);
+  }, [url, isMusic, onTimeUpdate, onError]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -99,11 +100,14 @@ export function PlyrPlayer({
 
   useEffect(() => {
     if (isPlaying) {
-      audioRef.current?.play().catch(console.error);
+      audioRef.current?.play().catch(error => {
+        console.error("Error playing audio:", error);
+        onError?.();
+      });
     } else {
       audioRef.current?.pause();
     }
-  }, [isPlaying]);
+  }, [isPlaying, onError]);
 
   return <div ref={containerRef} className="plyr-container" />;
 }
