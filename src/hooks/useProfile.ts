@@ -11,6 +11,10 @@ interface Profile {
   is_admin?: boolean;
 }
 
+interface RPCParams {
+  user_id: string;
+}
+
 export const useProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const { toast } = useToast();
@@ -33,7 +37,7 @@ export const useProfile = () => {
 
       if (!directError && directProfile) {
         console.log('Successfully fetched profile directly:', directProfile);
-        setProfile(directProfile);
+        setProfile(directProfile as Profile);
         return directProfile;
       }
 
@@ -46,19 +50,19 @@ export const useProfile = () => {
 
       if (!singleError && singleProfile) {
         console.log('Successfully fetched profile with single:', singleProfile);
-        setProfile(singleProfile);
+        setProfile(singleProfile as Profile);
         return singleProfile;
       }
 
       // If both approaches fail, try with RPC call
-      const { data: rpcProfile, error: rpcError } = await supabase.rpc<Profile>(
+      const { data: rpcProfile, error: rpcError } = await supabase.rpc<Profile, RPCParams>(
         'get_profile_by_id',
         { user_id: user.id }
       );
 
       if (!rpcError && rpcProfile) {
         console.log('Successfully fetched profile with RPC:', rpcProfile);
-        setProfile(rpcProfile);
+        setProfile(rpcProfile as Profile);
         return rpcProfile;
       }
 
