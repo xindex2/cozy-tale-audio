@@ -15,6 +15,10 @@ export function AudioControls({
   onVolumeChange,
   onToggleMute,
 }: AudioControlsProps) {
+  const handleVolumeChange = (values: number[]) => {
+    onVolumeChange(values[0]);
+  };
+
   return (
     <div className="flex items-center space-x-4">
       <Button variant="ghost" size="icon" onClick={onToggleMute}>
@@ -24,7 +28,7 @@ export function AudioControls({
         value={[volume]}
         max={1}
         step={0.1}
-        onValueChange={(values) => onVolumeChange(values[0])}
+        onValueChange={handleVolumeChange}
         className="w-32"
       />
     </div>
