@@ -1,17 +1,17 @@
 import { Routes as RouterRoutes, Route } from "react-router-dom";
-import { Dashboard } from "@/pages/Dashboard";
-import { CreateStory } from "@/pages/CreateStory";
-import { StoryView } from "@/pages/StoryView";
-import { Profile } from "@/pages/Profile";
-import { Settings } from "@/pages/Settings";
-import { Stories } from "@/pages/Stories";
-import { Index } from "@/pages/Index";
-import { Auth } from "@/pages/Auth";
-import { AdminDashboard } from "@/pages/AdminDashboard";
-import { Billing } from "@/pages/Billing";
-import { Contact } from "@/pages/Contact";
-import { Privacy } from "@/pages/Privacy";
-import { Terms } from "@/pages/Terms";
+import Dashboard from "@/pages/Dashboard";
+import CreateStory from "@/pages/CreateStory";
+import StoryView from "@/pages/StoryView";
+import Profile from "@/pages/Profile";
+import Settings from "@/pages/Settings";
+import Stories from "@/pages/Stories";
+import Index from "@/pages/Index";
+import Auth from "@/pages/Auth";
+import AdminDashboard from "@/pages/AdminDashboard";
+import Billing from "@/pages/Billing";
+import Contact from "@/pages/Contact";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 
 export function Routes() {
   return (
