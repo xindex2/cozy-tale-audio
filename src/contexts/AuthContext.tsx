@@ -34,21 +34,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      console.log('Signing out...');
-      await supabase.auth.signOut();
+      setIsLoading(true);
+      console.log('Starting signOut process...');
+      
+      // First clear local state
       clearProfile();
       setUser(null);
+      
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      console.log('SignOut successful');
+      toast({
+        title: "Logged out successfully",
+        description: "You have been signed out of your account",
+      });
     } catch (error) {
       console.error('Error signing out:', error);
-      throw error;
+      toast({
+        variant: "destructive",
+        title: "Error signing out",
+        description: "Please try again",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    console.log('Initializing auth...');
+    let mounted = true;
+    console.log('Setting up auth listener...');
     
     // Get initial session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (!mounted) return;
+      
       if (error) {
         console.error('Error getting session:', error);
         toast({
@@ -56,24 +77,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           description: 'Failed to get authentication session',
           variant: 'destructive',
         });
+        setIsLoading(false);
         return;
       }
       
-      setUser(session?.user ?? null);
       if (session?.user) {
+        console.log('Initial session found:', session.user.id);
+        setUser(session.user);
         fetchProfile(session.user);
+      } else {
+        console.log('No initial session found');
+        setUser(null);
+        clearProfile();
       }
       setIsLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+      
       console.log('Auth state changed:', event, session?.user?.id);
-      setUser(session?.user ?? null);
       
       if (session?.user) {
+        setUser(session.user);
         await fetchProfile(session.user);
       } else {
+        setUser(null);
         clearProfile();
       }
       
@@ -81,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [toast, fetchProfile, clearProfile]);

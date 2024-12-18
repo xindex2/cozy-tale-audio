@@ -16,6 +16,10 @@ export const useProfile = () => {
   const fetchProfile = async (user: User) => {
     try {
       console.log('Fetching profile for user:', user.id);
+      
+      // Add a small delay to ensure Supabase has processed the auth state
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
@@ -39,6 +43,7 @@ export const useProfile = () => {
   };
 
   const clearProfile = () => {
+    console.log('Clearing profile');
     setProfile(null);
   };
 
