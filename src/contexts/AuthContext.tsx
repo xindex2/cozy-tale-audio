@@ -29,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        setIsLoading(true);
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
@@ -37,11 +38,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           clearAuthState();
           clearProfile();
+          navigate('/auth');
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
         clearAuthState();
         clearProfile();
+        navigate('/auth');
       } finally {
         setIsLoading(false);
       }
@@ -62,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('Error handling sign in:', error);
           clearAuthState();
           clearProfile();
+          navigate('/auth');
         } finally {
           setIsLoading(false);
         }
@@ -69,7 +73,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('Handling SIGNED_OUT event');
         clearAuthState();
         clearProfile();
-        setIsLoading(false);
         navigate('/auth');
       }
     });
@@ -80,8 +83,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [navigate, setUser, setIsLoading, clearAuthState, fetchProfile, clearProfile]);
 
   const signOut = async () => {
-    await handleSignOut();
-    clearProfile();
+    try {
+      await handleSignOut();
+      clearProfile();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error in signOut:', error);
+      // Force clear everything even if there's an error
+      clearAuthState();
+      clearProfile();
+      navigate('/auth');
+    }
   };
 
   return (
