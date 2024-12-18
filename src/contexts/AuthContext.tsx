@@ -36,6 +36,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .eq('id', session.user.id)
             .single();
           setProfile(profile);
+        } else {
+          // Ensure state is cleared if no session exists
+          setUser(null);
+          setProfile(null);
         }
       } catch (error) {
         console.error('Error checking session:', error);
@@ -65,9 +69,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         navigate('/dashboard');
       } else if (event === 'SIGNED_OUT') {
         console.log('Handling SIGNED_OUT event');
+        // Clear all state immediately on sign out
         setUser(null);
         setProfile(null);
         queryClient.clear();
+        // Force a check of the current session
+        await checkSession();
         navigate('/auth');
       }
     });
@@ -92,9 +99,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       
       console.log('Sign out successful, clearing data');
-      queryClient.clear();
+      // Clear all state immediately
       setUser(null);
       setProfile(null);
+      queryClient.clear();
       
     } catch (error) {
       console.error('Sign out error:', error);
