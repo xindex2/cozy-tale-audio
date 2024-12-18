@@ -18,12 +18,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check active session
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -45,7 +45,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     checkSession();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session);
       
@@ -58,7 +57,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single();
         setProfile(profile);
         
-        // Invalidate and refetch relevant queries
         await queryClient.invalidateQueries({ queryKey: ['session'] });
         await queryClient.invalidateQueries({ queryKey: ['profile'] });
         
@@ -77,24 +75,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [navigate, queryClient]);
 
   const signOut = async () => {
+    if (isSigningOut) return;
+    
     try {
+      setIsSigningOut(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      // Clear all query cache
       queryClient.clear();
-      
-      // Reset local state
       setUser(null);
       setProfile(null);
-      
-      // Navigate to auth page
-      navigate('/auth');
       
       toast({
         title: "Signed out successfully",
         description: "You have been logged out",
       });
+      
+      navigate('/auth');
     } catch (error) {
       console.error('Sign out error:', error);
       toast({
@@ -102,6 +99,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "Please try again",
         variant: "destructive",
       });
+    } finally {
+      setIsSigningOut(false);
     }
   };
 

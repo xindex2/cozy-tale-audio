@@ -13,29 +13,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export function Header() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { user, profile, signOut } = useAuth();
-  const { toast } = useToast();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleSignOut = async () => {
+    if (isLoggingOut) return;
+    
+    setIsLoggingOut(true);
     try {
       await signOut();
-      toast({
-        title: "Signed out successfully",
-        description: "You have been logged out of your account",
-      });
-      navigate('/auth');
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast({
-        title: "Error signing out",
-        description: "There was a problem signing out. Please try again.",
-        variant: "destructive",
-      });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -104,8 +97,11 @@ export function Header() {
                     </>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    Log out
+                  <DropdownMenuItem 
+                    onClick={handleSignOut}
+                    disabled={isLoggingOut}
+                  >
+                    {isLoggingOut ? 'Logging out...' : 'Log out'}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
