@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -32,16 +32,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const { profile, fetchProfile, clearProfile } = useProfile();
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       setIsLoading(true);
       console.log('Starting signOut process...');
       
-      // First clear local state
       clearProfile();
       setUser(null);
       
-      // Then sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
@@ -53,21 +51,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         title: "Error signing out",
         description: "Please try again",
       });
-      throw error; // Re-throw to handle in the component
+      throw error;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [clearProfile, toast]);
 
   useEffect(() => {
     let mounted = true;
-    let authSubscription: { unsubscribe: () => void } | null = null;
-    
-    console.log('Setting up auth listener...');
     
     const setupAuth = async () => {
       try {
-        // Get initial session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (!mounted) return;
@@ -93,7 +87,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           clearProfile();
         }
         
-        // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
           if (!mounted) return;
           
@@ -108,7 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         });
         
-        authSubscription = subscription;
+        return () => {
+          subscription.unsubscribe();
+        };
       } catch (error) {
         console.error('Error in auth setup:', error);
         if (mounted) {
@@ -129,10 +124,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     return () => {
       mounted = false;
-      if (authSubscription) {
-        console.log('Cleaning up auth subscription');
-        authSubscription.unsubscribe();
-      }
     };
   }, [toast, fetchProfile, clearProfile]);
 

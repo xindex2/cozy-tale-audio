@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
@@ -11,76 +11,42 @@ interface Profile {
   is_admin?: boolean;
 }
 
-interface RPCResponse {
-  email?: string;
-  avatar_url?: string;
-  full_name?: string;
-  is_admin?: boolean;
-}
-
 export const useProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const { toast } = useToast();
 
-  const fetchProfile = async (user: User) => {
+  const fetchProfile = useCallback(async (user: User) => {
     try {
-      console.log('Fetching profile for user:', user.id);
-      
       if (!user.id) {
         console.log('No user ID provided');
         return null;
       }
 
-      // Try direct fetch first
-      const { data: directProfile, error: directError } = await supabase
+      // Use maybeSingle() instead of single() to handle no results gracefully
+      const { data: profileData, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .maybeSingle();
 
-      if (!directError && directProfile) {
-        console.log('Successfully fetched profile directly:', directProfile);
-        const typedDirectProfile = directProfile as Profile;
-        setProfile(typedDirectProfile);
-        return typedDirectProfile;
+      if (error) {
+        console.error('Error fetching profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile",
+          variant: "destructive",
+        });
+        return null;
       }
 
-      // If direct fetch fails, try alternative approach with single row fetch
-      const { data: singleProfile, error: singleError } = await supabase
-        .from('profiles')
-        .select()
-        .filter('id', 'eq', user.id)
-        .single();
-
-      if (!singleError && singleProfile) {
-        console.log('Successfully fetched profile with single:', singleProfile);
-        const typedSingleProfile = singleProfile as Profile;
-        setProfile(typedSingleProfile);
-        return typedSingleProfile;
-      }
-
-      // If both approaches fail, try with RPC call
-      const { data: rpcProfile, error: rpcError } = await supabase.rpc(
-        'get_profile_by_id',
-        { user_id: user.id }
-      );
-
-      if (!rpcError && rpcProfile) {
-        console.log('Successfully fetched profile with RPC:', rpcProfile);
-        const rpcData = rpcProfile as RPCResponse;
-        // Ensure the RPC response matches our Profile interface
-        const typedProfile: Profile = {
-          id: user.id,
-          email: rpcData.email,
-          avatar_url: rpcData.avatar_url,
-          full_name: rpcData.full_name,
-          is_admin: rpcData.is_admin,
-        };
+      if (profileData) {
+        console.log('Successfully fetched profile:', profileData);
+        const typedProfile = profileData as Profile;
         setProfile(typedProfile);
         return typedProfile;
       }
 
-      // If all attempts fail, create a minimal profile
+      // If no profile found, create minimal profile
       const minimalProfile: Profile = {
         id: user.id,
         email: user.email,
@@ -99,7 +65,6 @@ export const useProfile = () => {
         variant: "default",
       });
       
-      // Return minimal profile on error
       const fallbackProfile: Profile = {
         id: user.id,
         email: user.email,
@@ -107,12 +72,12 @@ export const useProfile = () => {
       setProfile(fallbackProfile);
       return fallbackProfile;
     }
-  };
+  }, [toast]);
 
-  const clearProfile = () => {
+  const clearProfile = useCallback(() => {
     console.log('Clearing profile');
     setProfile(null);
-  };
+  }, []);
 
   return {
     profile,
