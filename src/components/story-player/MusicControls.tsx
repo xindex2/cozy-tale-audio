@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PlyrPlayer } from "./PlyrPlayer";
+import 'plyr/dist/plyr.css';
 
 interface MusicControlsProps {
   volume: number;
@@ -60,6 +61,7 @@ export function MusicControls({
       
       const handleCanPlay = () => {
         setIsLoading(false);
+        setIsPlaying(true);
       };
       
       const handleError = () => {
@@ -76,6 +78,7 @@ export function MusicControls({
       };
     } else {
       setIsLoading(false);
+      setIsPlaying(false);
     }
   }, [selectedMusic, currentMusic?.url]);
 
@@ -145,7 +148,7 @@ export function MusicControls({
               url={currentMusic.url}
               volume={volume}
               isMuted={isMuted}
-              isPlaying={true}
+              isPlaying={isPlaying}
               isMusic={true}
               onError={() => setError("Failed to play music")}
             />
