@@ -8,5 +8,5 @@ export default function Story() {
     return <div>Story ID not found</div>;
   }
   
-  return <StoryView id={id} />;
+  return <StoryView />;
 }

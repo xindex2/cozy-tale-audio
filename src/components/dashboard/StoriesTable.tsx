@@ -23,7 +23,7 @@ export function StoriesTable({ stories, onRefresh }: StoriesTableProps) {
   const { toast } = useToast();
 
   const handleView = (story: Story) => {
-    navigate(`/stories/${story.id}`, { 
+    navigate(`/story/${story.id}`, { 
       state: { 
         settings: story.settings,
         initialStoryData: {

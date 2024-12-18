@@ -72,7 +72,7 @@ export default function CreateStory() {
 
     try {
       console.log("Saving story...");
-      await saveStory({
+      const savedStory = await saveStory({
         userId: user.id,
         title,
         content,
@@ -86,7 +86,8 @@ export default function CreateStory() {
         description: "Your story has been saved successfully."
       });
 
-      navigate('/stories', { replace: true });
+      // Don't navigate away after saving
+      console.log("Story saved:", savedStory);
     } catch (error) {
       console.error("Error saving story:", error);
       toast({
