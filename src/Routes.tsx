@@ -6,7 +6,8 @@ import Profile from "@/pages/Profile";
 import Settings from "@/pages/Settings";
 import Stories from "@/pages/Stories";
 import Index from "@/pages/Index";
-import Auth from "@/pages/Auth";
+import Login from "@/pages/auth/Login";
+import Register from "@/pages/auth/Register";
 import AdminDashboard from "@/pages/AdminDashboard";
 import Billing from "@/pages/Billing";
 import Contact from "@/pages/Contact";
@@ -32,7 +33,8 @@ export function Routes() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/stories" element={<Stories />} />
-      <Route path="/auth" element={<Auth />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/billing" element={<Billing />} />
       <Route path="/contact" element={<Contact />} />
