@@ -17,7 +17,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
   const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
   const [validMusicOptions, setValidMusicOptions] = useState<string[]>([]);
   const { handlePreview } = useAudioPreview();
-  
+
   const musicOptions = [
     {
       id: "no-music",
@@ -26,35 +26,59 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
       url: null
     },
     { 
+      id: "gentle-lullaby", 
+      name: "Gentle Lullaby", 
+      description: "Soft and calming lullaby for peaceful sleep", 
+      url: "https://cdn.pixabay.com/download/audio/2023/09/05/audio_168a3e0caa.mp3?filename=gentle-lullaby-165122.mp3"
+    },
+    { 
       id: "sleeping-lullaby", 
       name: "Sleeping Lullaby", 
-      description: "Gentle lullaby for peaceful sleep", 
-      url: "/assets/gentle-lullaby.mp3"
+      description: "Soothing lullaby melody", 
+      url: "https://cdn.pixabay.com/download/audio/2023/05/16/audio_166b9c7242.mp3?filename=lullaby-sleeping-150140.mp3"
     },
     { 
       id: "water-dreams", 
       name: "Water Dreams", 
-      description: "Calming water sounds with soft music", 
-      url: "/assets/ocean-waves.mp3"
-    },
-    { 
-      id: "forest-birds", 
-      name: "Nature Sounds", 
-      description: "Peaceful nature ambiance", 
-      url: "/assets/nature-sounds.mp3"
+      description: "Gentle water sounds with soft music", 
+      url: "https://cdn.pixabay.com/download/audio/2022/02/23/audio_ea70ad08e3.mp3?filename=little-water-dreams-21491.mp3"
     },
     { 
       id: "relaxing-piano", 
       name: "Relaxing Piano", 
-      description: "Soft piano melodies for bedtime", 
-      url: "/assets/soft-piano.mp3"
+      description: "Calming piano melodies", 
+      url: "https://cdn.pixabay.com/download/audio/2024/11/04/audio_4956b4edd1.mp3?filename=relaxing-piano-music-259727.mp3"
     },
     { 
-      id: "gentle-dreams", 
-      name: "Peaceful Dreams", 
-      description: "Soft and calming melody for sweet dreams", 
-      url: "/assets/peaceful-dreams.mp3"
+      id: "water-fountain", 
+      name: "Water Fountain", 
+      description: "Healing water fountain sounds", 
+      url: "https://cdn.pixabay.com/download/audio/2024/09/10/audio_6e5d7d1912.mp3?filename=water-fountain-healing-music-239455.mp3"
     },
+    { 
+      id: "ocean-waves", 
+      name: "Ocean Waves", 
+      description: "Calming ocean waves with piano", 
+      url: "https://cdn.pixabay.com/download/audio/2021/09/09/audio_478f62eb43.mp3?filename=waves-and-tears-sad-piano-music-with-calm-ocean-waves-8164.mp3"
+    },
+    { 
+      id: "forest-birds", 
+      name: "Forest Birds", 
+      description: "Peaceful nature and bird sounds", 
+      url: "https://cdn.pixabay.com/download/audio/2022/02/12/audio_8ca49a7f20.mp3?filename=birds39-forest-20772.mp3"
+    },
+    { 
+      id: "sleep-music", 
+      name: "Sleep Music", 
+      description: "Specially composed sleep music", 
+      url: "https://cdn.pixabay.com/download/audio/2023/10/30/audio_66f4e26e42.mp3?filename=sleep-music-vol5-173983.mp3"
+    },
+    { 
+      id: "guided-sleep", 
+      name: "Guided Sleep", 
+      description: "Relaxing guided sleep music", 
+      url: "https://cdn.pixabay.com/download/audio/2024/03/11/audio_2412defc6f.mp3?filename=guided-sleep-195499.mp3"
+    }
   ];
 
   useEffect(() => {

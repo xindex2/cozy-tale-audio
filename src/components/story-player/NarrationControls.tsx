@@ -7,7 +7,7 @@ interface NarrationControlsProps {
   onTogglePlay: () => void;
   volume: number;
   isMuted: boolean;
-  onVolumeChange: (newVolume: number[]) => void;
+  onVolumeChange: (volume: number) => void;
   onToggleMute: () => void;
 }
 
