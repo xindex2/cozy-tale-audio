@@ -6,7 +6,7 @@ import { Music } from "lucide-react";
 interface MusicControlsProps {
   volume: number;
   isMuted: boolean;
-  onVolumeChange: (newVolume: number[]) => void;
+  onVolumeChange: (volume: number) => void;
   onToggleMute: () => void;
   selectedMusic?: string;
 }

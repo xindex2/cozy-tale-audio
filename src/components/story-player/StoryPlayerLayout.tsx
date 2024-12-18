@@ -112,7 +112,7 @@ export function StoryPlayerLayout({
           <MusicControls
             volume={musicVolume}
             isMuted={isMusicMuted}
-            onVolumeChange={(newVolume) => onMusicVolumeChange(newVolume[0])}
+            onVolumeChange={onMusicVolumeChange}
             onToggleMute={onMusicToggleMute}
             selectedMusic={selectedMusic}
           />

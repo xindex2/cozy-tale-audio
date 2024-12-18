@@ -5,7 +5,7 @@ import { Volume2, VolumeX } from "lucide-react";
 interface AudioControlsProps {
   volume: number;
   isMuted: boolean;
-  onVolumeChange: (value: number[]) => void;
+  onVolumeChange: (value: number) => void;
   onToggleMute: () => void;
 }
 
@@ -24,7 +24,7 @@ export function AudioControls({
         value={[volume]}
         max={1}
         step={0.1}
-        onValueChange={onVolumeChange}
+        onValueChange={(values) => onVolumeChange(values[0])}
         className="w-32"
       />
     </div>
