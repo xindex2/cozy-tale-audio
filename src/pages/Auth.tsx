@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { getPendingStorySettings } from "@/utils/authNavigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     console.log("Checking authentication status...");
@@ -40,6 +42,10 @@ export default function Auth() {
       if (event === 'SIGNED_IN' && session) {
         setIsLoading(true);
         try {
+          // Invalidate and refetch relevant queries
+          await queryClient.invalidateQueries({ queryKey: ['session'] });
+          await queryClient.invalidateQueries({ queryKey: ['profile'] });
+          
           // Check if there was a pending story creation
           const pendingStorySettings = getPendingStorySettings();
           if (pendingStorySettings) {
@@ -68,7 +74,7 @@ export default function Auth() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, toast]);
+  }, [navigate, toast, queryClient]);
 
   // Handle any auth errors from URL parameters
   useEffect(() => {

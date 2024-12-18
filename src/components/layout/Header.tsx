@@ -12,7 +12,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "@/hooks/use-theme";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
@@ -21,6 +21,7 @@ export function Header() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: session, refetch: refetchSession } = useQuery({
     queryKey: ['session'],
@@ -45,7 +46,6 @@ export function Header() {
     },
   });
 
-  // Listen for auth state changes
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed in Header:", event, session);
@@ -54,24 +54,31 @@ export function Header() {
         if (session?.user?.id) {
           await refetchProfile();
         }
+        // Clear all queries on sign out
+        if (event === 'SIGNED_OUT') {
+          queryClient.clear();
+        }
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [refetchSession, refetchProfile]);
+  }, [refetchSession, refetchProfile, queryClient]);
 
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
+      // Clear all queries and navigate to auth page
+      queryClient.clear();
+      navigate('/auth');
+      
       toast({
         title: "Signed out successfully",
         description: "You have been logged out",
       });
-      navigate('/auth');
     } catch (error) {
       console.error('Sign out error:', error);
       toast({
