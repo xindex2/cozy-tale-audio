@@ -77,7 +77,7 @@ export function StoryPlayerLayout({
               title={title}
               volume={volume}
               isMuted={isMuted}
-              onVolumeChange={(newVolume) => onVolumeChange(newVolume[0])}
+              onVolumeChange={onVolumeChange}
               onToggleMute={onToggleMute}
               isPlaying={isPlaying}
               onTogglePlay={onTogglePlay}

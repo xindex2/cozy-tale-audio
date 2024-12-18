@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { ShikwasaPlayer } from "./ShikwasaPlayer";
+import { PlyrPlayer } from "./PlyrPlayer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Music } from "lucide-react";
 
@@ -53,7 +53,7 @@ export function MusicControls({
         </Select>
 
         {selectedMusic && (
-          <ShikwasaPlayer
+          <PlyrPlayer
             url={selectedMusic}
             volume={volume}
             isMuted={isMuted}

@@ -71,7 +71,9 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
 
       console.log("Audio uploaded successfully:", audioUrl);
       if (onSave) {
-        saveStory(storyTitle, storyContent, audioUrl, currentMusicUrl || "");
+        // Save both audio and background music URLs
+        await saveStory(storyTitle, storyContent, audioUrl, currentMusicUrl || "");
+        console.log("Story saved with audio:", audioUrl, "and music:", currentMusicUrl);
       }
       
     } catch (error) {
