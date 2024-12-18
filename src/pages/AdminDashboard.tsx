@@ -8,65 +8,29 @@ import { StatsCards } from "@/components/admin/dashboard/StatsCards";
 import { AdminHeader } from "@/components/admin/dashboard/AdminHeader";
 
 export default function AdminDashboard() {
-  // Check if user is authenticated
   const { data: session, isLoading: isLoadingSession } = useQuery({
     queryKey: ['session'],
     queryFn: async () => {
-      console.log("Checking session...");
       const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Session error:", error);
-        throw error;
-      }
-      if (!session) {
-        console.log("No session found");
-        throw new Error('No session found');
-      }
-      console.log("Session found:", session);
+      if (error) throw error;
+      if (!session) throw new Error('No session found');
       return session;
     },
   });
 
-  // Check if user is admin
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ['admin-profile', session?.user?.id],
     enabled: !!session?.user?.id,
     queryFn: async () => {
-      console.log("Checking admin status for user:", session?.user?.id);
       const { data, error } = await supabase
         .from('profiles')
         .select('is_admin')
         .eq('id', session!.user.id)
         .single();
 
-      if (error) {
-        console.error("Profile error:", error);
-        throw error;
-      }
-      if (!data) {
-        console.log("No profile found");
-        throw new Error('No profile found');
-      }
-      console.log("Profile found:", data);
+      if (error) throw error;
+      if (!data) throw new Error('No profile found');
       return data;
-    },
-  });
-
-  // Fetch stats
-  const { data: stats, isLoading: isLoadingStats } = useQuery({
-    queryKey: ['admin-stats'],
-    enabled: !!profile?.is_admin,
-    queryFn: async () => {
-      console.log("Fetching admin stats...");
-      const [{ count: usersCount }, { count: storiesCount }] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('stories').select('*', { count: 'exact', head: true }),
-      ]);
-
-      return {
-        users: usersCount || 0,
-        stories: storiesCount || 0,
-      };
     },
   });
 
@@ -82,27 +46,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // Handle authentication errors
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
-        <Header />
-        <main className="container py-8">
-          <Alert variant="destructive">
-            <AlertTitle>Authentication Error</AlertTitle>
-            <AlertDescription>
-              Please sign in to access this page.
-            </AlertDescription>
-          </Alert>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  // Handle profile errors or non-admin users
-  if (!profile?.is_admin) {
-    console.log("Access denied - User is not admin:", profile);
+  if (!session || !profile?.is_admin) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
         <Header />
@@ -110,7 +54,7 @@ export default function AdminDashboard() {
           <Alert variant="destructive">
             <AlertTitle>Access Denied</AlertTitle>
             <AlertDescription>
-              You don't have permission to access this page. Please contact an administrator if you believe this is an error.
+              You don't have permission to access this page.
             </AlertDescription>
           </Alert>
         </main>
@@ -124,17 +68,7 @@ export default function AdminDashboard() {
       <Header />
       <main className="container py-8">
         <AdminHeader />
-        {isLoadingStats ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          </div>
-        ) : (
-          <StatsCards 
-            usersCount={stats?.users || 0}
-            storiesCount={stats?.stories || 0}
-            isLoading={isLoadingStats}
-          />
-        )}
+        <StatsCards />
       </main>
       <Footer />
     </div>
