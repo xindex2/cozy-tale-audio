@@ -9,6 +9,7 @@ export interface StoryResponse {
   audioUrl: string | null;
   backgroundMusicUrl: string | null;
   title: string;
+  content: string;
 }
 
 const AUDIO_URLS = {
@@ -32,6 +33,29 @@ class AIService {
   private genAI: GoogleGenerativeAI | null = null;
   private chatSession: any = null;
   private isInitialized: boolean = false;
+
+  constructor() {
+    this.initializeFromEnvironment();
+  }
+
+  private async initializeFromEnvironment() {
+    try {
+      const { data: apiKeys, error } = await supabase
+        .from('api_keys')
+        .select('*')
+        .eq('api_type', 'gemini')
+        .eq('is_active', true)
+        .single();
+
+      if (error) throw error;
+      
+      if (apiKeys?.key_value) {
+        await this.initializeGemini(apiKeys.key_value);
+      }
+    } catch (error) {
+      console.error("Error initializing AI service:", error);
+    }
+  }
 
   setApiKey(key: string) {
     this.apiKey = key;
@@ -130,6 +154,7 @@ class AIService {
       return {
         title: cleanTitle,
         text: content,
+        content: content,
         audioUrl: null,
         backgroundMusicUrl: null
       };
@@ -152,6 +177,7 @@ class AIService {
       
       return {
         text: responseText,
+        content: responseText,
         audioUrl: null,
         backgroundMusicUrl: null,
         title: "Story Continuation"
