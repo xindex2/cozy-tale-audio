@@ -4,6 +4,7 @@ import { useStoryState } from "./story/useStoryState";
 import { useStoryActions } from "./story/useStoryActions";
 import { uploadAudioToStorage } from "@/utils/audioStorage";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useStoryPlayer(
   settings: StorySettings,
@@ -17,6 +18,52 @@ export function useStoryPlayer(
 ) {
   const state = useStoryState();
   const actions = useStoryActions(state, onSave);
+
+  // Save playback position when it changes
+  useEffect(() => {
+    const savePlaybackPosition = async () => {
+      const storyId = window.location.pathname.split('/').pop();
+      if (!storyId) return;
+
+      try {
+        await supabase
+          .from('stories')
+          .update({ playback_position: state.playback.currentTime })
+          .eq('id', storyId);
+      } catch (error) {
+        console.error('Error saving playback position:', error);
+      }
+    };
+
+    // Debounce the save to avoid too many database calls
+    const timeoutId = setTimeout(savePlaybackPosition, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [state.playback.currentTime]);
+
+  // Load initial playback position
+  useEffect(() => {
+    const loadPlaybackPosition = async () => {
+      const storyId = window.location.pathname.split('/').pop();
+      if (!storyId) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('stories')
+          .select('playback_position')
+          .eq('id', storyId)
+          .single();
+
+        if (error) throw error;
+        if (data?.playback_position) {
+          state.playback.setCurrentTime(data.playback_position);
+        }
+      } catch (error) {
+        console.error('Error loading playback position:', error);
+      }
+    };
+
+    loadPlaybackPosition();
+  }, []);
 
   useEffect(() => {
     if (initialStoryData) {
