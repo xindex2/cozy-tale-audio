@@ -7,9 +7,9 @@ interface AdminGuardProps {
 }
 
 export function AdminGuard({ children }: AdminGuardProps) {
-  const { user } = useAuth();
+  const { profile } = useAuth();
 
-  if (!user?.is_admin) {
+  if (!profile?.is_admin) {
     return <Navigate to="/" />;
   }
 
