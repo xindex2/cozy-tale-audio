@@ -23,15 +23,13 @@ export function PlyrPlayer({
   onError,
   showVolumeControl = true,
 }: PlyrPlayerProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playerRef = useRef<Plyr | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!url) {
-      console.log(`No ${isMusic ? 'music' : 'voice'} URL provided`);
-      return;
-    }
+    if (!url || !containerRef.current) return;
 
     let mounted = true;
 
@@ -39,9 +37,13 @@ export function PlyrPlayer({
       try {
         if (!mounted) return;
 
+        // Create audio element
         const audio = document.createElement('audio');
         audio.crossOrigin = "anonymous";
         audio.preload = "auto";
+        
+        // Add audio element to container
+        containerRef.current?.appendChild(audio);
         
         audio.addEventListener('canplay', () => {
           if (mounted) setIsLoading(false);
@@ -75,8 +77,8 @@ export function PlyrPlayer({
 
           if (!isMusic) {
             playerRef.current.on('timeupdate', () => {
-              if (mounted && audioRef.current) {
-                onTimeUpdate?.(audioRef.current.currentTime);
+              if (mounted && audio) {
+                onTimeUpdate?.(audio.currentTime);
               }
             });
           }
@@ -130,11 +132,10 @@ export function PlyrPlayer({
     }
   }, [isPlaying, isLoading, onError]);
 
-  if (isLoading) {
-    return null;
-  }
-
   return (
-    <div className="plyr-container rounded-lg overflow-hidden border border-gray-200 shadow-sm" />
+    <div 
+      ref={containerRef}
+      className="plyr-container rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-white" 
+    />
   );
 }

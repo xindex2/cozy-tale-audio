@@ -23,10 +23,11 @@ export function StoryDisplay({
   onAudioGenerated
 }: StoryDisplayProps) {
   const isMobile = useIsMobile();
-  // Remove asterisks from title and clean up formatting
-  const titleMatch = text.match(/^[*\s]*(.+?)[*\s]*$/m);
-  const title = titleMatch ? titleMatch[1].trim() : "";
-  const content = text.split('\n').slice(1).join('\n').replace(/\*\*/g, '');
+  
+  // Extract title and content, removing asterisks and extra whitespace
+  const lines = text.split('\n');
+  const title = lines[0].replace(/\*/g, '').trim();
+  const content = lines.slice(1).join('\n').replace(/\*\*/g, '').trim();
 
   return (
     <Card className="p-6 space-y-4">
