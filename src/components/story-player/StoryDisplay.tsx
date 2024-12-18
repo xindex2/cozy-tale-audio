@@ -30,11 +30,13 @@ export function StoryDisplay({
   const content = lines.slice(1).join('\n').replace(/\*\*/g, '').trim();
 
   return (
-    <Card className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">{title}</h1>
+    <Card className="p-6 space-y-6 bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
+      <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-center">
+        {title}
+      </h1>
       
       {audioUrl && (
-        <div className="w-full mb-6">
+        <div className="w-full mb-6 rounded-lg overflow-hidden shadow-md">
           <PlyrPlayer
             url={audioUrl}
             volume={1}
@@ -46,15 +48,17 @@ export function StoryDisplay({
         </div>
       )}
 
-      <SynchronizedText
-        text={content}
-        audioUrl={audioUrl}
-        isPlaying={isPlaying}
-        currentTime={currentTime}
-        duration={duration}
-        isFreeTrial={isFreeTrial}
-        onAudioGenerated={onAudioGenerated}
-      />
+      <div className="prose prose-lg max-w-none dark:prose-invert">
+        <SynchronizedText
+          text={content}
+          audioUrl={audioUrl}
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+          duration={duration}
+          isFreeTrial={isFreeTrial}
+          onAudioGenerated={onAudioGenerated}
+        />
+      </div>
     </Card>
   );
 }
