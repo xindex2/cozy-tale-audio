@@ -1,11 +1,13 @@
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Music } from "lucide-react";
+import { Music, Play, Pause, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PlyrPlayer } from "./PlyrPlayer";
 import { AudioControls } from "./AudioControls";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface MusicControlsProps {
   volume: number;
@@ -20,6 +22,7 @@ interface MusicTrack {
   id: string;
   name: string;
   url: string;
+  category: string;
   is_active: boolean;
 }
 
@@ -44,14 +47,14 @@ export function MusicControls({
         .order('name');
       
       if (error) throw error;
-      return [{ id: 'no-music', name: 'No Music', url: null }, ...(data as MusicTrack[])];
+      return data as MusicTrack[];
     }
   });
 
   const currentMusic = musicTracks?.find(track => track.id === selectedMusic);
 
-  const handleMusicChange = (value: string) => {
-    onMusicChange?.(value);
+  const handleMusicChange = (trackId: string) => {
+    onMusicChange?.(trackId);
     setError(null);
     setIsPlaying(true);
   };
@@ -68,28 +71,49 @@ export function MusicControls({
         )}
       </div>
 
-      <Select 
-        value={selectedMusic || "no-music"}
-        onValueChange={handleMusicChange}
-        disabled={isLoadingTracks}
-      >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select music">
-            {currentMusic?.name || "No Music"}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {musicTracks?.map((track) => (
-            <SelectItem key={track.id} value={track.id}>
-              {track.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
       {error && (
         <p className="text-sm text-red-500">{error}</p>
       )}
+
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead className="w-24">Play</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {musicTracks?.map((track) => (
+              <TableRow 
+                key={track.id}
+                className={selectedMusic === track.id ? "bg-blue-50" : undefined}
+              >
+                <TableCell className="font-medium">{track.name}</TableCell>
+                <TableCell>
+                  <Badge variant="secondary" className="capitalize">
+                    {track.category}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleMusicChange(track.id)}
+                  >
+                    {selectedMusic === track.id ? (
+                      <Pause className="h-4 w-4" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       {currentMusic?.url && (
         <div className="space-y-4">
