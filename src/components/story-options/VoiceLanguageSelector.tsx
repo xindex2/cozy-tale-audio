@@ -18,41 +18,35 @@ export function VoiceLanguageSelector({
   onVoiceSelect,
   onLanguageSelect 
 }: VoiceLanguageSelectorProps) {
-  const voices: { id: Voice; name: string; description: string; icon?: React.ReactNode }[] = [
+  const voices: { id: Voice; name: string; icon?: React.ReactNode }[] = [
     {
       id: 'alloy',
       name: 'Alloy',
-      description: 'Versatile, well-rounded voice',
       icon: <Volume2 className="h-4 w-4" />
     },
     {
       id: 'echo',
       name: 'Echo',
-      description: 'Warm and engaging voice',
       icon: <Volume2 className="h-4 w-4" />
     },
     {
       id: 'fable',
       name: 'Fable',
-      description: 'British accent, ideal for storytelling',
       icon: <Volume2 className="h-4 w-4" />
     },
     {
       id: 'onyx',
       name: 'Onyx',
-      description: 'Deep and authoritative voice',
       icon: <Volume2 className="h-4 w-4" />
     },
     {
       id: 'nova',
       name: 'Nova',
-      description: 'Energetic and friendly voice',
       icon: <Volume2 className="h-4 w-4" />
     },
     {
       id: 'shimmer',
       name: 'Shimmer',
-      description: 'Clear and expressive voice',
       icon: <Volume2 className="h-4 w-4" />
     }
   ];
@@ -85,7 +79,6 @@ export function VoiceLanguageSelector({
           <div className="space-y-4">
             <div>
               <h3 className="text-lg font-semibold mb-2 text-gray-800">Select a Language</h3>
-              <p className="text-sm text-gray-600 mb-3">Choose the language for your story</p>
             </div>
             
             <Select value={selectedLanguage} onValueChange={onLanguageSelect}>
@@ -109,7 +102,6 @@ export function VoiceLanguageSelector({
           <div className="space-y-4">
             <div>
               <h3 className="text-lg font-semibold mb-2 text-gray-800">Select a Voice</h3>
-              <p className="text-sm text-gray-600 mb-3">Choose the voice that will narrate your story</p>
             </div>
             
             <Select 
@@ -125,10 +117,7 @@ export function VoiceLanguageSelector({
                   <SelectItem key={voice.id} value={voice.id}>
                     <div className="flex items-center gap-2">
                       {voice.icon}
-                      <div>
-                        <div className="font-medium">{voice.name}</div>
-                        <div className="text-xs text-gray-500">{voice.description}</div>
-                      </div>
+                      <span>{voice.name}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -154,16 +143,6 @@ export function VoiceLanguageSelector({
                 No audio narration
               </label>
             </div>
-          </div>
-        </div>
-
-        {/* Combined Notes Section */}
-        <div className="mt-6">
-          <div className="bg-purple-50 p-4 rounded-xl shadow-sm">
-            <p className="text-base text-gray-700 leading-relaxed">
-              <span className="font-bold text-story-purple">🌍 Language Selection:</span> When you choose a language, 
-              both the story text and available voice options will adjust to match your selected language.
-            </p>
           </div>
         </div>
       </div>

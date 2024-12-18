@@ -45,16 +45,16 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
   };
 
   return (
-    <div className="w-full mx-auto px-0 md:max-w-2xl md:px-6">
+    <div className="w-full mx-auto px-4 md:px-6 lg:w-[90%]">
       {/* Progress Bar */}
-      <div className="mb-8">
+      <div className="mb-12">
         <div className="flex justify-between text-sm font-medium text-gray-500">
           {['Language & Voice', 'Age & Theme', 'Duration'].map((label, idx) => (
             <div 
               key={label} 
               className={`flex items-center ${idx + 1 === step ? 'text-primary' : ''}`}
             >
-              <span className={`w-8 h-8 flex items-center justify-center rounded-full ${
+              <span className={`w-10 h-10 flex items-center justify-center rounded-full ${
                 idx + 1 === step 
                   ? 'bg-primary text-white' 
                   : idx + 1 < step 
@@ -67,7 +67,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
             </div>
           ))}
         </div>
-        <div className="mt-2 h-2 bg-gray-200 rounded-full">
+        <div className="mt-4 h-2 bg-gray-200 rounded-full">
           <div 
             className="h-full bg-primary rounded-full transition-all duration-300"
             style={{ width: `${((step - 1) / 2) * 100}%` }}
@@ -82,13 +82,13 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.2 }}
-          className="space-y-6"
+          className="space-y-8"
         >
           {step === 1 && (
-            <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-blue-50 border-0 shadow-lg rounded-none sm:rounded-3xl">
-              <div className="space-y-6">
+            <Card className="p-6 sm:p-8 bg-gradient-to-br from-purple-50 to-blue-50 border-0 shadow-lg rounded-3xl">
+              <div className="space-y-8">
                 <div className="text-center">
-                  <h2 className="text-xl sm:text-2xl font-bold text-purple-800 mb-2">Choose Your Story Settings</h2>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-purple-800 mb-4">Choose Your Story Settings</h2>
                   <p className="text-gray-600">Select the language and voice for your story</p>
                 </div>
                 <VoiceLanguageSelector 
@@ -102,13 +102,13 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
           )}
 
           {step === 2 && (
-            <Card className="p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-purple-50 border-0 shadow-lg rounded-none sm:rounded-3xl">
-              <div className="space-y-6">
+            <Card className="p-6 sm:p-8 bg-gradient-to-br from-blue-50 to-purple-50 border-0 shadow-lg rounded-3xl">
+              <div className="space-y-8">
                 <div className="text-center">
-                  <h2 className="text-xl sm:text-2xl font-bold text-blue-800 mb-2">Customize Your Story</h2>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 mb-4">Customize Your Story</h2>
                   <p className="text-gray-600">Choose the age group and theme</p>
                 </div>
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 gap-8">
                   <AgeGroupSelector 
                     selectedAge={settings.ageGroup} 
                     onAgeSelect={(value) => onSettingsChange({ ageGroup: value })} 
@@ -123,10 +123,10 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
           )}
 
           {step === 3 && (
-            <Card className="p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-indigo-50 border-0 shadow-lg rounded-none sm:rounded-3xl">
-              <div className="space-y-6">
+            <Card className="p-6 sm:p-8 bg-gradient-to-br from-purple-50 to-indigo-50 border-0 shadow-lg rounded-3xl">
+              <div className="space-y-8">
                 <div className="text-center">
-                  <h2 className="text-xl sm:text-2xl font-bold text-indigo-800 mb-2">Story Duration</h2>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-indigo-800 mb-4">Story Duration</h2>
                   <p className="text-gray-600">How long would you like your story to be?</p>
                 </div>
                 <DurationSelector 
@@ -139,7 +139,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
         </motion.div>
       </AnimatePresence>
 
-      <div className="flex justify-between mt-8">
+      <div className="flex justify-between mt-12">
         {step > 1 ? (
           <Button 
             variant="outline" 
