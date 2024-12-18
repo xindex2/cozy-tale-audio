@@ -7,7 +7,7 @@ import { StoryDisplay } from "./story-player/StoryDisplay";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { StoryHeader } from "./story-player/StoryHeader";
 import { useStoryPlayer } from "@/hooks/useStoryPlayer";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { LoadingState } from "./story-player/LoadingState";
 import { useToast } from "@/hooks/use-toast";
 import { useUserUsage } from "@/hooks/useUserUsage";
@@ -87,21 +87,28 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     }
   }, [currentAudioUrl, currentMusicUrl, storyTitle, storyContent, onSave]);
 
-  const handleChatMessage = async (message: string) => {
-    const canProceed = await checkAndIncrementUsage('chat_messages_sent');
+  // Debounced version of the upgrade prompt handler
+  const handleUpgradePrompt = useCallback(async (action: 'chat_messages_sent' | 'quiz_questions_answered') => {
+    const canProceed = await checkAndIncrementUsage(action);
     if (!canProceed) {
-      setShowUpgradePrompt(true);
-      return;
+      // Use setTimeout to prevent immediate state updates
+      setTimeout(() => {
+        setShowUpgradePrompt(true);
+      }, 100);
+      return false;
     }
+    return true;
+  }, [checkAndIncrementUsage]);
+
+  const handleChatMessage = async (message: string) => {
+    const canProceed = await handleUpgradePrompt('chat_messages_sent');
+    if (!canProceed) return;
     handleSendMessage(message);
   };
 
   const handleQuizGeneration = async () => {
-    const canProceed = await checkAndIncrementUsage('quiz_questions_answered');
-    if (!canProceed) {
-      setShowUpgradePrompt(true);
-      return;
-    }
+    const canProceed = await handleUpgradePrompt('quiz_questions_answered');
+    if (!canProceed) return;
     generateQuiz();
   };
 

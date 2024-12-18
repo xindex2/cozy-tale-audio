@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 interface UpgradePromptProps {
   open: boolean;
@@ -22,9 +23,32 @@ export function UpgradePrompt({
   description = "Unlock unlimited stories, quizzes, and chat features with our premium plans.",
 }: UpgradePromptProps) {
   const navigate = useNavigate();
+  const [showDialog, setShowDialog] = useState(false);
+
+  // Add debounce to prevent flashing
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    if (open) {
+      timeoutId = setTimeout(() => {
+        setShowDialog(true);
+      }, 500); // Wait 500ms before showing the dialog
+    } else {
+      setShowDialog(false);
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [open]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={showDialog} onOpenChange={(value) => {
+      setShowDialog(value);
+      onOpenChange(value);
+    }}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -34,6 +58,7 @@ export function UpgradePrompt({
           <Button
             className="w-full"
             onClick={() => {
+              setShowDialog(false);
               onOpenChange(false);
               navigate('/pricing');
             }}
@@ -43,7 +68,10 @@ export function UpgradePrompt({
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => onOpenChange(false)}
+            onClick={() => {
+              setShowDialog(false);
+              onOpenChange(false);
+            }}
           >
             Maybe Later
           </Button>
