@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Key, CreditCard } from "lucide-react";
+import { LayoutDashboard, Key, CreditCard, Music } from "lucide-react";
 
 export function AdminNav() {
   const location = useLocation();
@@ -20,6 +20,11 @@ export function AdminNav() {
       href: "/admin/plans",
       label: "Plans",
       icon: CreditCard,
+    },
+    {
+      href: "/admin/music",
+      label: "Music",
+      icon: Music,
     },
   ];
 
