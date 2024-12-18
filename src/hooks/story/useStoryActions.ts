@@ -4,6 +4,40 @@ import { audioService } from "@/services/audioService";
 import type { StorySettings } from "@/components/StoryOptions";
 import type { Message, QuizQuestion } from "@/types/story";
 
+const getToastMessage = (key: string, language: string) => {
+  const messages: { [key: string]: { [lang: string]: string } } = {
+    generating: {
+      en: "Creating your story...",
+      es: "Creando tu historia...",
+      fr: "Création de votre histoire...",
+      de: "Erstelle deine Geschichte...",
+      ar: "جاري إنشاء قصتك..."
+    },
+    audioGenerating: {
+      en: "Generating audio narration...",
+      es: "Generando narración de audio...",
+      fr: "Génération de la narration audio...",
+      de: "Generiere Audio-Erzählung...",
+      ar: "جاري إنشاء السرد الصوتي..."
+    },
+    ready: {
+      en: "Your story is ready to play!",
+      es: "¡Tu historia está lista para reproducir!",
+      fr: "Votre histoire est prête à être jouée !",
+      de: "Deine Geschichte ist bereit zum Abspielen!",
+      ar: "قصتك جاهزة للتشغيل!"
+    },
+    error: {
+      en: "Failed to generate story",
+      es: "Error al generar la historia",
+      fr: "Échec de la génération de l'histoire",
+      de: "Geschichte konnte nicht generiert werden",
+      ar: "فشل في إنشاء القصة"
+    }
+  };
+  return messages[key][language] || messages[key]['en'];
+};
+
 export function useStoryActions(
   state: ReturnType<typeof import("./useStoryState").useStoryState>,
   onSave?: (title: string, content: string, audioUrl: string, backgroundMusicUrl: string) => void
@@ -19,22 +53,23 @@ export function useStoryActions(
     try {
       console.log("Starting story generation with settings:", settings);
       
-      const systemPrompt = `You are a professional storyteller. 
-      Create a story that is exactly ${settings.duration} minutes long when read aloud.
-      Format your response exactly as:
-      TITLE: [Story Title]
-      CONTENT: [Story Content]`;
-
-      const userPrompt = `Create an engaging ${settings.theme} story for ${settings.ageGroup} year olds.
-      The story should be appropriate for the age group and last ${settings.duration} minutes when read aloud.
-      Make it creative and engaging.`;
-
+      // Show initial toast
       toast({
-        title: "Generating Story",
-        description: "Creating your story...",
+        title: getToastMessage("generating", settings.language),
+        duration: 5000, // Longer duration to prevent flashing
       });
 
-      const response = await openaiService.generateContent(userPrompt, systemPrompt);
+      const response = await openaiService.generateContent(
+        `Create an engaging ${settings.theme} story for ${settings.ageGroup} year olds that lasts ${settings.duration} minutes when read aloud.`,
+        `You are a professional storyteller who writes ONLY in ${settings.language}. 
+        Important rules:
+        1. Write EVERYTHING in ${settings.language} only
+        2. Use proper grammar and punctuation for ${settings.language}
+        3. Never mix languages or include any English text
+        4. Format your response exactly as:
+        TITLE: [Story Title in ${settings.language}]
+        CONTENT: [Story Content in ${settings.language}]`
+      );
       
       // Extract title and content
       const titleMatch = response.match(/TITLE:\s*(.*?)(?=\s*\n+\s*CONTENT:)/s);
@@ -46,15 +81,14 @@ export function useStoryActions(
         
         state.story.setTitle(title);
         state.story.setContent(content);
-        
-        toast({
-          title: "Story Created",
-          description: "Generating audio narration...",
-        });
 
         // Generate audio if voice is enabled
         if (settings.voice !== 'none') {
           state.loading.setStage('audio');
+          toast({
+            title: getToastMessage("audioGenerating", settings.language),
+            duration: 5000,
+          });
           const audioUrl = await audioService.generateAudio(content);
           state.audio.setCurrentAudioUrl(audioUrl);
         }
@@ -80,9 +114,10 @@ export function useStoryActions(
           );
         }
 
+        // Show final success toast
         toast({
-          title: "Story Ready",
-          description: "Your story is ready to play!",
+          title: getToastMessage("ready", settings.language),
+          duration: 3000,
         });
       } else {
         throw new Error("Failed to parse story response");
@@ -90,9 +125,10 @@ export function useStoryActions(
     } catch (error) {
       console.error("Error starting story:", error);
       toast({
-        title: "Error",
+        title: getToastMessage("error", settings.language),
         description: error instanceof Error ? error.message : "Failed to generate story",
         variant: "destructive",
+        duration: 5000,
       });
     } finally {
       state.loading.setIsLoading(false);
