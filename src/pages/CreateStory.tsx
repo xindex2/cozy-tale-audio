@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { StoryOptions, type StorySettings } from "@/components/StoryOptions";
 import { StoryPlayer } from "@/components/StoryPlayer";
@@ -26,6 +26,16 @@ export default function CreateStory() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!isLoading && !userId) {
+      navigate("/auth");
+    }
+  }, [userId, isLoading, navigate]);
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   if (error) {
     console.error("Authentication error:", error);
     toast({
@@ -34,10 +44,6 @@ export default function CreateStory() {
       variant: "destructive",
     });
     return null;
-  }
-
-  if (isLoading) {
-    return <LoadingScreen />;
   }
 
   const handleStart = async (settings: StorySettings) => {

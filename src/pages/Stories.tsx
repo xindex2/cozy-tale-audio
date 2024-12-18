@@ -6,29 +6,46 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, Plus } from "lucide-react";
 import { StoriesTable } from "@/components/dashboard/StoriesTable";
 import { GradientButton } from "@/components/ui/gradient-button";
+import { LoadingScreen } from "@/components/ui/loading-screen";
+import { useEffect } from "react";
 
 export default function Stories() {
   const navigate = useNavigate();
 
-  const { data: stories, isLoading, error, refetch } = useQuery({
-    queryKey: ['stories'],
+  // Check authentication first
+  const { data: session, isLoading: isSessionLoading } = useQuery({
+    queryKey: ['session'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return [];
-      }
+      return session;
+    },
+  });
 
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isSessionLoading && !session) {
+      navigate("/auth");
+    }
+  }, [session, isSessionLoading, navigate]);
+
+  const { data: stories, isLoading, error, refetch } = useQuery({
+    queryKey: ['stories', session?.user?.id],
+    enabled: !!session?.user?.id,
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('stories')
         .select('*')
-        .eq('user_id', session.user.id)
+        .eq('user_id', session!.user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data;
     },
   });
+
+  if (isSessionLoading || isLoading) {
+    return <LoadingScreen />;
+  }
 
   if (error) {
     return (
@@ -56,11 +73,7 @@ export default function Stories() {
           </GradientButton>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          </div>
-        ) : stories && stories.length > 0 ? (
+        {stories && stories.length > 0 ? (
           <StoriesTable stories={stories} onRefresh={refetch} />
         ) : (
           <div className="text-center py-12 space-y-4">
