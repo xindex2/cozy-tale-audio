@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import "shikwasa";
+import "shikwasa/dist/shikwasa.es.js";
 import "shikwasa/dist/style.css";
 
 interface ShikwasaPlayerProps {
@@ -12,7 +12,6 @@ interface ShikwasaPlayerProps {
   text?: string;
 }
 
-// Add type declaration for Shikwasa
 declare global {
   class Shikwasa {
     constructor(config: {
@@ -79,7 +78,7 @@ export function ShikwasaPlayer({
       autoplay: false,
       muted: isMuted,
       volume: volume,
-      download: false,
+      download: false
     });
 
     // Add event listeners
