@@ -34,6 +34,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
   const [persistedAudioUrl, setPersistedAudioUrl] = useState<string | null>(null);
   const [persistedMusicUrl, setPersistedMusicUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [hasShownUploadSuccess, setHasShownUploadSuccess] = useState(false);
 
   const {
     isPlaying,
@@ -84,11 +85,16 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
       }
       
       setPersistedAudioUrl(audioUrl);
-      toast({
-        title: "Success",
-        description: "Audio file uploaded successfully",
-        duration: 3000,
-      });
+      
+      // Only show success toast once per upload
+      if (!hasShownUploadSuccess) {
+        toast({
+          title: "Success",
+          description: "Audio file uploaded successfully",
+          duration: 3000,
+        });
+        setHasShownUploadSuccess(true);
+      }
     } catch (error) {
       console.error("Error uploading audio:", error);
       toast({
@@ -101,6 +107,11 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
       setIsUploading(false);
     }
   };
+
+  // Reset hasShownUploadSuccess when audio URL changes
+  useEffect(() => {
+    setHasShownUploadSuccess(false);
+  }, [currentAudioUrl]);
 
   useEffect(() => {
     if (initialStoryData?.audioUrl) {
