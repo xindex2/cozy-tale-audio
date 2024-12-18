@@ -1,13 +1,21 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { StatsCards } from "@/components/admin/dashboard/StatsCards";
+import { AdminNav } from "@/components/admin/AdminNav";
+import { ApiKeysTable } from "@/components/admin/ApiKeysTable";
+import { SubscriptionPlansTable } from "@/components/admin/SubscriptionPlansTable";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { StatsCards } from "@/components/admin/dashboard/StatsCards";
-import { AdminHeader } from "@/components/admin/dashboard/AdminHeader";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { SubscriptionPlanDialog } from "@/components/admin/SubscriptionPlanDialog";
 
 export default function AdminDashboard() {
+  const [showPlanDialog, setShowPlanDialog] = useState(false);
+
   const { data: session, isLoading: isLoadingSession } = useQuery({
     queryKey: ['session'],
     queryFn: async () => {
@@ -67,8 +75,25 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
       <Header />
       <main className="container py-8">
-        <AdminHeader />
+        <AdminNav />
         <StatsCards />
+        <div className="mt-8">
+          <ApiKeysTable />
+        </div>
+        <div className="mt-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Subscription Plans</h2>
+            <Button onClick={() => setShowPlanDialog(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add Plan
+            </Button>
+          </div>
+          <SubscriptionPlansTable />
+          <SubscriptionPlanDialog 
+            open={showPlanDialog} 
+            onOpenChange={setShowPlanDialog} 
+          />
+        </div>
       </main>
       <Footer />
     </div>
