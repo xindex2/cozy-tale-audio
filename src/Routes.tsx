@@ -18,6 +18,11 @@ const Settings = lazy(() => import('@/pages/Settings'));
 const Billing = lazy(() => import('@/pages/Billing'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
+// Admin Pages
+const AdminDashboard = lazy(() => import('@/pages/admin/Dashboard'));
+const AdminApiKeys = lazy(() => import('@/pages/admin/ApiKeys'));
+const AdminPlans = lazy(() => import('@/pages/admin/Plans'));
+
 // SEO Landing Pages
 const BedtimeStoriesForKids = lazy(() => import('@/pages/landing/BedtimeStoriesForKids'));
 const ShortBedtimeStories = lazy(() => import('@/pages/landing/ShortBedtimeStories'));
@@ -108,6 +113,32 @@ export default function Routes() {
           element={
             <AuthGuard>
               <Billing />
+            </AuthGuard>
+          }
+        />
+
+        {/* Admin Routes */}
+        <Route
+          path="/admin"
+          element={
+            <AuthGuard>
+              <AdminDashboard />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/api-keys"
+          element={
+            <AuthGuard>
+              <AdminApiKeys />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/plans"
+          element={
+            <AuthGuard>
+              <AdminPlans />
             </AuthGuard>
           }
         />
