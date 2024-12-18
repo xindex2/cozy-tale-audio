@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { StoryOptions, type StorySettings } from "@/components/StoryOptions";
 import { StoryPlayer } from "@/components/StoryPlayer";
@@ -20,11 +20,31 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function CreateStory() {
-  const [storySettings, setStorySettings] = useState<StorySettings | null>(null);
+  const [storySettings, setStorySettings] = useState<StorySettings | null>(() => {
+    const saved = sessionStorage.getItem('pendingStorySettings');
+    return saved ? JSON.parse(saved) : null;
+  });
+  
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Save settings to sessionStorage when they change
+  useEffect(() => {
+    if (storySettings) {
+      sessionStorage.setItem('pendingStorySettings', JSON.stringify(storySettings));
+    } else {
+      sessionStorage.removeItem('pendingStorySettings');
+    }
+  }, [storySettings]);
+
+  // Clear settings when component unmounts
+  useEffect(() => {
+    return () => {
+      sessionStorage.removeItem('pendingStorySettings');
+    };
+  }, []);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -51,7 +71,9 @@ export default function CreateStory() {
   };
 
   const handleBack = () => {
-    setStorySettings(null);
+    if (window.confirm("Are you sure you want to go back? Your progress will be lost.")) {
+      setStorySettings(null);
+    }
   };
 
   const handleSaveStory = async (
@@ -86,7 +108,6 @@ export default function CreateStory() {
         description: "Your story has been saved successfully."
       });
 
-      // Don't navigate away after saving
       console.log("Story saved:", savedStory);
     } catch (error) {
       console.error("Error saving story:", error);
