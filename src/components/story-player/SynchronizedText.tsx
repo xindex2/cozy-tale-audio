@@ -2,12 +2,23 @@ import { useEffect, useRef } from "react";
 
 interface SynchronizedTextProps {
   text: string;
+  audioUrl?: string | null;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
+  isFreeTrial?: boolean;
+  onAudioGenerated?: (blob: Blob) => Promise<void>;
 }
 
-export function SynchronizedText({ text, isPlaying, currentTime, duration }: SynchronizedTextProps) {
+export function SynchronizedText({ 
+  text, 
+  audioUrl,
+  isPlaying, 
+  currentTime, 
+  duration,
+  isFreeTrial,
+  onAudioGenerated 
+}: SynchronizedTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
