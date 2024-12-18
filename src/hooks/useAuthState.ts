@@ -9,11 +9,13 @@ export const useAuthState = () => {
   const { toast } = useToast();
 
   const clearAuthState = () => {
+    console.log('Clearing auth state');
     setUser(null);
     setIsLoading(false);
   };
 
   const handleSignOut = async () => {
+    console.log('Handling sign out...');
     try {
       setIsLoading(true);
       const { error } = await supabase.auth.signOut();
@@ -28,8 +30,6 @@ export const useAuthState = () => {
         description: "Please try again",
       });
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 

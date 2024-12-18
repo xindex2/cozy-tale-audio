@@ -27,35 +27,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   } = useAuthState();
 
   useEffect(() => {
+    let mounted = true;
+
     const initializeAuth = async () => {
       try {
+        console.log('Initializing auth...');
         setIsLoading(true);
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (session?.user) {
+        if (session?.user && mounted) {
+          console.log('Session found, setting user:', session.user.id);
           setUser(session.user);
           await fetchProfile(session.user);
         } else {
+          console.log('No session found, clearing state');
           clearAuthState();
           clearProfile();
-          navigate('/auth');
+          if (mounted) navigate('/auth');
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
         clearAuthState();
         clearProfile();
-        navigate('/auth');
+        if (mounted) navigate('/auth');
       } finally {
-        setIsLoading(false);
+        if (mounted) setIsLoading(false);
       }
     };
 
     initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session);
+      console.log('Auth state changed:', event, session?.user?.id);
 
-      if (event === 'SIGNED_IN' && session) {
+      if (event === 'SIGNED_IN' && session && mounted) {
         try {
           setIsLoading(true);
           setUser(session.user);
@@ -67,9 +72,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           clearProfile();
           navigate('/auth');
         } finally {
-          setIsLoading(false);
+          if (mounted) setIsLoading(false);
         }
-      } else if (event === 'SIGNED_OUT') {
+      } else if (event === 'SIGNED_OUT' && mounted) {
         console.log('Handling SIGNED_OUT event');
         clearAuthState();
         clearProfile();
@@ -78,11 +83,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [navigate, setUser, setIsLoading, clearAuthState, fetchProfile, clearProfile]);
 
   const signOut = async () => {
+    console.log('Starting sign out process...');
     try {
       await handleSignOut();
       clearProfile();
