@@ -1,141 +1,54 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Book, Moon, Sun } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useNavigate } from "react-router-dom";
-import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { Shield } from "lucide-react";
 
 export function Header() {
-  const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
-  const { user, profile, signOut } = useAuth();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { toast } = useToast();
-
-  const handleSignOut = async () => {
-    if (isLoggingOut) {
-      console.log('Already logging out, returning');
-      return;
-    }
-    
-    console.log('Starting logout process in Header');
-    setIsLoggingOut(true);
-    try {
-      console.log('Calling signOut function');
-      await signOut();
-      console.log('SignOut successful, showing toast');
-      toast({
-        title: "Logged out successfully",
-        description: "You have been signed out of your account",
-      });
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast({
-        variant: "destructive",
-        title: "Error signing out",
-        description: "Please try again",
-      });
-    } finally {
-      console.log('Logout process complete in Header');
-      setIsLoggingOut(false);
-    }
-  };
+  const { user, profile } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
-        <Link to="/" className="flex items-center space-x-2">
-          <Book className="h-6 w-6" />
-          <span className="font-bold">BedTimey</span>
-        </Link>
-
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <nav className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="h-9 w-9 px-0"
-            >
-              <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-            
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={profile?.avatar_url} alt={profile?.email} />
-                      <AvatarFallback>{profile?.email?.[0]?.toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{profile?.full_name || 'User'}</p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {profile?.email}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-                    Dashboard
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/stories')}>
-                    My Stories
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/profile')}>
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/billing')}>
-                    Billing
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/settings')}>
-                    Settings
-                  </DropdownMenuItem>
-                  {profile?.is_admin && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate('/admin')}>
-                        Admin Dashboard
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={handleSignOut}
-                    disabled={isLoggingOut}
-                  >
-                    {isLoggingOut ? 'Logging out...' : 'Log out'}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <div className="space-x-2">
-                <Button variant="ghost" onClick={() => navigate('/login')}>
-                  Sign In
-                </Button>
-                <Button onClick={() => navigate('/register')}>
-                  Sign Up
-                </Button>
-              </div>
-            )}
-          </nav>
+    <header className="border-b">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center gap-6">
+          <Link to="/" className="text-xl font-bold">
+            Bedtime Stories
+          </Link>
+          {user && (
+            <nav className="flex items-center gap-4">
+              <Link to="/dashboard" className="text-sm font-medium">
+                Dashboard
+              </Link>
+              <Link to="/stories" className="text-sm font-medium">
+                My Stories
+              </Link>
+              {profile?.is_admin && (
+                <Link 
+                  to="/admin" 
+                  className="flex items-center gap-2 text-sm font-medium text-blue-600"
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin
+                </Link>
+              )}
+            </nav>
+          )}
+        </div>
+        <div className="flex items-center gap-4">
+          {user ? (
+            <>
+              <Link to="/create">
+                <Button>Create Story</Button>
+              </Link>
+              <Link to="/profile">Profile</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/login">Login</Link>
+              <Link to="/register">
+                <Button>Get Started</Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
