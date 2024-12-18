@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { useToast } from "@/hooks/use-toast";
 
 interface Profile {
   id: string;
@@ -12,6 +13,7 @@ interface Profile {
 
 export const useProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const { toast } = useToast();
 
   const fetchProfile = async (user: User, retryCount = 3) => {
     try {
@@ -22,8 +24,13 @@ export const useProfile = () => {
       
       for (let i = 0; i < retryCount; i++) {
         try {
-          // Add a small delay before each attempt
-          await delay((i + 1) * 500);
+          if (!user.id) {
+            console.log('No user ID provided');
+            return null;
+          }
+
+          // Add a small delay before each attempt (exponential backoff)
+          await delay(Math.min(1000 * Math.pow(2, i), 5000));
           
           const { data: profile, error } = await supabase
             .from('profiles')
@@ -33,6 +40,11 @@ export const useProfile = () => {
 
           if (error) {
             console.error(`Error fetching profile (attempt ${i + 1}/${retryCount}):`, error);
+            toast({
+              title: "Error fetching profile",
+              description: "Please try refreshing the page",
+              variant: "destructive",
+            });
             continue;
           }
 
@@ -46,7 +58,14 @@ export const useProfile = () => {
           return profile;
         } catch (error) {
           console.error(`Fetch attempt ${i + 1}/${retryCount} failed:`, error);
-          if (i === retryCount - 1) throw error;
+          if (i === retryCount - 1) {
+            toast({
+              title: "Error fetching profile",
+              description: "Please try refreshing the page",
+              variant: "destructive",
+            });
+            throw error;
+          }
         }
       }
       

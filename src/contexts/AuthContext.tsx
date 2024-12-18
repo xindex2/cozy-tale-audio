@@ -46,10 +46,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       
       console.log('SignOut successful');
-      toast({
-        title: "Logged out successfully",
-        description: "You have been signed out of your account",
-      });
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
@@ -57,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         title: "Error signing out",
         description: "Please try again",
       });
+      throw error; // Re-throw to handle in the component
     } finally {
       setIsLoading(false);
     }
@@ -133,6 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       mounted = false;
       if (authSubscription) {
+        console.log('Cleaning up auth subscription');
         authSubscription.unsubscribe();
       }
     };
