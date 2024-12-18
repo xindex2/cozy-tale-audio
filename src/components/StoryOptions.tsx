@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useStorySettings } from "./story-options/useStorySettings";
 import { StoryOptionsHeader } from "./story-options/StoryOptionsHeader";
 import { StoryOptionsForm } from "./story-options/StoryOptionsForm";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface StoryOptionsProps {
   onStart: (options: StorySettings) => void;
