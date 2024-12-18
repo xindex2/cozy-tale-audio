@@ -43,13 +43,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('No session found, clearing state');
           clearAuthState();
           clearProfile();
-          if (mounted) navigate('/auth');
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
         clearAuthState();
         clearProfile();
-        if (mounted) navigate('/auth');
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -65,12 +63,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setIsLoading(true);
           setUser(session.user);
           await fetchProfile(session.user);
-          navigate('/dashboard');
+          navigate('/dashboard', { replace: true });
         } catch (error) {
           console.error('Error handling sign in:', error);
           clearAuthState();
           clearProfile();
-          navigate('/auth');
         } finally {
           if (mounted) setIsLoading(false);
         }
@@ -78,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('Handling SIGNED_OUT event');
         clearAuthState();
         clearProfile();
-        navigate('/auth');
+        navigate('/login', { replace: true });
       }
     });
 
@@ -93,13 +90,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await handleSignOut();
       clearProfile();
-      navigate('/auth');
+      navigate('/login', { replace: true });
     } catch (error) {
       console.error('Error in signOut:', error);
-      // Force clear everything even if there's an error
       clearAuthState();
       clearProfile();
-      navigate('/auth');
+      navigate('/login', { replace: true });
     }
   };
 
