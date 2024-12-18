@@ -86,19 +86,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setProfile(null);
       
-      toast({
-        title: "Signed out successfully",
-        description: "You have been logged out",
-      });
-      
       navigate('/auth');
     } catch (error) {
       console.error('Sign out error:', error);
-      toast({
-        title: "Error signing out",
-        description: "Please try again",
-        variant: "destructive",
-      });
+      throw error;
     } finally {
       setIsSigningOut(false);
     }

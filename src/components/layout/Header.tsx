@@ -14,12 +14,14 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { user, profile, signOut } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { toast } = useToast();
 
   const handleSignOut = async () => {
     if (isLoggingOut) return;
@@ -27,6 +29,18 @@ export function Header() {
     setIsLoggingOut(true);
     try {
       await signOut();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been signed out of your account",
+      });
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        variant: "destructive",
+        title: "Error signing out",
+        description: "Please try again",
+      });
     } finally {
       setIsLoggingOut(false);
     }
