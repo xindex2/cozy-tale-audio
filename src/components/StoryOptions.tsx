@@ -15,7 +15,7 @@ export interface StorySettings {
   ageGroup: string;
   duration: number;
   music: string;
-  voice: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' | 'none';
+  voice: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
   theme: string;
   language: string;
 }
