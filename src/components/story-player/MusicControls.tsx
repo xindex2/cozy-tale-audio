@@ -32,6 +32,7 @@ export function MusicControls({
   onMusicChange
 }: MusicControlsProps) {
   const [error, setError] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   const { data: musicTracks, isLoading: isLoadingTracks } = useQuery({
     queryKey: ['music-library'],
@@ -52,10 +53,11 @@ export function MusicControls({
   const handleMusicChange = (value: string) => {
     onMusicChange?.(value);
     setError(null);
+    setIsPlaying(true);
   };
 
   return (
-    <Card className="p-4 space-y-4">
+    <Card className="p-4 space-y-4 bg-white/90 backdrop-blur-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Music className="h-4 w-4 text-blue-500" />
@@ -101,6 +103,7 @@ export function MusicControls({
             url={currentMusic.url}
             volume={volume}
             isMuted={isMuted}
+            isPlaying={isPlaying}
             onError={() => setError("Failed to play music")}
             showVolumeControl={false}
             isMusic={true}
