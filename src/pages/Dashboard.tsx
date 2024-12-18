@@ -13,30 +13,28 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-    };
-    checkAuth();
-  }, [navigate]);
-
-  const { data: stories, isLoading, error, refetch } = useQuery({
-    queryKey: ['stories'],
+  const { data: session, isLoading: isSessionLoading } = useQuery({
+    queryKey: ['session'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return [];
-      }
+      return session;
+    },
+  });
 
+  useEffect(() => {
+    if (!isSessionLoading && !session) {
+      navigate("/auth");
+    }
+  }, [session, isSessionLoading, navigate]);
+
+  const { data: stories, isLoading: isStoriesLoading, error, refetch } = useQuery({
+    queryKey: ['stories', session?.user?.id],
+    enabled: !!session?.user?.id,
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('stories')
         .select('*')
-        .eq('user_id', session.user.id)
+        .eq('user_id', session!.user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -74,6 +72,21 @@ export default function Dashboard() {
     );
   }
 
+  if (isSessionLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
+        <Header />
+        <main className="container py-8">
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <span className="ml-2 text-gray-600">Loading...</span>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-blue-50">
       <Header />
@@ -83,7 +96,7 @@ export default function Dashboard() {
             onCreateNew={handleCreateNew}
             onSubscribe={handleSubscribe}
           />
-          {isLoading ? (
+          {isStoriesLoading ? (
             <div className="flex justify-center items-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
               <span className="ml-2 text-gray-600">Loading your stories...</span>

@@ -15,13 +15,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/hooks/use-theme";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 export function Header() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
-  const { data: session } = useQuery({
+  const { data: session, refetch: refetchSession } = useQuery({
     queryKey: ['session'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -29,7 +30,7 @@ export function Header() {
     },
   });
 
-  const { data: profile } = useQuery({
+  const { data: profile, refetch: refetchProfile } = useQuery({
     queryKey: ['profile', session?.user?.id],
     enabled: !!session?.user?.id,
     queryFn: async () => {
@@ -44,42 +45,38 @@ export function Header() {
     },
   });
 
+  // Listen for auth state changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed in Header:", event, session);
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        await refetchSession();
+        if (session?.user?.id) {
+          await refetchProfile();
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [refetchSession, refetchProfile]);
+
   const handleSignOut = async () => {
     try {
-      // Get current session
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-
-      // Clear all Supabase-related items from localStorage first
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('supabase.auth.')) {
-          localStorage.removeItem(key);
-        }
-      });
-
-      // Only attempt to sign out if there's an active session
-      if (currentSession) {
-        await supabase.auth.signOut({
-          scope: 'local'
-        });
-      }
-
-      // Show success message
+      await supabase.auth.signOut();
       toast({
         title: "Signed out successfully",
         description: "You have been logged out",
       });
-
-      // Navigate to auth page
       navigate('/auth');
     } catch (error) {
       console.error('Sign out error:', error);
-      // Clear storage and navigate anyway
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('supabase.auth.')) {
-          localStorage.removeItem(key);
-        }
+      toast({
+        title: "Error signing out",
+        description: "Please try again",
+        variant: "destructive",
       });
-      navigate('/auth');
     }
   };
 
