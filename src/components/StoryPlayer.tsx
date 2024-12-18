@@ -33,6 +33,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
   const [isFreeTrial, setIsFreeTrial] = useState(false);
   const [persistedAudioUrl, setPersistedAudioUrl] = useState<string | null>(null);
   const [persistedMusicUrl, setPersistedMusicUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const {
     isPlaying,
@@ -63,11 +64,14 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     handleAudioGeneration
   } = useStoryPlayer(settings, onSave, initialStoryData);
 
-  // Handle audio blob upload
+  // Handle audio blob upload with debounced toast
   const handleAudioUpload = async (audioBlob: Blob) => {
+    if (isUploading) return;
+    setIsUploading(true);
+
     try {
       console.log("Handling audio upload...");
-      const fileName = `${storyTitle.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-audio.mp3`;
+      const fileName = `${storyTitle.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${Date.now()}-audio.mp3`;
       const audioUrl = await uploadAudioToStorage(audioBlob, fileName);
       
       if (!audioUrl) {
@@ -83,6 +87,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
       toast({
         title: "Success",
         description: "Audio file uploaded successfully",
+        duration: 3000,
       });
     } catch (error) {
       console.error("Error uploading audio:", error);
@@ -90,7 +95,10 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
         title: "Error",
         description: "Failed to upload audio file. Please try again.",
         variant: "destructive",
+        duration: 5000,
       });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -178,7 +186,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
           <Card className="p-3 sm:p-4 lg:p-8 space-y-6 bg-white dark:bg-gray-800">
             <StoryHeader
               onBack={onBack}
-              title={displayTitle || initialStoryData?.title || ""}
+              title={storyTitle || initialStoryData?.title || ""}
               volume={volume}
               isMuted={isMuted}
               onVolumeChange={(newVolume) => setVolume(newVolume[0])}
@@ -190,7 +198,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
 
             <ErrorBoundary>
               <StoryDisplay
-                text={displayContent || initialStoryData?.content || ""}
+                text={storyContent || initialStoryData?.content || ""}
                 audioUrl={currentDisplayAudioUrl}
                 isPlaying={isPlaying}
                 currentTime={currentTime}

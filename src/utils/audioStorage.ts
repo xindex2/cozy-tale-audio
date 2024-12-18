@@ -4,8 +4,9 @@ export async function uploadAudioToStorage(audioBlob: Blob, fileName: string): P
   try {
     console.log("Starting audio upload for:", fileName);
     
-    // Generate a unique file path
-    const filePath = `${crypto.randomUUID()}-${fileName}`;
+    // Generate a unique file path with timestamp
+    const timestamp = Date.now();
+    const filePath = `${timestamp}-${fileName}`;
     
     // Upload the audio file to the story-audio bucket
     const { data, error } = await supabase.storage

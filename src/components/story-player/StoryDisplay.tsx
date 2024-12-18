@@ -43,7 +43,8 @@ export function StoryDisplay({
       if (currentPhrase) {
         currentPhrase.scrollIntoView({ 
           behavior: 'smooth', 
-          block: 'center'
+          block: 'center',
+          inline: 'nearest'
         });
       }
     }
@@ -66,7 +67,7 @@ export function StoryDisplay({
       
       <div 
         ref={containerRef}
-        className="prose prose-lg max-w-none space-y-2 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto max-h-[60vh]"
+        className="prose prose-lg max-w-none space-y-2 p-6 bg-white/90 rounded-lg shadow-sm overflow-auto max-h-[60vh] relative"
       >
         <AnimatePresence mode="wait">
           {visiblePhrases.map((phrase, index) => (
@@ -78,10 +79,11 @@ export function StoryDisplay({
                 color: index === currentPhraseIndex ? "#4F46E5" : 
                        index < currentPhraseIndex ? "#6B7280" : "#1F2937",
                 scale: index === currentPhraseIndex ? 1.02 : 1,
+                backgroundColor: index === currentPhraseIndex ? "#EEF2FF" : "transparent",
               }}
               transition={{ duration: 0.3 }}
-              className={`leading-relaxed transition-all duration-300 ${
-                index === currentPhraseIndex ? "bg-indigo-50 font-medium p-2 rounded-md" : ""
+              className={`leading-relaxed transition-all duration-300 p-2 rounded-md ${
+                index === currentPhraseIndex ? "font-medium" : ""
               }`}
             >
               {phrase}
