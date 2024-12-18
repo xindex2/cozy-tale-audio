@@ -4,7 +4,7 @@ import { StoryPlayer } from "@/components/StoryPlayer";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
-const Index = () => {
+export default function Index() {
   const [storySettings, setStorySettings] = useState<StorySettings | null>(null);
 
   const handleStart = (settings: StorySettings) => {
@@ -31,5 +31,3 @@ const Index = () => {
     </div>
   );
 }
-
-export default Index;
