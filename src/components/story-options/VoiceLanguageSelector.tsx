@@ -7,15 +7,15 @@ type Voice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' | 'none';
 
 interface VoiceLanguageSelectorProps {
   selectedVoice: Voice;
-  onVoiceSelect: (voice: Voice) => void;
   selectedLanguage: string;
+  onVoiceSelect: (voice: Voice) => void;
   onLanguageSelect: (language: string) => void;
 }
 
 export function VoiceLanguageSelector({ 
   selectedVoice, 
-  onVoiceSelect,
   selectedLanguage,
+  onVoiceSelect,
   onLanguageSelect 
 }: VoiceLanguageSelectorProps) {
   const voices: { id: Voice; name: string; description: string; icon?: React.ReactNode }[] = [
@@ -81,7 +81,7 @@ export function VoiceLanguageSelector({
         <h2 className="text-2xl font-semibold text-story-blue mb-6">Language and Voice</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Language Selection - Now on the left */}
+          {/* Language Selection */}
           <div className="space-y-4">
             <div>
               <h3 className="text-lg font-semibold mb-2 text-gray-800">Select a Language</h3>
@@ -105,7 +105,7 @@ export function VoiceLanguageSelector({
             </Select>
           </div>
 
-          {/* Voice Selection - Now on the right */}
+          {/* Voice Selection */}
           <div className="space-y-4">
             <div>
               <h3 className="text-lg font-semibold mb-2 text-gray-800">Select a Voice</h3>

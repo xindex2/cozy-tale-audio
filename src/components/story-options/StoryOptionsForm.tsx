@@ -24,30 +24,30 @@ export function StoryOptionsForm({ settings, onSettingsChange, onStart }: StoryO
       <Card className="p-6">
         <div className="space-y-6">
           <AgeGroupSelector 
-            value={settings.ageGroup} 
-            onChange={(value) => onSettingsChange({ ageGroup: value })} 
+            selectedAge={settings.ageGroup} 
+            onAgeSelect={(value) => onSettingsChange({ ageGroup: value })} 
           />
           
           <DurationSelector 
-            value={settings.duration} 
-            onChange={(value) => onSettingsChange({ duration: value })} 
+            selectedDuration={settings.duration} 
+            onDurationSelect={(value) => onSettingsChange({ duration: value })} 
           />
           
           <MusicSelector 
-            value={settings.music} 
-            onChange={(value) => onSettingsChange({ music: value })} 
+            selectedMusic={settings.music} 
+            onMusicSelect={(value) => onSettingsChange({ music: value })} 
           />
           
           <ThemeSelector 
-            value={settings.theme} 
-            onChange={(value) => onSettingsChange({ theme: value })} 
+            selectedTheme={settings.theme} 
+            onThemeSelect={(value) => onSettingsChange({ theme: value })} 
           />
           
           <VoiceLanguageSelector 
-            voice={settings.voice}
-            language={settings.language}
-            onVoiceChange={(value) => onSettingsChange({ voice: value })}
-            onLanguageChange={(value) => onSettingsChange({ language: value })}
+            selectedVoice={settings.voice}
+            selectedLanguage={settings.language}
+            onVoiceSelect={(value) => onSettingsChange({ voice: value })}
+            onLanguageSelect={(value) => onSettingsChange({ language: value })}
           />
         </div>
       </Card>
