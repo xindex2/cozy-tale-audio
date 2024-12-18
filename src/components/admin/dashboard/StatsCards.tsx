@@ -9,16 +9,15 @@ export function StatsCards() {
     queryKey: ['admin-stats'],
     queryFn: async () => {
       console.log("Fetching admin stats...");
-      const [{ data: profiles }, { count: storiesCount }] = await Promise.all([
-        supabase.from('profiles').select('email'),
+      const [{ count: usersCount }, { count: storiesCount }] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('stories').select('*', { count: 'exact', head: true }),
       ]);
 
-      const usersWithEmail = profiles?.filter(profile => profile.email).length || 0;
-      console.log('Stats fetched:', { usersWithEmail, storiesCount });
+      console.log('Stats fetched:', { usersCount, storiesCount });
       
       return {
-        users: usersWithEmail,
+        users: usersCount || 0,
         stories: storiesCount || 0,
       };
     },
