@@ -14,20 +14,13 @@ export default function Stories() {
   const navigate = useNavigate();
   const { user, isLoading: isAuthLoading } = useAuth();
 
-  // Redirect if not authenticated
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        console.log('No session found, redirecting to auth');
-        navigate("/auth");
-      }
-    };
-    
-    checkAuth();
-  }, [navigate]);
+    if (!isAuthLoading && !user) {
+      console.log('No authenticated user found, redirecting to auth');
+      navigate("/auth");
+    }
+  }, [user, isAuthLoading, navigate]);
 
-  // Don't fetch stories until we confirm auth status
   const { data: stories, isLoading: isStoriesLoading, error, refetch } = useQuery({
     queryKey: ['stories', user?.id],
     enabled: !!user?.id,
@@ -52,10 +45,8 @@ export default function Stories() {
     return <LoadingScreen />;
   }
 
-  // If not authenticated after loading, redirect
-  if (!isAuthLoading && !user) {
-    console.log('No user found after auth check, redirecting');
-    navigate("/auth");
+  // If not authenticated after loading, don't render anything as we're redirecting
+  if (!user) {
     return null;
   }
 
