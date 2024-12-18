@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import Shikwasa from "shikwasa/dist/shikwasa.js";
+import "shikwasa";
 import "shikwasa/dist/style.css";
 
 interface ShikwasaPlayerProps {
@@ -13,33 +13,35 @@ interface ShikwasaPlayerProps {
 }
 
 // Add type declaration for Shikwasa
-declare class Shikwasa {
-  constructor(config: {
-    container: HTMLElement;
-    audio: {
-      title: string;
-      artist: string;
-      cover: string;
-      src: string;
-      lyrics?: { text: string }[];
-    };
-    fixed: {
-      type: string;
-    };
-    themeColor: string;
-    autoplay: boolean;
-    muted: boolean;
+declare global {
+  class Shikwasa {
+    constructor(config: {
+      container: HTMLElement;
+      audio: {
+        title: string;
+        artist: string;
+        cover: string;
+        src: string;
+        lyrics?: { text: string }[];
+      };
+      fixed: {
+        type: string;
+      };
+      themeColor: string;
+      autoplay: boolean;
+      muted: boolean;
+      volume: number;
+      download: boolean;
+    });
+    on(event: string, callback: (...args: any[]) => void): void;
+    play(): Promise<void>;
+    pause(): void;
+    destroy(): void;
     volume: number;
-    download: boolean;
-  });
-  on(event: string, callback: (...args: any[]) => void): void;
-  play(): Promise<void>;
-  pause(): void;
-  destroy(): void;
-  volume: number;
-  audio: {
-    currentTime: number;
-  };
+    audio: {
+      currentTime: number;
+    };
+  }
 }
 
 export function ShikwasaPlayer({
@@ -68,10 +70,10 @@ export function ShikwasaPlayer({
         artist: isMusic ? "Background" : "Narrator",
         cover: "/placeholder.svg",
         src: url,
-        lyrics: text ? [{ text: text }] : undefined,
+        lyrics: text ? [{ text }] : undefined
       },
       fixed: {
-        type: 'static',
+        type: 'static'
       },
       themeColor: '#60A5FA',
       autoplay: false,
