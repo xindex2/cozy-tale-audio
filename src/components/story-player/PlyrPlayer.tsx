@@ -57,12 +57,10 @@ export function PlyrPlayer({
         resetOnEnd: true,
       });
 
-      // Apply custom styling
-      document.documentElement.style.setProperty('--plyr-color-main', '#60A5FA');
-      document.documentElement.style.setProperty('--plyr-range-fill-background', '#60A5FA');
-      document.documentElement.style.setProperty('--plyr-audio-controls-background', '#1e293b');
-      document.documentElement.style.setProperty('--plyr-audio-control-color', '#ffffff');
-      document.documentElement.style.setProperty('--plyr-audio-control-color-hover', '#60A5FA');
+      // Load metadata to get duration
+      audio.addEventListener('loadedmetadata', () => {
+        console.log(`${isMusic ? 'Music' : 'Voice'} duration:`, audio.duration);
+      });
 
       const handleError = (e: Event) => {
         console.error(`${isMusic ? 'Music' : 'Voice'} audio error:`, e);

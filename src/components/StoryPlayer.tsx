@@ -71,9 +71,8 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
 
       console.log("Audio uploaded successfully:", audioUrl);
       if (onSave) {
-        // Save both audio and background music URLs
-        await saveStory(storyTitle, storyContent, audioUrl, currentMusicUrl || "");
-        console.log("Story saved with audio:", audioUrl, "and music:", currentMusicUrl);
+        await saveStory(storyTitle, storyContent, audioUrl, settings.music || "");
+        console.log("Story saved with audio:", audioUrl, "and music:", settings.music);
       }
       
     } catch (error) {
@@ -152,10 +151,10 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
       onMusicToggleMute={() => setIsMusicMuted(!isMusicMuted)}
       selectedMusic={settings?.music}
       messages={messages}
-      onSendMessage={handleChatMessage}
+      onSendMessage={handleSendMessage}
       isSending={isSending}
       quiz={quiz}
-      onGenerateQuiz={handleQuizGeneration}
+      onGenerateQuiz={generateQuiz}
       isGeneratingQuiz={isGeneratingQuiz}
       language={settings.language}
       currentTime={currentTime}
