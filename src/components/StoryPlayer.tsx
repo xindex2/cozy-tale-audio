@@ -7,12 +7,12 @@ import { StoryDisplay } from "./story-player/StoryDisplay";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { StoryHeader } from "./story-player/StoryHeader";
 import { useStoryPlayer } from "@/hooks/useStoryPlayer";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { LoadingState } from "./story-player/LoadingState";
 import { useToast } from "@/hooks/use-toast";
 import { useUserUsage } from "@/hooks/useUserUsage";
 import { UpgradePrompt } from "./UpgradePrompt";
-import { uploadAudioToStorage } from "@/utils/audioStorage";
+import { useStorySave } from "@/hooks/story/useStorySave";
 
 interface StoryPlayerProps {
   settings: StorySettings;
@@ -31,10 +31,8 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
   const { usage, checkAndIncrementUsage } = useUserUsage();
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [isFreeTrial, setIsFreeTrial] = useState(false);
-  const [persistedAudioUrl, setPersistedAudioUrl] = useState<string | null>(null);
-  const [persistedMusicUrl, setPersistedMusicUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [hasShownUploadSuccess, setHasShownUploadSuccess] = useState(false);
+  const { saveStory, isSaving, savedAudioUrl } = useStorySave(onSave);
 
   const {
     isPlaying,
@@ -62,16 +60,14 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     generateQuiz,
     handleSendMessage,
     loadingStage,
-    handleAudioGeneration
   } = useStoryPlayer(settings, onSave, initialStoryData);
 
-  // Handle audio blob upload with debounced toast
+  // Handle audio blob upload
   const handleAudioUpload = async (audioBlob: Blob) => {
     if (isUploading) return;
     setIsUploading(true);
 
     try {
-      console.log("Handling audio upload...");
       const fileName = `${storyTitle.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${Date.now()}-audio.mp3`;
       const audioUrl = await uploadAudioToStorage(audioBlob, fileName);
       
@@ -81,20 +77,9 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
 
       console.log("Audio uploaded successfully:", audioUrl);
       if (onSave) {
-        onSave(storyTitle, storyContent, audioUrl, currentMusicUrl || "");
+        saveStory(storyTitle, storyContent, audioUrl, currentMusicUrl || "");
       }
       
-      setPersistedAudioUrl(audioUrl);
-      
-      // Only show success toast once per upload
-      if (!hasShownUploadSuccess) {
-        toast({
-          title: "Success",
-          description: "Audio file uploaded successfully",
-          duration: 3000,
-        });
-        setHasShownUploadSuccess(true);
-      }
     } catch (error) {
       console.error("Error uploading audio:", error);
       toast({
@@ -108,38 +93,19 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     }
   };
 
-  // Reset hasShownUploadSuccess when audio URL changes
-  useEffect(() => {
-    setHasShownUploadSuccess(false);
-  }, [currentAudioUrl]);
-
-  useEffect(() => {
-    if (initialStoryData?.audioUrl) {
-      setPersistedAudioUrl(initialStoryData.audioUrl);
-    }
-    if (initialStoryData?.backgroundMusicUrl) {
-      setPersistedMusicUrl(initialStoryData.backgroundMusicUrl);
-    }
-  }, [initialStoryData]);
-
   useEffect(() => {
     if (usage && !initialStoryData) {
       setIsFreeTrial(usage.stories_created >= 1);
     }
   }, [usage, initialStoryData]);
 
+  // Save story when audio URL changes
   useEffect(() => {
-    if (currentAudioUrl && onSave) {
-      onSave(
-        storyTitle,
-        storyContent,
-        currentAudioUrl,
-        currentMusicUrl || ""
-      );
+    if (currentAudioUrl && onSave && !isSaving && currentAudioUrl !== savedAudioUrl) {
+      saveStory(storyTitle, storyContent, currentAudioUrl, currentMusicUrl || "");
     }
-  }, [currentAudioUrl, currentMusicUrl, storyTitle, storyContent, onSave]);
+  }, [currentAudioUrl, currentMusicUrl, storyTitle, storyContent, onSave, isSaving, savedAudioUrl, saveStory]);
 
-  // Debounced version of the upgrade prompt handler
   const handleUpgradePrompt = useCallback(async (action: 'chat_messages_sent' | 'quiz_questions_answered') => {
     const canProceed = await checkAndIncrementUsage(action);
     if (!canProceed) {
@@ -164,20 +130,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     generateQuiz();
   };
 
-  let displayContent = storyContent;
-  let displayTitle = storyTitle;
-
-  try {
-    if (typeof storyContent === 'string' && storyContent.trim().startsWith('{')) {
-      const parsed = JSON.parse(storyContent);
-      displayContent = parsed.content || parsed.text || storyContent;
-      displayTitle = parsed.title || storyTitle;
-    }
-  } catch (e) {
-    console.error('Error parsing story content:', e);
-    displayContent = storyContent;
-  }
-
   if (isLoading) {
     return (
       <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
@@ -187,8 +139,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
       </div>
     );
   }
-
-  const currentDisplayAudioUrl = persistedAudioUrl || currentAudioUrl || initialStoryData?.audioUrl;
 
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
@@ -204,13 +154,13 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
               onToggleMute={() => setIsMuted(!isMuted)}
               isPlaying={isPlaying}
               onTogglePlay={() => setIsPlaying(!isPlaying)}
-              audioUrl={currentDisplayAudioUrl}
+              audioUrl={currentAudioUrl || initialStoryData?.audioUrl}
             />
 
             <ErrorBoundary>
               <StoryDisplay
                 text={storyContent || initialStoryData?.content || ""}
-                audioUrl={currentDisplayAudioUrl}
+                audioUrl={currentAudioUrl || initialStoryData?.audioUrl}
                 isPlaying={isPlaying}
                 currentTime={currentTime}
                 duration={settings.duration * 60}
@@ -234,7 +184,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
 
           <ChatPanel
             messages={messages}
-            onSendMessage={handleChatMessage}
+            onSendMessage={handleSendMessage}
             isLoading={isSending}
             quiz={quiz}
             onGenerateQuiz={handleQuizGeneration}
