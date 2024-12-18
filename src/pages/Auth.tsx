@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -6,75 +6,24 @@ import { useToast } from "@/hooks/use-toast";
 import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { getPendingStorySettings } from "@/utils/authNavigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const [isLoading, setIsLoading] = useState(false);
-  const queryClient = useQueryClient();
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    console.log("Checking authentication status...");
-    const checkAuth = async () => {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) {
-        console.error("Session error:", sessionError);
-        toast({
-          variant: "destructive",
-          title: "Authentication Error",
-          description: "There was a problem checking your session. Please try again.",
-        });
-        return;
-      }
-      if (session) {
-        console.log("User is already logged in, redirecting...");
+    if (!isLoading && user) {
+      const pendingStorySettings = getPendingStorySettings();
+      if (pendingStorySettings) {
+        navigate('/create', { state: { settings: pendingStorySettings } });
+      } else {
         navigate('/dashboard');
       }
-    };
-    checkAuth();
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event);
-      
-      if (event === 'SIGNED_IN' && session) {
-        setIsLoading(true);
-        try {
-          // Invalidate and refetch relevant queries
-          await queryClient.invalidateQueries({ queryKey: ['session'] });
-          await queryClient.invalidateQueries({ queryKey: ['profile'] });
-          
-          // Check if there was a pending story creation
-          const pendingStorySettings = getPendingStorySettings();
-          if (pendingStorySettings) {
-            navigate('/create', { state: { settings: pendingStorySettings } });
-          } else {
-            navigate('/dashboard');
-          }
-
-          toast({
-            title: "Welcome to Bedtimey!",
-            description: "You have successfully signed in.",
-          });
-        } catch (error) {
-          console.error("Error during sign in process:", error);
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "There was a problem signing in. Please try again.",
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate, toast, queryClient]);
+    }
+  }, [user, isLoading, navigate]);
 
   // Handle any auth errors from URL parameters
   useEffect(() => {
@@ -89,6 +38,10 @@ export default function Auth() {
       });
     }
   }, [searchParams, toast]);
+
+  if (isLoading) {
+    return null; // or a loading spinner
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50 flex items-center justify-center p-4">
@@ -127,12 +80,12 @@ export default function Auth() {
               sign_in: {
                 email_label: "Email",
                 password_label: "Password",
-                button_label: isLoading ? "Signing in..." : "Sign in",
+                button_label: "Sign in",
               },
               sign_up: {
                 email_label: "Email",
                 password_label: "Password",
-                button_label: isLoading ? "Creating account..." : "Create account",
+                button_label: "Create account",
               },
             },
           }}

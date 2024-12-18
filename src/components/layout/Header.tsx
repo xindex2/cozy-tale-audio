@@ -11,83 +11,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "@/hooks/use-theme";
-import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Header() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const { data: session, refetch: refetchSession } = useQuery({
-    queryKey: ['session'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      return session;
-    },
-  });
-
-  const { data: profile, refetch: refetchProfile } = useQuery({
-    queryKey: ['profile', session?.user?.id],
-    enabled: !!session?.user?.id,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session!.user.id)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed in Header:", event, session);
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-        await refetchSession();
-        if (session?.user?.id) {
-          await refetchProfile();
-        }
-        // Clear all queries on sign out
-        if (event === 'SIGNED_OUT') {
-          queryClient.clear();
-        }
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [refetchSession, refetchProfile, queryClient]);
-
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      // Clear all queries and navigate to auth page
-      queryClient.clear();
-      navigate('/auth');
-      
-      toast({
-        title: "Signed out successfully",
-        description: "You have been logged out",
-      });
-    } catch (error) {
-      console.error('Sign out error:', error);
-      toast({
-        title: "Error signing out",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    }
-  };
+  const { user, profile, signOut } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -110,7 +40,7 @@ export function Header() {
               <span className="sr-only">Toggle theme</span>
             </Button>
             
-            {session ? (
+            {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -154,7 +84,7 @@ export function Header() {
                     </>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
+                  <DropdownMenuItem onClick={signOut}>
                     Log out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
