@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Plyr from 'plyr';
 import 'plyr/dist/plyr.css';
 
@@ -23,7 +23,7 @@ export function PlyrPlayer({
 }: PlyrPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playerRef = useRef<Plyr | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!url) {
@@ -31,83 +31,99 @@ export function PlyrPlayer({
       return;
     }
 
-    // Create audio element
-    const audio = document.createElement('audio');
-    audio.src = url;
-    audio.preload = "auto";
-    if (isMusic) {
-      audio.loop = true;
-    }
+    let mounted = true;
 
-    // Ensure container exists
-    if (!containerRef.current) return;
+    const initializePlayer = async () => {
+      try {
+        if (!mounted) return;
 
-    // Clear container
-    containerRef.current.innerHTML = '';
-    
-    // Append audio to container
-    containerRef.current.appendChild(audio);
-    audioRef.current = audio;
+        // Create audio element
+        const audio = document.createElement('audio');
+        audio.crossOrigin = "anonymous";
+        audio.preload = "auto";
+        
+        // Set up event listeners before setting source
+        audio.addEventListener('canplay', () => {
+          if (mounted) setIsLoading(false);
+        });
 
-    // Initialize Plyr
-    if (audioRef.current) {
-      playerRef.current = new Plyr(audioRef.current, {
-        controls: [],
-        hideControls: false,
-        resetOnEnd: true,
-      });
+        audio.addEventListener('error', (e) => {
+          console.error(`${isMusic ? 'Music' : 'Voice'} audio error:`, e);
+          if (mounted) {
+            setIsLoading(false);
+            onError?.();
+          }
+        });
 
-      // Load metadata to get duration
-      audio.addEventListener('loadedmetadata', () => {
-        console.log(`${isMusic ? 'Music' : 'Voice'} duration:`, audio.duration);
-      });
-
-      const handleError = (e: Event) => {
-        console.error(`${isMusic ? 'Music' : 'Voice'} audio error:`, e);
-        onError?.();
-      };
-
-      const handleTimeUpdate = () => {
-        if (audioRef.current) {
-          onTimeUpdate?.(audioRef.current.currentTime);
+        // Now set the source
+        audio.src = url;
+        
+        if (isMusic) {
+          audio.loop = true;
         }
-      };
 
-      audio.addEventListener('error', handleError);
-      if (!isMusic) {
-        audio.addEventListener('timeupdate', handleTimeUpdate);
+        // Initialize Plyr
+        if (mounted) {
+          playerRef.current = new Plyr(audio, {
+            controls: [],
+            volume: isMuted ? 0 : volume,
+            muted: isMuted,
+          });
+
+          if (!isMusic) {
+            playerRef.current.on('timeupdate', () => {
+              if (mounted && audioRef.current) {
+                onTimeUpdate?.(audioRef.current.currentTime);
+              }
+            });
+          }
+
+          audioRef.current = audio;
+        }
+      } catch (error) {
+        console.error('Error initializing Plyr player:', error);
+        if (mounted) {
+          setIsLoading(false);
+          onError?.();
+        }
       }
+    };
 
-      return () => {
-        audio.removeEventListener('error', handleError);
-        if (!isMusic) {
-          audio.removeEventListener('timeupdate', handleTimeUpdate);
-        }
-        if (playerRef.current) {
-          playerRef.current.destroy();
-          playerRef.current = null;
-        }
-        audioRef.current = null;
-      };
-    }
+    initializePlayer();
+
+    return () => {
+      mounted = false;
+      if (playerRef.current) {
+        playerRef.current.destroy();
+      }
+      if (audioRef.current) {
+        audioRef.current.remove();
+      }
+    };
   }, [url, isMusic, onTimeUpdate, onError]);
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume;
+    if (playerRef.current) {
+      playerRef.current.volume = isMuted ? 0 : volume;
     }
   }, [volume, isMuted]);
 
   useEffect(() => {
-    if (isPlaying) {
-      audioRef.current?.play().catch(error => {
-        console.error("Error playing audio:", error);
-        onError?.();
-      });
-    } else {
-      audioRef.current?.pause();
+    if (!isLoading && playerRef.current) {
+      if (isPlaying) {
+        playerRef.current.play().catch((error) => {
+          console.error("Error playing audio:", error);
+          onError?.();
+        });
+      } else {
+        playerRef.current.pause();
+      }
     }
-  }, [isPlaying, onError]);
+  }, [isPlaying, isLoading, onError]);
 
-  return <div ref={containerRef} className="plyr-container" />;
+  if (isLoading) {
+    return null;
+  }
+
+  return <div className="plyr-container" />;
 }
