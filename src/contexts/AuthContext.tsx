@@ -64,55 +64,77 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    let authSubscription: { unsubscribe: () => void } | null = null;
+    
     console.log('Setting up auth listener...');
     
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (!mounted) return;
-      
-      if (error) {
-        console.error('Error getting session:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to get authentication session',
-          variant: 'destructive',
+    const setupAuth = async () => {
+      try {
+        // Get initial session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+        
+        if (sessionError) {
+          console.error('Error getting session:', sessionError);
+          toast({
+            title: 'Error',
+            description: 'Failed to get authentication session',
+            variant: 'destructive',
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        if (session?.user) {
+          console.log('Initial session found:', session.user.id);
+          setUser(session.user);
+          await fetchProfile(session.user);
+        } else {
+          console.log('No initial session found');
+          setUser(null);
+          clearProfile();
+        }
+        
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+          if (!mounted) return;
+          
+          console.log('Auth state changed:', event, session?.user?.id);
+          
+          if (session?.user) {
+            setUser(session.user);
+            await fetchProfile(session.user);
+          } else {
+            setUser(null);
+            clearProfile();
+          }
         });
-        setIsLoading(false);
-        return;
+        
+        authSubscription = subscription;
+      } catch (error) {
+        console.error('Error in auth setup:', error);
+        if (mounted) {
+          toast({
+            title: 'Error',
+            description: 'Failed to initialize authentication',
+            variant: 'destructive',
+          });
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
-      
-      if (session?.user) {
-        console.log('Initial session found:', session.user.id);
-        setUser(session.user);
-        fetchProfile(session.user);
-      } else {
-        console.log('No initial session found');
-        setUser(null);
-        clearProfile();
-      }
-      setIsLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return;
-      
-      console.log('Auth state changed:', event, session?.user?.id);
-      
-      if (session?.user) {
-        setUser(session.user);
-        await fetchProfile(session.user);
-      } else {
-        setUser(null);
-        clearProfile();
-      }
-      
-      setIsLoading(false);
-    });
-
+    };
+    
+    setupAuth();
+    
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
     };
   }, [toast, fetchProfile, clearProfile]);
 

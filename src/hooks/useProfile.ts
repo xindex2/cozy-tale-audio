@@ -13,28 +13,46 @@ interface Profile {
 export const useProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
 
-  const fetchProfile = async (user: User) => {
+  const fetchProfile = async (user: User, retryCount = 3) => {
     try {
       console.log('Fetching profile for user:', user.id);
       
-      // Add a small delay to ensure Supabase has processed the auth state
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Add a delay between retries
+      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
       
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle();
+      for (let i = 0; i < retryCount; i++) {
+        try {
+          // Add a small delay before each attempt
+          await delay((i + 1) * 500);
+          
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-        setProfile(null);
-        return null;
+          if (error) {
+            console.error(`Error fetching profile (attempt ${i + 1}/${retryCount}):`, error);
+            continue;
+          }
+
+          if (!profile) {
+            console.log(`Profile not found (attempt ${i + 1}/${retryCount}), retrying...`);
+            continue;
+          }
+
+          console.log('Successfully fetched profile:', profile);
+          setProfile(profile);
+          return profile;
+        } catch (error) {
+          console.error(`Fetch attempt ${i + 1}/${retryCount} failed:`, error);
+          if (i === retryCount - 1) throw error;
+        }
       }
-
-      console.log('Fetched profile:', profile);
-      setProfile(profile);
-      return profile;
+      
+      console.error('All retry attempts failed');
+      setProfile(null);
+      return null;
     } catch (error) {
       console.error('Error in fetchProfile:', error);
       setProfile(null);
