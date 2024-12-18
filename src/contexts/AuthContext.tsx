@@ -81,7 +81,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
+      // Clear all query cache
       queryClient.clear();
+      
+      // Reset local state
+      setUser(null);
+      setProfile(null);
+      
+      // Navigate to auth page
       navigate('/auth');
       
       toast({
