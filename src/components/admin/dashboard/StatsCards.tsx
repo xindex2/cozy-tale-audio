@@ -1,15 +1,33 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, BookOpen } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
-interface StatsCardsProps {
-  usersCount: number;
-  storiesCount: number;
-  isLoading: boolean;
-}
+export function StatsCards() {
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['admin-stats'],
+    queryFn: async () => {
+      console.log("Fetching admin stats...");
+      const [{ count: usersCount }, { count: storiesCount }] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('stories').select('*', { count: 'exact', head: true }),
+      ]);
 
-export function StatsCards({ usersCount, storiesCount, isLoading }: StatsCardsProps) {
+      console.log('Stats fetched:', { usersCount, storiesCount });
+      return {
+        users: usersCount || 0,
+        stories: storiesCount || 0,
+      };
+    },
+  });
+
   if (isLoading) {
-    return null;
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
   }
 
   return (
@@ -22,7 +40,7 @@ export function StatsCards({ usersCount, storiesCount, isLoading }: StatsCardsPr
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-3xl font-bold">{usersCount}</p>
+          <p className="text-3xl font-bold">{stats?.users || 0}</p>
         </CardContent>
       </Card>
       <Card>
@@ -33,7 +51,7 @@ export function StatsCards({ usersCount, storiesCount, isLoading }: StatsCardsPr
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-3xl font-bold">{storiesCount}</p>
+          <p className="text-3xl font-bold">{stats?.stories || 0}</p>
         </CardContent>
       </Card>
     </div>
