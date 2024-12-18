@@ -71,13 +71,6 @@ class OpenAIClient {
     }
   }
 
-  cancelCurrentRequest() {
-    if (this.controller) {
-      this.controller.abort();
-      this.controller = null;
-    }
-  }
-
   async generateContent(prompt: string, systemPrompt?: string, onStream?: (chunk: string) => void) {
     // Cancel any existing request
     this.cancelCurrentRequest();
@@ -102,9 +95,8 @@ class OpenAIClient {
         body: JSON.stringify({
           model: OPENAI_CONFIG.defaultModel,
           messages,
+          stream: true,
           ...OPENAI_CONFIG.generationConfig,
-          max_tokens: 2000, // Limit tokens for faster response
-          temperature: 0.7, // Slightly reduce randomness for faster generation
         }),
       });
 
@@ -149,7 +141,8 @@ class OpenAIClient {
               }
             }
           } catch (e) {
-            console.error('Error parsing streaming response:', e);
+            console.warn('Error parsing streaming response:', e);
+            // Continue processing other chunks even if one fails
           }
         }
       }
@@ -170,6 +163,13 @@ class OpenAIClient {
       });
       throw error;
     } finally {
+      this.controller = null;
+    }
+  }
+
+  cancelCurrentRequest() {
+    if (this.controller) {
+      this.controller.abort();
       this.controller = null;
     }
   }
