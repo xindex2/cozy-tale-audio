@@ -11,6 +11,13 @@ interface Profile {
   is_admin?: boolean;
 }
 
+interface RPCResponse {
+  email?: string;
+  avatar_url?: string;
+  full_name?: string;
+  is_admin?: boolean;
+}
+
 export const useProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const { toast } = useToast();
@@ -60,13 +67,14 @@ export const useProfile = () => {
 
       if (!rpcError && rpcProfile) {
         console.log('Successfully fetched profile with RPC:', rpcProfile);
+        const rpcData = rpcProfile as RPCResponse;
         // Ensure the RPC response matches our Profile interface
         const typedProfile: Profile = {
           id: user.id,
-          email: rpcProfile.email,
-          avatar_url: rpcProfile.avatar_url,
-          full_name: rpcProfile.full_name,
-          is_admin: rpcProfile.is_admin,
+          email: rpcData.email,
+          avatar_url: rpcData.avatar_url,
+          full_name: rpcData.full_name,
+          is_admin: rpcData.is_admin,
         };
         setProfile(typedProfile);
         return typedProfile;
