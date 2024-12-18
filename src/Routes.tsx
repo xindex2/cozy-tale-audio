@@ -3,8 +3,9 @@ import Music from "./pages/admin/Music";
 import CreateStory from "./pages/CreateStory";
 import Story from "./pages/Story";
 import StoryView from "./pages/StoryView";
-import { AuthGuard } from "@/components/AuthGuard";
-import { AdminGuard } from "@/components/admin/AdminGuard";
+import { AuthGuard } from "./components/auth/AuthGuard";
+import { AdminGuard } from "./components/admin/AdminGuard";
+import Home from "./pages/landing/Home";
 
 export default function AppRoutes() {
   return (

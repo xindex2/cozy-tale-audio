@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Volume2 } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
@@ -96,7 +96,7 @@ export function MusicLibraryTable() {
                 </Badge>
               </TableCell>
               <TableCell>
-                <Badge variant={track.is_active ? "success" : "secondary"}>
+                <Badge variant={track.is_active ? "default" : "secondary"}>
                   {track.is_active ? "Active" : "Inactive"}
                 </Badge>
               </TableCell>

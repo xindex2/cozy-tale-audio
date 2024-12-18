@@ -1,29 +1,20 @@
-import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { LoadingScreen } from '@/components/ui/loading-screen';
+import { ReactNode } from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
-export function AuthGuard({ children }: { children: React.ReactNode }) {
+interface AuthGuardProps {
+  children: ReactNode;
+}
+
+export function AuthGuard({ children }: AuthGuardProps) {
   const { user, isLoading } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      // Redirect to login with return path
-      navigate('/login', {
-        replace: true,
-        state: { from: location.pathname }
-      });
-    }
-  }, [user, isLoading, navigate, location]);
 
   if (isLoading) {
-    return <LoadingScreen />;
+    return <div>Loading...</div>;
   }
 
   if (!user) {
-    return null;
+    return <Navigate to="/auth" />;
   }
 
   return <>{children}</>;
