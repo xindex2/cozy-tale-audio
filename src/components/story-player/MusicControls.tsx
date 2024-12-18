@@ -32,7 +32,6 @@ export function MusicControls({
   onMusicChange
 }: MusicControlsProps) {
   const [error, setError] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   const { data: musicTracks, isLoading: isLoadingTracks } = useQuery({
     queryKey: ['music-library'],
@@ -102,7 +101,6 @@ export function MusicControls({
             url={currentMusic.url}
             volume={volume}
             isMuted={isMuted}
-            isPlaying={isPlaying}
             onError={() => setError("Failed to play music")}
             showVolumeControl={false}
             isMusic={true}
