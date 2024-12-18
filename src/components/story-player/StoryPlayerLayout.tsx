@@ -1,15 +1,15 @@
 import { Card } from "@/components/ui/card";
 import { StoryHeader } from "./StoryHeader";
 import { StoryDisplay } from "./StoryDisplay";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { MusicControls } from "./MusicControls";
 import { ChatPanel } from "./ChatPanel";
 import { UpgradePrompt } from "../UpgradePrompt";
+import { AudioManager } from "./AudioManager";
+import { MusicControls } from "./MusicControls";
 
 interface StoryPlayerLayoutProps {
   title: string;
   content: string;
-  audioUrl?: string;
+  audioUrl?: string | null;
   volume: number;
   isMuted: boolean;
   isPlaying: boolean;
@@ -82,32 +82,40 @@ export function StoryPlayerLayout({
               isPlaying={isPlaying}
               onTogglePlay={onTogglePlay}
               audioUrl={audioUrl}
+              text={content}
             />
 
-            <ErrorBoundary>
-              <StoryDisplay
-                text={content}
-                audioUrl={audioUrl}
-                isPlaying={isPlaying}
-                currentTime={currentTime}
-                duration={duration}
-                isFreeTrial={isFreeTrial}
-                onAudioGenerated={onAudioGenerated}
-              />
-            </ErrorBoundary>
+            <AudioManager
+              voiceUrl={audioUrl}
+              backgroundMusicUrl={selectedMusic}
+              isPlaying={isPlaying}
+              volume={volume}
+              isMuted={isMuted}
+              musicVolume={musicVolume}
+              isMusicMuted={isMusicMuted}
+              onTimeUpdate={(time) => console.log("Time update:", time)}
+            />
+
+            <StoryDisplay
+              text={content}
+              audioUrl={audioUrl}
+              isPlaying={isPlaying}
+              currentTime={currentTime}
+              duration={duration}
+              isFreeTrial={isFreeTrial}
+              onAudioGenerated={onAudioGenerated}
+            />
           </Card>
         </div>
 
         <div className="lg:h-[800px] space-y-4">
-          <Card className="p-4">
-            <MusicControls
-              volume={musicVolume}
-              isMuted={isMusicMuted}
-              onVolumeChange={(newVolume) => onMusicVolumeChange(newVolume[0])}
-              onToggleMute={onMusicToggleMute}
-              selectedMusic={selectedMusic}
-            />
-          </Card>
+          <MusicControls
+            volume={musicVolume}
+            isMuted={isMusicMuted}
+            onVolumeChange={(newVolume) => onMusicVolumeChange(newVolume[0])}
+            onToggleMute={onMusicToggleMute}
+            selectedMusic={selectedMusic}
+          />
 
           <ChatPanel
             messages={messages}
