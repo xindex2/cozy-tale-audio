@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { SkipBack } from "lucide-react";
-import { PlyrPlayer } from "./PlyrPlayer";
+import { ShikwasaPlayer } from "./ShikwasaPlayer";
 
 interface StoryHeaderProps {
   onBack: () => void;
@@ -12,6 +12,7 @@ interface StoryHeaderProps {
   isPlaying: boolean;
   onTogglePlay: () => void;
   audioUrl?: string | null;
+  text?: string;
 }
 
 export function StoryHeader({
@@ -24,6 +25,7 @@ export function StoryHeader({
   isPlaying,
   onTogglePlay,
   audioUrl,
+  text,
 }: StoryHeaderProps) {
   return (
     <div className="space-y-4">
@@ -37,12 +39,13 @@ export function StoryHeader({
       </div>
       {audioUrl && (
         <div className="w-full">
-          <PlyrPlayer
+          <ShikwasaPlayer
             url={audioUrl}
             volume={volume}
             isMuted={isMuted}
             isPlaying={isPlaying}
             isMusic={false}
+            text={text}
           />
         </div>
       )}
