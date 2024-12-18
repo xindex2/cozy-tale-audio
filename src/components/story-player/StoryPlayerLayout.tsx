@@ -3,8 +3,8 @@ import { StoryHeader } from "./StoryHeader";
 import { StoryDisplay } from "./StoryDisplay";
 import { ChatPanel } from "./ChatPanel";
 import { UpgradePrompt } from "../UpgradePrompt";
-import { AudioManager } from "./AudioManager";
-import { MusicControls } from "./MusicControls";
+import { PlyrPlayer } from "./PlyrPlayer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface StoryPlayerLayoutProps {
   title: string;
@@ -67,6 +67,8 @@ export function StoryPlayerLayout({
   showUpgradePrompt,
   onUpgradePromptChange,
 }: StoryPlayerLayoutProps) {
+  const isMobile = useIsMobile();
+
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-4 lg:gap-6">
@@ -75,24 +77,21 @@ export function StoryPlayerLayout({
             <StoryHeader
               onBack={onBack}
               title={title}
-              volume={volume}
-              isMuted={isMuted}
-              onVolumeChange={onVolumeChange}
-              onToggleMute={onToggleMute}
               isPlaying={isPlaying}
               onTogglePlay={onTogglePlay}
             />
 
-            <AudioManager
-              voiceUrl={audioUrl}
-              backgroundMusicUrl={selectedMusic}
-              isPlaying={isPlaying}
-              volume={volume}
-              isMuted={isMuted}
-              musicVolume={musicVolume}
-              isMusicMuted={isMusicMuted}
-              onTimeUpdate={(time) => console.log("Time update:", time)}
-            />
+            {isMobile && audioUrl && (
+              <div className="w-full">
+                <PlyrPlayer
+                  url={audioUrl}
+                  volume={volume}
+                  isMuted={isMuted}
+                  isPlaying={isPlaying}
+                  onTimeUpdate={(time) => console.log("Time update:", time)}
+                />
+              </div>
+            )}
 
             <StoryDisplay
               text={content}
@@ -107,13 +106,18 @@ export function StoryPlayerLayout({
         </div>
 
         <div className="lg:h-[800px] space-y-4">
-          <MusicControls
-            volume={musicVolume}
-            isMuted={isMusicMuted}
-            onVolumeChange={onMusicVolumeChange}
-            onToggleMute={onMusicToggleMute}
-            selectedMusic={selectedMusic}
-          />
+          {selectedMusic && (
+            <Card className="p-4">
+              <h3 className="text-sm font-medium mb-2">Background Music</h3>
+              <PlyrPlayer
+                url={selectedMusic}
+                volume={musicVolume}
+                isMuted={isMusicMuted}
+                isPlaying={isPlaying}
+                isMusic={true}
+              />
+            </Card>
+          )}
 
           <ChatPanel
             messages={messages}

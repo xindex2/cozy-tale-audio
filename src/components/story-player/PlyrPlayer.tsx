@@ -37,12 +37,10 @@ export function PlyrPlayer({
       try {
         if (!mounted) return;
 
-        // Create audio element
         const audio = document.createElement('audio');
         audio.crossOrigin = "anonymous";
         audio.preload = "auto";
         
-        // Set up event listeners before setting source
         audio.addEventListener('canplay', () => {
           if (mounted) setIsLoading(false);
         });
@@ -55,19 +53,17 @@ export function PlyrPlayer({
           }
         });
 
-        // Now set the source
         audio.src = url;
         
         if (isMusic) {
           audio.loop = true;
         }
 
-        // Initialize Plyr
         if (mounted) {
           playerRef.current = new Plyr(audio, {
-            controls: [],
-            volume: isMuted ? 0 : volume,
-            muted: isMuted,
+            controls: ['play', 'progress', 'current-time', 'mute', 'volume'],
+            hideControls: false,
+            resetOnEnd: true,
           });
 
           if (!isMusic) {
