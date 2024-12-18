@@ -2,19 +2,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { chunkText } from "@/utils/textChunker";
 import { toast } from "@/hooks/use-toast";
 
-const AUDIO_URLS = {
-  "no-music": null,
-  "gentle-lullaby": "https://cdn.pixabay.com/download/audio/2023/09/05/audio_168a3e0caa.mp3",
-  "sleeping-lullaby": "https://cdn.pixabay.com/download/audio/2023/05/16/audio_166b9c7242.mp3",
-  "water-dreams": "https://cdn.pixabay.com/download/audio/2022/02/23/audio_ea70ad08e3.mp3",
-  "relaxing-piano": "https://cdn.pixabay.com/download/audio/2024/11/04/audio_4956b4edd1.mp3",
-  "water-fountain": "https://cdn.pixabay.com/download/audio/2024/09/10/audio_6e5d7d1912.mp3",
-  "ocean-waves": "https://cdn.pixabay.com/download/audio/2021/09/09/audio_478f62eb43.mp3",
-  "forest-birds": "https://cdn.pixabay.com/download/audio/2022/02/12/audio_8ca49a7f20.mp3",
-  "sleep-music": "https://cdn.pixabay.com/download/audio/2023/10/30/audio_66f4e26e42.mp3",
-  "guided-sleep": "https://cdn.pixabay.com/download/audio/2024/03/11/audio_2412defc6f.mp3"
-};
-
 async function getOpenAIKey() {
   try {
     const { data, error } = await supabase
@@ -118,8 +105,21 @@ export const audioService = {
     }
   },
 
-  getBackgroundMusicUrl(musicSetting: string | null): string | null {
-    if (!musicSetting || musicSetting === 'no-music') return null;
-    return AUDIO_URLS[musicSetting as keyof typeof AUDIO_URLS] || null;
+  async getBackgroundMusicUrl(musicId: string): Promise<string | null> {
+    if (!musicId || musicId === 'no-music') return null;
+
+    try {
+      const { data, error } = await supabase
+        .from('music_library')
+        .select('url')
+        .eq('id', musicId)
+        .single();
+
+      if (error) throw error;
+      return data?.url || null;
+    } catch (error) {
+      console.error('Error fetching music URL:', error);
+      return null;
+    }
   }
 };

@@ -6,10 +6,19 @@ import { Label } from "@/components/ui/label";
 import { Music } from "lucide-react";
 import { MusicOption } from "./music/MusicOption";
 import { useAudioPreview } from "./music/useAudioPreview";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface MusicSelectorProps {
   selectedMusic: string;
   onMusicSelect: (music: string) => void;
+}
+
+interface MusicTrack {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
 }
 
 export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorProps) {
@@ -18,6 +27,20 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
   const [validMusicOptions, setValidMusicOptions] = useState<string[]>([]);
   const { handlePreview } = useAudioPreview();
 
+  const { data: musicTracks, isLoading: isLoadingTracks } = useQuery({
+    queryKey: ['music-library'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('music_library')
+        .select('*')
+        .eq('is_active', true)
+        .order('name');
+      
+      if (error) throw error;
+      return data as MusicTrack[];
+    }
+  });
+
   const musicOptions = [
     {
       id: "no-music",
@@ -25,60 +48,12 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
       description: "Play the story without background music",
       url: null
     },
-    { 
-      id: "gentle-lullaby", 
-      name: "Gentle Lullaby", 
-      description: "Soft and calming lullaby for peaceful sleep", 
-      url: "https://cdn.pixabay.com/download/audio/2023/09/05/audio_168a3e0caa.mp3"
-    },
-    { 
-      id: "sleeping-lullaby", 
-      name: "Sleeping Lullaby", 
-      description: "Soothing lullaby melody", 
-      url: "https://cdn.pixabay.com/download/audio/2023/05/16/audio_166b9c7242.mp3"
-    },
-    { 
-      id: "water-dreams", 
-      name: "Water Dreams", 
-      description: "Gentle water sounds with soft music", 
-      url: "https://cdn.pixabay.com/download/audio/2022/02/23/audio_ea70ad08e3.mp3"
-    },
-    { 
-      id: "relaxing-piano", 
-      name: "Relaxing Piano", 
-      description: "Calming piano melodies", 
-      url: "https://cdn.pixabay.com/download/audio/2024/11/04/audio_4956b4edd1.mp3"
-    },
-    { 
-      id: "water-fountain", 
-      name: "Water Fountain", 
-      description: "Healing water fountain sounds", 
-      url: "https://cdn.pixabay.com/download/audio/2024/09/10/audio_6e5d7d1912.mp3"
-    },
-    { 
-      id: "ocean-waves", 
-      name: "Ocean Waves", 
-      description: "Calming ocean waves with piano", 
-      url: "https://cdn.pixabay.com/download/audio/2021/09/09/audio_478f62eb43.mp3"
-    },
-    { 
-      id: "forest-birds", 
-      name: "Forest Birds", 
-      description: "Peaceful nature and bird sounds", 
-      url: "https://cdn.pixabay.com/download/audio/2022/02/12/audio_8ca49a7f20.mp3"
-    },
-    { 
-      id: "sleep-music", 
-      name: "Sleep Music", 
-      description: "Specially composed sleep music", 
-      url: "https://cdn.pixabay.com/download/audio/2023/10/30/audio_66f4e26e42.mp3"
-    },
-    { 
-      id: "guided-sleep", 
-      name: "Guided Sleep", 
-      description: "Relaxing guided sleep music", 
-      url: "https://cdn.pixabay.com/download/audio/2024/03/11/audio_2412defc6f.mp3"
-    }
+    ...(musicTracks?.map(track => ({
+      id: track.id,
+      name: track.name,
+      description: track.description || '',
+      url: track.url
+    })) || [])
   ];
 
   useEffect(() => {
@@ -116,7 +91,7 @@ export function MusicSelector({ selectedMusic, onMusicSelect }: MusicSelectorPro
 
       audio.load();
     });
-  }, []);
+  }, [musicTracks]);
 
   useEffect(() => {
     setUseMusic(selectedMusic !== "no-music");
