@@ -33,8 +33,9 @@ export const useProfile = () => {
 
       if (!directError && directProfile) {
         console.log('Successfully fetched profile directly:', directProfile);
-        setProfile(directProfile as Profile);
-        return directProfile as Profile;
+        const typedDirectProfile = directProfile as Profile;
+        setProfile(typedDirectProfile);
+        return typedDirectProfile;
       }
 
       // If direct fetch fails, try alternative approach with single row fetch
@@ -46,8 +47,9 @@ export const useProfile = () => {
 
       if (!singleError && singleProfile) {
         console.log('Successfully fetched profile with single:', singleProfile);
-        setProfile(singleProfile as Profile);
-        return singleProfile as Profile;
+        const typedSingleProfile = singleProfile as Profile;
+        setProfile(typedSingleProfile);
+        return typedSingleProfile;
       }
 
       // If both approaches fail, try with RPC call
@@ -58,7 +60,14 @@ export const useProfile = () => {
 
       if (!rpcError && rpcProfile) {
         console.log('Successfully fetched profile with RPC:', rpcProfile);
-        const typedProfile = rpcProfile as Profile;
+        // Ensure the RPC response matches our Profile interface
+        const typedProfile: Profile = {
+          id: user.id,
+          email: rpcProfile.email,
+          avatar_url: rpcProfile.avatar_url,
+          full_name: rpcProfile.full_name,
+          is_admin: rpcProfile.is_admin,
+        };
         setProfile(typedProfile);
         return typedProfile;
       }
