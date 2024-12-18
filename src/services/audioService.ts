@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { chunkText } from "@/utils/textChunker";
 
 const AUDIO_URLS = {
   "no-music": null,
@@ -34,25 +35,38 @@ export const audioService = {
         throw new Error('OpenAI API key not found');
       }
 
-      const response = await fetch('https://api.openai.com/v1/audio/speech', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: "tts-1",
-          voice: "alloy",
-          input: text,
-        }),
-      });
+      // Split text into chunks that fit within OpenAI's limit
+      const chunks = chunkText(text);
+      const audioBlobs: Blob[] = [];
 
-      if (!response.ok) {
-        throw new Error('Failed to generate audio');
+      // Generate audio for each chunk
+      for (const chunk of chunks) {
+        const response = await fetch('https://api.openai.com/v1/audio/speech', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: "tts-1",
+            voice: "alloy",
+            input: chunk,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          console.error("OpenAI API error:", error);
+          throw new Error('Failed to generate audio');
+        }
+
+        const audioBlob = await response.blob();
+        audioBlobs.push(audioBlob);
       }
 
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
+      // Combine all audio blobs
+      const combinedBlob = new Blob(audioBlobs, { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(combinedBlob);
       return audioUrl;
     } catch (error) {
       console.error('Error generating audio:', error);
