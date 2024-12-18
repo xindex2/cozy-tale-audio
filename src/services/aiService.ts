@@ -3,6 +3,7 @@ import { audioService } from './audioService';
 import { generateQuiz } from './quizService';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { StorySettings } from "@/components/StoryOptions";
+import { toast } from "@/hooks/use-toast";
 
 export interface StoryResponse {
   text: string;
@@ -40,20 +41,37 @@ class AIService {
 
   private async initializeFromEnvironment() {
     try {
+      console.log("Fetching Gemini API key...");
       const { data: apiKeys, error } = await supabase
         .from('api_keys')
         .select('*')
-        .eq('api_type', 'gemini')
+        .eq('key_name', 'GEMINI_API_KEY')
         .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
-      
-      if (apiKeys?.key_value) {
-        await this.initializeGemini(apiKeys.key_value);
+      if (error) {
+        console.error("Error fetching API key:", error);
+        throw error;
       }
+      
+      if (!apiKeys) {
+        console.warn("No active Gemini API key found");
+        toast({
+          title: "Configuration Required",
+          description: "Please add a Gemini API key in the admin settings.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      await this.initializeGemini(apiKeys.key_value);
     } catch (error) {
       console.error("Error initializing AI service:", error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize AI service. Please check your configuration.",
+        variant: "destructive",
+      });
     }
   }
 
