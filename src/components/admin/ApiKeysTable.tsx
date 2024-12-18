@@ -15,14 +15,16 @@ import { useState } from "react";
 import type { ApiKey } from "./api-keys/types";
 import { AddKeyDialog } from "./api-keys/AddKeyDialog";
 import { EditKeyDialog } from "./api-keys/EditKeyDialog";
+import { useToast } from "@/hooks/use-toast";
 
 const REQUIRED_KEYS = ["OPENAI_API_KEY", "ELEVEN_LABS_API_KEY"];
 
 export function ApiKeysTable() {
   const [editingKey, setEditingKey] = useState<ApiKey | null>(null);
   const [isAddingKey, setIsAddingKey] = useState(false);
+  const { toast } = useToast();
 
-  const { data: apiKeys, isLoading, refetch } = useQuery({
+  const { data: apiKeys, isLoading, error, refetch } = useQuery({
     queryKey: ['admin-api-keys'],
     queryFn: async () => {
       console.log("Fetching API keys...");
@@ -40,6 +42,17 @@ export function ApiKeysTable() {
     },
   });
 
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          Failed to load API keys. Please try again.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
@@ -49,8 +62,20 @@ export function ApiKeysTable() {
   }
 
   const missingKeys = REQUIRED_KEYS.filter(
-    requiredKey => !apiKeys?.some(key => key.key_name === requiredKey)
+    requiredKey => !apiKeys?.some(key => key.key_name === requiredKey && key.is_active)
   );
+
+  const hasOpenAIKey = apiKeys?.some(key => 
+    key.key_name === "OPENAI_API_KEY" && key.is_active
+  );
+
+  if (!hasOpenAIKey) {
+    toast({
+      title: "OpenAI API Key Required",
+      description: "Please add your OpenAI API key to enable AI features.",
+      variant: "destructive",
+    });
+  }
 
   return (
     <div className="space-y-4">
@@ -76,6 +101,7 @@ export function ApiKeysTable() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Value</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -86,8 +112,13 @@ export function ApiKeysTable() {
                 <TableCell>{key.key_name}</TableCell>
                 <TableCell>
                   <code className="bg-gray-100 px-2 py-1 rounded">
-                    {key.key_value}
+                    {key.key_value.substring(0, 8)}...
                   </code>
+                </TableCell>
+                <TableCell>
+                  <span className={`px-2 py-1 rounded text-sm ${key.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {key.is_active ? 'Active' : 'Inactive'}
+                  </span>
                 </TableCell>
                 <TableCell>
                   {new Date(key.created_at).toLocaleDateString()}

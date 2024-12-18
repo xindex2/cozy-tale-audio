@@ -17,10 +17,14 @@ export default function Profile() {
   const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        setLoading(true);
+        setError(null);
+        
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
           navigate("/auth");
@@ -35,6 +39,7 @@ export default function Profile() {
 
         if (error) {
           console.error('Error fetching profile:', error);
+          setError('Failed to load profile. Please try again.');
           toast({
             title: "Error",
             description: "Failed to load profile",
@@ -46,6 +51,7 @@ export default function Profile() {
         setProfile(data);
       } catch (error) {
         console.error('Error:', error);
+        setError('An unexpected error occurred');
         toast({
           title: "Error",
           description: "An unexpected error occurred",
@@ -58,6 +64,31 @@ export default function Profile() {
 
     checkAuth();
   }, [navigate, toast]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
+        <Header />
+        <main className="container py-8">
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle>Error</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-red-600">{error}</p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="mt-4 text-blue-600 hover:underline"
+              >
+                Try Again
+              </button>
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -74,7 +105,30 @@ export default function Profile() {
     );
   }
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
+        <Header />
+        <main className="container py-8">
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle>Profile Not Found</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>Unable to load your profile. Please try signing in again.</p>
+              <button 
+                onClick={() => navigate('/auth')}
+                className="mt-4 text-blue-600 hover:underline"
+              >
+                Sign In
+              </button>
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
