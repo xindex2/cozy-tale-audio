@@ -23,6 +23,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const clearAuthState = () => {
+    setUser(null);
+    setProfile(null);
+    queryClient.clear();
+  };
+
   const checkSession = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -37,13 +43,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .single();
         setProfile(profile);
       } else {
-        setUser(null);
-        setProfile(null);
+        clearAuthState();
       }
     } catch (error) {
       console.error('Error checking session:', error);
-      setUser(null);
-      setProfile(null);
+      clearAuthState();
     } finally {
       setIsLoading(false);
     }
@@ -54,9 +58,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session);
-      setIsLoading(true);
       
       if (event === 'SIGNED_IN' && session) {
+        setIsLoading(true);
         console.log('Setting user and profile for SIGNED_IN');
         setUser(session.user);
         const { data: profile } = await supabase
@@ -73,13 +77,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         navigate('/dashboard');
       } else if (event === 'SIGNED_OUT') {
         console.log('Handling SIGNED_OUT event');
-        setUser(null);
-        setProfile(null);
-        queryClient.clear();
+        clearAuthState();
         setIsLoading(false);
         navigate('/auth');
-      } else {
-        setIsLoading(false);
       }
     });
 
@@ -101,10 +101,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      console.log('Sign out successful, clearing data');
-      setUser(null);
-      setProfile(null);
-      queryClient.clear();
+      clearAuthState();
+      navigate('/auth');
       
     } catch (error) {
       console.error('Sign out error:', error);
