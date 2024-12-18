@@ -10,6 +10,7 @@ interface PlyrPlayerProps {
   onTimeUpdate?: (time: number) => void;
   isMusic?: boolean;
   onError?: () => void;
+  showVolumeControl?: boolean;
 }
 
 export function PlyrPlayer({
@@ -20,6 +21,7 @@ export function PlyrPlayer({
   onTimeUpdate,
   isMusic = false,
   onError,
+  showVolumeControl = true,
 }: PlyrPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playerRef = useRef<Plyr | null>(null);
@@ -60,8 +62,13 @@ export function PlyrPlayer({
         }
 
         if (mounted) {
+          const controls = ['play', 'progress', 'current-time'];
+          if (showVolumeControl) {
+            controls.push('mute', 'volume');
+          }
+
           playerRef.current = new Plyr(audio, {
-            controls: ['play', 'progress', 'current-time', 'mute', 'volume'],
+            controls,
             hideControls: false,
             resetOnEnd: true,
           });
@@ -96,7 +103,7 @@ export function PlyrPlayer({
         audioRef.current.remove();
       }
     };
-  }, [url, isMusic, onTimeUpdate, onError]);
+  }, [url, isMusic, onTimeUpdate, onError, showVolumeControl]);
 
   useEffect(() => {
     if (playerRef.current) {
@@ -127,5 +134,7 @@ export function PlyrPlayer({
     return null;
   }
 
-  return <div className="plyr-container" />;
+  return (
+    <div className="plyr-container rounded-lg overflow-hidden border border-gray-200 shadow-sm" />
+  );
 }

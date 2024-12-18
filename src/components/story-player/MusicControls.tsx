@@ -87,8 +87,9 @@ export function MusicControls({
               volume={volume}
               isMuted={isMuted}
               isPlaying={isPlaying}
-              isMusic={true}
               onError={() => setError("Failed to play music")}
+              showVolumeControl={false}
+              isMusic={true}
             />
           </div>
         )}

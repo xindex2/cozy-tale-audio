@@ -28,16 +28,17 @@ export function StoryDisplay({
 
   return (
     <Card className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold text-gray-900">{cleanTitle}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-4">{cleanTitle}</h1>
       
-      {isMobile && audioUrl && (
-        <div className="w-full mb-4">
+      {audioUrl && (
+        <div className="w-full mb-6">
           <PlyrPlayer
             url={audioUrl}
             volume={1}
             isMuted={false}
             isPlaying={isPlaying}
             onTimeUpdate={(time) => console.log("Time update:", time)}
+            showVolumeControl={false}
           />
         </div>
       )}
