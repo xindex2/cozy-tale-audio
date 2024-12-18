@@ -11,6 +11,7 @@ interface StoryDisplayProps {
   currentTime: number;
   duration: number;
   isFreeTrial?: boolean;
+  onAudioGenerated?: (audioBlob: Blob) => Promise<void>;
 }
 
 export function StoryDisplay({ 
@@ -19,7 +20,8 @@ export function StoryDisplay({
   isPlaying,
   currentTime,
   duration,
-  isFreeTrial = false
+  isFreeTrial = false,
+  onAudioGenerated
 }: StoryDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
