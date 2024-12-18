@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, CreditCard, Infinity, Loader2, Star } from "lucide-react";
+import { Check, CreditCard, Loader2, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SubscriptionPlan {
   id: string;
@@ -20,6 +21,7 @@ interface SubscriptionPlan {
 export default function Pricing() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const { data: plans, isLoading } = useQuery({
     queryKey: ['subscription-plans'],
@@ -39,7 +41,7 @@ export default function Pricing() {
     try {
       const session = await supabase.auth.getSession();
       if (!session.data.session) {
-        navigate('/auth?redirect=/pricing');
+        navigate('/login', { replace: true, state: { from: '/pricing' } });
         return;
       }
 
@@ -150,7 +152,7 @@ export default function Pricing() {
           <Button 
             variant="link" 
             className="text-blue-600 hover:text-blue-800 p-0 h-auto font-normal"
-            onClick={() => navigate('/contact')}
+            onClick={() => navigate('/contact', { replace: true })}
           >
             Contact us
           </Button>

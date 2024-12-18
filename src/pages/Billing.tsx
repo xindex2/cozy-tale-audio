@@ -7,36 +7,35 @@ import { Loader2 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { GradientButton } from "@/components/ui/gradient-button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Billing() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const { data: subscription, isLoading } = useQuery({
-    queryKey: ['subscription-status'],
+    queryKey: ['subscription-status', user?.id],
     queryFn: async () => {
-      const session = await supabase.auth.getSession();
-      if (!session.data.session) {
-        navigate('/auth');
-        return null;
-      }
+      if (!user) return null;
 
       const response = await fetch('/functions/v1/check-subscription', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${session.data.session.access_token}`,
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         },
       });
       if (!response.ok) throw new Error('Failed to fetch subscription status');
       return response.json();
     },
+    enabled: !!user,
   });
 
   const handleManageSubscription = async () => {
     try {
       const session = await supabase.auth.getSession();
       if (!session.data.session) {
-        navigate('/auth');
+        navigate('/login', { replace: true });
         return;
       }
 
@@ -99,7 +98,7 @@ export default function Billing() {
                   Manage Subscription
                 </GradientButton>
                 {!subscription?.subscribed && (
-                  <GradientButton variant="outline" onClick={() => navigate('/pricing')}>
+                  <GradientButton variant="outline" onClick={() => navigate('/pricing', { replace: true })}>
                     View Plans
                   </GradientButton>
                 )}

@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { StoryOptions, type StorySettings } from "@/components/StoryOptions";
 import { StoryPlayer } from "@/components/StoryPlayer";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { useToast } from "@/hooks/use-toast";
-import { useAuthCheck } from "@/hooks/useAuthCheck";
+import { useAuth } from "@/contexts/AuthContext";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { saveStory } from "@/services/storyService";
 import {
@@ -22,33 +22,17 @@ import {
 export default function CreateStory() {
   const [storySettings, setStorySettings] = useState<StorySettings | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const { userId, isLoading, error } = useAuthCheck();
+  const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isLoading && !userId) {
-      navigate("/auth");
-    }
-  }, [userId, isLoading, navigate]);
 
   if (isLoading) {
     return <LoadingScreen />;
   }
 
-  if (error) {
-    console.error("Authentication error:", error);
-    toast({
-      title: "Authentication Error",
-      description: "Please try again later",
-      variant: "destructive",
-    });
-    return null;
-  }
-
   const handleStart = async (settings: StorySettings) => {
     try {
-      if (!userId) {
+      if (!user) {
         setStorySettings(settings);
         setShowAuthDialog(true);
         return;
@@ -76,8 +60,8 @@ export default function CreateStory() {
     audioUrl: string, 
     backgroundMusicUrl: string
   ) => {
-    if (!userId || !storySettings) {
-      console.error("Missing userId or storySettings");
+    if (!user || !storySettings) {
+      console.error("Missing user or storySettings");
       toast({
         title: "Error",
         description: "Unable to save story. Please try again.",
@@ -89,7 +73,7 @@ export default function CreateStory() {
     try {
       console.log("Saving story...");
       await saveStory({
-        userId,
+        userId: user.id,
         title,
         content,
         audioUrl,
@@ -102,6 +86,7 @@ export default function CreateStory() {
         description: "Your story has been saved successfully."
       });
 
+      navigate('/stories', { replace: true });
     } catch (error) {
       console.error("Error saving story:", error);
       toast({
@@ -143,11 +128,10 @@ export default function CreateStory() {
             <AlertDialogAction
               onClick={() => {
                 setShowAuthDialog(false);
-                // Store settings in localStorage before redirecting
                 if (storySettings) {
                   localStorage.setItem('pendingStorySettings', JSON.stringify(storySettings));
                 }
-                navigate('/auth');
+                navigate('/login', { replace: true, state: { from: '/create' } });
               }}
             >
               Create Account
