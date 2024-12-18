@@ -6,6 +6,7 @@ import { Music, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { PlyrPlayer } from "./PlyrPlayer";
 
 interface MusicControlsProps {
   volume: number;
@@ -30,6 +31,7 @@ export function MusicControls({
   selectedMusic,
 }: MusicControlsProps) {
   const [error, setError] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const { data: musicTracks, isLoading: isLoadingTracks } = useQuery({
     queryKey: ['music-library'],
@@ -46,7 +48,6 @@ export function MusicControls({
   });
 
   const currentMusic = musicTracks?.find(track => track.id === selectedMusic);
-
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -137,6 +138,19 @@ export function MusicControls({
             disabled={isLoading}
           />
         </div>
+
+        {currentMusic?.url && (
+          <div className="hidden">
+            <PlyrPlayer
+              url={currentMusic.url}
+              volume={volume}
+              isMuted={isMuted}
+              isPlaying={true}
+              isMusic={true}
+              onError={() => setError("Failed to play music")}
+            />
+          </div>
+        )}
       </div>
     </Card>
   );
