@@ -12,6 +12,7 @@ import { LoadingState } from "./story-player/LoadingState";
 import { useToast } from "@/hooks/use-toast";
 import { useUserUsage } from "@/hooks/useUserUsage";
 import { UpgradePrompt } from "./UpgradePrompt";
+import { uploadAudioToStorage } from "@/utils/audioStorage";
 
 interface StoryPlayerProps {
   settings: StorySettings;
@@ -58,8 +59,40 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
     startStory,
     generateQuiz,
     handleSendMessage,
-    loadingStage
+    loadingStage,
+    handleAudioGeneration
   } = useStoryPlayer(settings, onSave, initialStoryData);
+
+  // Handle audio blob upload
+  const handleAudioUpload = async (audioBlob: Blob) => {
+    try {
+      console.log("Handling audio upload...");
+      const fileName = `${storyTitle.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-audio.mp3`;
+      const audioUrl = await uploadAudioToStorage(audioBlob, fileName);
+      
+      if (!audioUrl) {
+        throw new Error('Failed to upload audio file');
+      }
+
+      console.log("Audio uploaded successfully:", audioUrl);
+      if (onSave) {
+        onSave(storyTitle, storyContent, audioUrl, currentMusicUrl || "");
+      }
+      
+      setPersistedAudioUrl(audioUrl);
+      toast({
+        title: "Success",
+        description: "Audio file uploaded successfully",
+      });
+    } catch (error) {
+      console.error("Error uploading audio:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload audio file. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     if (initialStoryData?.audioUrl) {
@@ -75,15 +108,6 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
       setIsFreeTrial(usage.stories_created >= 1);
     }
   }, [usage, initialStoryData]);
-
-  useEffect(() => {
-    if (initialStoryData?.audioUrl) {
-      setPersistedAudioUrl(initialStoryData.audioUrl);
-    }
-    if (initialStoryData?.backgroundMusicUrl) {
-      setPersistedMusicUrl(initialStoryData.backgroundMusicUrl);
-    }
-  }, [initialStoryData]);
 
   useEffect(() => {
     if (currentAudioUrl && onSave) {
@@ -172,6 +196,7 @@ export function StoryPlayer({ settings, onBack, onSave, initialStoryData }: Stor
                 currentTime={currentTime}
                 duration={settings.duration * 60}
                 isFreeTrial={isFreeTrial}
+                onAudioGenerated={handleAudioUpload}
               />
             </ErrorBoundary>
           </Card>
