@@ -1,115 +1,62 @@
-import { createContext, useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import type { User } from "@supabase/supabase-js";
-import { useProfile } from "@/hooks/useProfile";
-import { useAuthState } from "@/hooks/useAuthState";
+import { createContext, useContext, useEffect, useState } from 'react';
+import { User } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
-  profile: any | null;
   isLoading: boolean;
-  signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({ user: null, isLoading: true });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const navigate = useNavigate();
-  const { profile, fetchProfile, clearProfile } = useProfile();
-  const {
-    user,
-    setUser,
-    isLoading,
-    setIsLoading,
-    clearAuthState,
-    handleSignOut,
-  } = useAuthState();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    let mounted = true;
-
-    const initializeAuth = async () => {
-      try {
-        console.log('Initializing auth...');
-        setIsLoading(true);
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user && mounted) {
-          console.log('Session found, setting user:', session.user.id);
-          setUser(session.user);
-          await fetchProfile(session.user);
-        } else {
-          console.log('No session found, clearing state');
-          clearAuthState();
-          clearProfile();
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        clearAuthState();
-        clearProfile();
-      } finally {
-        if (mounted) setIsLoading(false);
+    console.log('Initializing auth...');
+    
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Error getting session:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to get authentication session',
+          variant: 'destructive',
+        });
+        return;
       }
-    };
+      
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
 
-    initializeAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state changed:', event, session?.user?.id);
-
-      if (event === 'SIGNED_IN' && session && mounted) {
-        try {
-          setIsLoading(true);
-          setUser(session.user);
-          await fetchProfile(session.user);
-          navigate('/dashboard', { replace: true });
-        } catch (error) {
-          console.error('Error handling sign in:', error);
-          clearAuthState();
-          clearProfile();
-        } finally {
-          if (mounted) setIsLoading(false);
-        }
-      } else if (event === 'SIGNED_OUT' && mounted) {
-        console.log('Handling SIGNED_OUT event');
-        clearAuthState();
-        clearProfile();
-        navigate('/login', { replace: true });
-      }
+      setUser(session?.user ?? null);
+      setIsLoading(false);
     });
 
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate, setUser, setIsLoading, clearAuthState, fetchProfile, clearProfile]);
-
-  const signOut = async () => {
-    console.log('Starting sign out process...');
-    try {
-      await handleSignOut();
-      clearProfile();
-      navigate('/login', { replace: true });
-    } catch (error) {
-      console.error('Error in signOut:', error);
-      clearAuthState();
-      clearProfile();
-      navigate('/login', { replace: true });
-    }
-  };
+  }, [toast]);
 
   return (
-    <AuthContext.Provider value={{ user, profile, isLoading, signOut }}>
+    <AuthContext.Provider value={{ user, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};
