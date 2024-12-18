@@ -50,7 +50,7 @@ export default function Stories() {
       <main className="container py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">My Stories</h1>
-          <GradientButton onClick={() => navigate("/create-story")} className="gap-2">
+          <GradientButton onClick={() => navigate("/create")} className="gap-2">
             <Plus className="h-4 w-4" />
             Create Story
           </GradientButton>
@@ -63,8 +63,12 @@ export default function Stories() {
         ) : stories && stories.length > 0 ? (
           <StoriesTable stories={stories} onRefresh={refetch} />
         ) : (
-          <div className="text-center py-12">
+          <div className="text-center py-12 space-y-4">
             <p className="text-gray-600">No stories yet. Create your first story!</p>
+            <GradientButton onClick={() => navigate("/create")} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Create Your First Story
+            </GradientButton>
           </div>
         )}
       </main>
