@@ -4,7 +4,7 @@ export interface StoryGenerationSettings {
   theme: string;
   language: string;
   audio?: boolean;
-  voice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
+  voice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' | 'none';
   music?: string;
 }
 
