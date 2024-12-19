@@ -9,12 +9,13 @@ interface StoryOptionsFormProps {
 }
 
 export function StoryOptionsForm({ settings, onSettingsChange, onStart }: StoryOptionsFormProps) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+  };
+
   return (
     <form 
-      onSubmit={(e) => {
-        e.preventDefault();
-        onStart(settings);
-      }} 
+      onSubmit={handleSubmit}
       className="min-h-[100dvh] md:min-h-0 space-y-6 mb-8"
     >
       <Card className="p-0 md:p-6 h-full">

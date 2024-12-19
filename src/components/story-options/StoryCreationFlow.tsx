@@ -23,6 +23,13 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
     );
   };
 
+  const handleStartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isComplete()) {
+      onStart(settings);
+    }
+  };
+
   return (
     <div className="w-full mx-auto px-4 md:px-6 lg:w-[90%]">
       <Card className="p-6 sm:p-8 bg-gradient-to-br from-purple-50 to-blue-50 border-0 shadow-lg rounded-3xl">
@@ -63,7 +70,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
 
       <div className="flex justify-end mt-8">
         <Button 
-          onClick={() => onStart(settings)}
+          onClick={handleStartClick}
           disabled={!isComplete()}
           className="bg-primary hover:bg-primary/90 px-8"
         >
