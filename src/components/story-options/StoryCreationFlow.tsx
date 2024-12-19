@@ -20,11 +20,15 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
   const [step, setStep] = useState(1);
 
   const handleNext = () => {
-    setStep(prev => prev + 1);
+    if (step < 3) {
+      setStep(prev => prev + 1);
+    }
   };
 
   const handleBack = () => {
-    setStep(prev => prev - 1);
+    if (step > 1) {
+      setStep(prev => prev - 1);
+    }
   };
 
   const handleStart = () => {
@@ -34,14 +38,22 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
   const isStepComplete = () => {
     switch (step) {
       case 1:
-        return settings.voice && settings.language;
+        return Boolean(settings.voice && settings.language);
       case 2:
-        return settings.ageGroup && settings.theme;
+        return Boolean(settings.ageGroup && settings.theme);
       case 3:
-        return settings.duration > 0;
+        return Boolean(settings.duration > 0 && settings.music);
       default:
         return false;
     }
+  };
+
+  const getStepProgress = () => {
+    let progress = 0;
+    if (settings.voice && settings.language) progress++;
+    if (settings.ageGroup && settings.theme) progress++;
+    if (settings.duration > 0 && settings.music) progress++;
+    return (progress / 3) * 100;
   };
 
   return (
@@ -49,7 +61,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
       {/* Progress Bar */}
       <div className="mb-12">
         <div className="flex justify-between text-sm font-medium text-gray-500">
-          {['Language & Voice', 'Age & Theme', 'Duration'].map((label, idx) => (
+          {['Language & Voice', 'Age & Theme', 'Duration & Music'].map((label, idx) => (
             <div 
               key={label} 
               className={`flex items-center ${idx + 1 === step ? 'text-primary' : ''}`}
@@ -70,7 +82,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
         <div className="mt-4 h-2 bg-gray-200 rounded-full">
           <div 
             className="h-full bg-primary rounded-full transition-all duration-300"
-            style={{ width: `${((step - 1) / 2) * 100}%` }}
+            style={{ width: `${getStepProgress()}%` }}
           />
         </div>
       </div>
