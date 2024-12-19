@@ -1,5 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Music from "./pages/admin/Music";
+import ApiKeys from "./pages/admin/ApiKeys";
+import Plans from "./pages/admin/Plans";
 import CreateStory from "./pages/CreateStory";
 import Story from "./pages/Story";
 import StoryView from "./pages/StoryView";
@@ -106,6 +108,20 @@ export default function AppRoutes() {
         <AuthGuard>
           <AdminGuard>
             <Music />
+          </AdminGuard>
+        </AuthGuard>
+      } />
+      <Route path="/admin/api-keys" element={
+        <AuthGuard>
+          <AdminGuard>
+            <ApiKeys />
+          </AdminGuard>
+        </AuthGuard>
+      } />
+      <Route path="/admin/plans" element={
+        <AuthGuard>
+          <AdminGuard>
+            <Plans />
           </AdminGuard>
         </AuthGuard>
       } />
