@@ -20,9 +20,13 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
   const [step, setStep] = useState(1);
 
   const handleNext = () => {
+    if (!isStepComplete()) {
+      return;
+    }
+
     if (step < 3) {
       setStep(prev => prev + 1);
-    } else if (step === 3 && isStepComplete()) {
+    } else if (step === 3) {
       onStart(settings);
     }
   };
@@ -36,10 +40,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
   const isStepComplete = () => {
     switch (step) {
       case 1:
-        return Boolean(
-          (settings.voice === 'none' || settings.voice) && 
-          settings.language
-        );
+        return Boolean(settings.language && (settings.voice || settings.voice === 'none'));
       case 2:
         return Boolean(settings.ageGroup && settings.theme);
       case 3:
@@ -51,7 +52,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
 
   const getStepProgress = () => {
     let progress = 0;
-    if ((settings.voice === 'none' || settings.voice) && settings.language) progress++;
+    if (settings.language && (settings.voice || settings.voice === 'none')) progress++;
     if (settings.ageGroup && settings.theme) progress++;
     if (settings.duration > 0 && settings.music) progress++;
     return (progress / 3) * 100;
