@@ -16,9 +16,9 @@ export function StoryOptionsForm({ settings, onSettingsChange, onStart }: StoryO
   return (
     <form 
       onSubmit={handleSubmit}
-      className="min-h-[100dvh] md:min-h-0 space-y-6 mb-8"
+      className="min-h-[calc(100dvh-4rem)] md:min-h-0 py-4 md:py-8 space-y-6"
     >
-      <Card className="p-0 md:p-6 h-full">
+      <Card className="p-0 md:p-6 h-full bg-transparent shadow-none">
         <StoryCreationFlow 
           settings={settings}
           onSettingsChange={onSettingsChange}

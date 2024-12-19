@@ -32,8 +32,8 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
 
   return (
     <div className="w-full mx-auto px-4 md:px-6 lg:w-[90%]">
-      <Card className="p-6 sm:p-8 bg-gradient-to-br from-purple-50 to-blue-50 border-0 shadow-lg rounded-3xl">
-        <div className="space-y-12">
+      <Card className="p-4 sm:p-6 md:p-8 bg-gradient-to-br from-purple-50 to-blue-50 border-0 shadow-lg rounded-3xl">
+        <div className="space-y-8 md:space-y-12">
           <div className="text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-purple-800 mb-4">
               Create Your Story
@@ -43,22 +43,22 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-            <Card className="p-6 bg-white shadow-md rounded-2xl border-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+            <Card className="p-4 sm:p-6 bg-white shadow-md rounded-2xl border-0">
               <LanguageSection 
                 settings={settings}
                 onSettingsChange={onSettingsChange}
               />
             </Card>
 
-            <Card className="p-6 bg-white shadow-md rounded-2xl border-0">
+            <Card className="p-4 sm:p-6 bg-white shadow-md rounded-2xl border-0">
               <ThemeSection 
                 settings={settings}
                 onSettingsChange={onSettingsChange}
               />
             </Card>
 
-            <Card className="p-6 bg-white shadow-md rounded-2xl border-0">
+            <Card className="p-4 sm:p-6 bg-white shadow-md rounded-2xl border-0 md:col-span-2 lg:col-span-1">
               <DurationSection 
                 settings={settings}
                 onSettingsChange={onSettingsChange}
@@ -68,11 +68,11 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
         </div>
       </Card>
 
-      <div className="flex justify-end mt-8">
+      <div className="flex justify-center sm:justify-end mt-6 sm:mt-8">
         <Button 
           onClick={handleStartClick}
           disabled={!isComplete()}
-          className="bg-primary hover:bg-primary/90 px-8"
+          className="w-full sm:w-auto bg-primary hover:bg-primary/90 px-8 py-6 text-lg"
         >
           Create Story
         </Button>
