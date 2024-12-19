@@ -22,6 +22,8 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
   const handleNext = () => {
     if (step < 3) {
       setStep(prev => prev + 1);
+    } else if (step === 3 && isStepComplete()) {
+      onStart(settings);
     }
   };
 
@@ -31,14 +33,14 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
     }
   };
 
-  const handleStart = () => {
-    onStart(settings);
-  };
-
   const isStepComplete = () => {
     switch (step) {
       case 1:
-        return Boolean(settings.voice && settings.language);
+        // Allow 'none' as a valid voice option
+        return Boolean(
+          (settings.voice === 'none' || settings.voice) && 
+          settings.language
+        );
       case 2:
         return Boolean(settings.ageGroup && settings.theme);
       case 3:
@@ -50,11 +52,13 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
 
   const getStepProgress = () => {
     let progress = 0;
-    if (settings.voice && settings.language) progress++;
+    if ((settings.voice === 'none' || settings.voice) && settings.language) progress++;
     if (settings.ageGroup && settings.theme) progress++;
     if (settings.duration > 0 && settings.music) progress++;
     return (progress / 3) * 100;
   };
+
+  // ... keep existing code (progress bar JSX)
 
   return (
     <div className="w-full mx-auto px-4 md:px-6 lg:w-[90%]">
@@ -169,24 +173,20 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
           <div></div>
         )}
         
-        {step < 3 ? (
-          <Button 
-            onClick={handleNext}
-            disabled={!isStepComplete()}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90"
-          >
-            Next
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        ) : (
-          <Button 
-            onClick={handleStart}
-            disabled={!isStepComplete()}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90"
-          >
-            Create Story
-          </Button>
-        )}
+        <Button 
+          onClick={handleNext}
+          disabled={!isStepComplete()}
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+        >
+          {step < 3 ? (
+            <>
+              Next
+              <ChevronRight className="w-4 h-4" />
+            </>
+          ) : (
+            'Create Story'
+          )}
+        </Button>
       </div>
     </div>
   );

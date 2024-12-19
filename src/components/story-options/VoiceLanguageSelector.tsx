@@ -1,8 +1,8 @@
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
-type Voice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
+type Voice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer' | 'none';
 
 interface VoiceLanguageSelectorProps {
   selectedVoice: Voice;
@@ -17,70 +17,32 @@ export function VoiceLanguageSelector({
   onVoiceSelect,
   onLanguageSelect
 }: VoiceLanguageSelectorProps) {
+  const voices: { value: Voice; label: string }[] = [
+    { value: 'none', label: 'No Audio' },
+    { value: 'alloy', label: 'Alloy' },
+    { value: 'echo', label: 'Echo' },
+    { value: 'fable', label: 'Fable' },
+    { value: 'onyx', label: 'Onyx' },
+    { value: 'nova', label: 'Nova' },
+    { value: 'shimmer', label: 'Shimmer' },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
         <Label>Select Voice</Label>
-        <RadioGroup
-          value={selectedVoice}
-          onValueChange={(value) => onVoiceSelect(value as Voice)}
-          className="grid grid-cols-2 sm:grid-cols-3 gap-4"
-        >
-          <div>
-            <RadioGroupItem value="alloy" id="alloy" className="peer sr-only" />
-            <Label
-              htmlFor="alloy"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              <span>Alloy</span>
-            </Label>
-          </div>
-          <div>
-            <RadioGroupItem value="echo" id="echo" className="peer sr-only" />
-            <Label
-              htmlFor="echo"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              <span>Echo</span>
-            </Label>
-          </div>
-          <div>
-            <RadioGroupItem value="fable" id="fable" className="peer sr-only" />
-            <Label
-              htmlFor="fable"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              <span>Fable</span>
-            </Label>
-          </div>
-          <div>
-            <RadioGroupItem value="onyx" id="onyx" className="peer sr-only" />
-            <Label
-              htmlFor="onyx"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              <span>Onyx</span>
-            </Label>
-          </div>
-          <div>
-            <RadioGroupItem value="nova" id="nova" className="peer sr-only" />
-            <Label
-              htmlFor="nova"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              <span>Nova</span>
-            </Label>
-          </div>
-          <div>
-            <RadioGroupItem value="shimmer" id="shimmer" className="peer sr-only" />
-            <Label
-              htmlFor="shimmer"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              <span>Shimmer</span>
-            </Label>
-          </div>
-        </RadioGroup>
+        <Select value={selectedVoice} onValueChange={(value) => onVoiceSelect(value as Voice)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select a voice" />
+          </SelectTrigger>
+          <SelectContent>
+            {voices.map((voice) => (
+              <SelectItem key={voice.value} value={voice.value}>
+                {voice.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-4">
