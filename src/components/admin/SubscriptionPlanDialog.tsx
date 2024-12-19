@@ -46,10 +46,10 @@ export function SubscriptionPlanDialog({
   useEffect(() => {
     if (planToEdit) {
       setFormData({
-        name: planToEdit.name,
+        name: planToEdit.name || "",
         description: planToEdit.description || "",
-        price_amount: planToEdit.price_amount,
-        stripe_price_id: planToEdit.stripe_price_id,
+        price_amount: planToEdit.price_amount || 0,
+        stripe_price_id: planToEdit.stripe_price_id || "",
         features: planToEdit.features ? planToEdit.features.join("\n") : "",
       });
     } else {
@@ -84,7 +84,7 @@ export function SubscriptionPlanDialog({
 
       console.log('Processed plan data:', planData);
 
-      if (planToEdit) {
+      if (planToEdit?.id) {
         console.log('Updating plan:', planToEdit.id);
         const { error: updateError } = await supabase
           .from('subscription_plans')
