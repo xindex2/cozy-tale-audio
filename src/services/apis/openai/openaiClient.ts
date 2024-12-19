@@ -72,11 +72,11 @@ class OpenAIClient {
   }
 
   async generateContent(prompt: string, systemPrompt?: string, onStream?: (chunk: string) => void) {
-    // Cancel any existing request
-    this.cancelCurrentRequest();
-    this.controller = new AbortController();
-
     try {
+      // Create a new controller for this request
+      this.cancelCurrentRequest();
+      this.controller = new AbortController();
+      
       console.log("Generating content with prompt:", prompt);
       
       const headers = await this.getHeaders();
@@ -163,13 +163,18 @@ class OpenAIClient {
       });
       throw error;
     } finally {
+      // Clear the controller after the request is complete
       this.controller = null;
     }
   }
 
   cancelCurrentRequest() {
     if (this.controller) {
-      this.controller.abort();
+      try {
+        this.controller.abort();
+      } catch (error) {
+        console.warn('Error aborting request:', error);
+      }
       this.controller = null;
     }
   }
