@@ -6,7 +6,7 @@ import { AgeGroupSelector } from "./AgeGroupSelector";
 import { ThemeSelector } from "./ThemeSelector";
 import { DurationSelector } from "./DurationSelector";
 import { MusicSelector } from "./MusicSelector";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Globe, Sparkles, Timer } from "lucide-react";
 import type { StorySettings } from "../StoryOptions";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -36,7 +36,6 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
   const isStepComplete = () => {
     switch (step) {
       case 1:
-        // Allow 'none' as a valid voice option
         return Boolean(
           (settings.voice === 'none' || settings.voice) && 
           settings.language
@@ -58,32 +57,66 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
     return (progress / 3) * 100;
   };
 
-  // ... keep existing code (progress bar JSX)
+  const steps = [
+    { 
+      label: 'Language & Voice',
+      icon: <Globe className="w-5 h-5" />,
+      description: 'Choose your story language and narration voice'
+    },
+    { 
+      label: 'Theme & Age',
+      icon: <Sparkles className="w-5 h-5" />,
+      description: 'Select theme and age group'
+    },
+    { 
+      label: 'Duration & Music',
+      icon: <Timer className="w-5 h-5" />,
+      description: 'Set story length and background music'
+    }
+  ];
 
   return (
     <div className="w-full mx-auto px-4 md:px-6 lg:w-[90%]">
-      {/* Progress Bar */}
-      <div className="mb-12">
-        <div className="flex justify-between text-sm font-medium text-gray-500">
-          {['Language & Voice', 'Age & Theme', 'Duration & Music'].map((label, idx) => (
+      {/* Progress Bar and Steps */}
+      <div className="mb-8 md:mb-12">
+        <div className="flex justify-between mb-6">
+          {steps.map((stepItem, idx) => (
             <div 
-              key={label} 
-              className={`flex items-center ${idx + 1 === step ? 'text-primary' : ''}`}
+              key={stepItem.label}
+              className={`flex-1 relative ${idx !== steps.length - 1 ? 'mr-4' : ''}`}
             >
-              <span className={`w-10 h-10 flex items-center justify-center rounded-full ${
-                idx + 1 === step 
-                  ? 'bg-primary text-white' 
-                  : idx + 1 < step 
-                    ? 'bg-green-500 text-white' 
-                    : 'bg-gray-200'
-              }`}>
-                {idx + 1}
-              </span>
-              <span className="ml-2 hidden sm:inline">{label}</span>
+              <div className={`
+                flex flex-col items-center md:flex-row md:items-start
+                ${idx + 1 === step ? 'text-primary' : idx + 1 < step ? 'text-green-500' : 'text-gray-400'}
+              `}>
+                <div className={`
+                  w-10 h-10 flex items-center justify-center rounded-full mb-2 md:mb-0 md:mr-3
+                  ${idx + 1 === step ? 'bg-primary text-white' : 
+                    idx + 1 < step ? 'bg-green-500 text-white' : 
+                    'bg-gray-200 text-gray-500'}
+                `}>
+                  {stepItem.icon}
+                </div>
+                <div className="text-center md:text-left">
+                  <p className="text-sm font-medium hidden md:block">{stepItem.label}</p>
+                  <p className="text-xs text-gray-500 hidden md:block">{stepItem.description}</p>
+                </div>
+              </div>
+              {idx !== steps.length - 1 && (
+                <div className="hidden md:block absolute top-5 left-full w-full h-[2px] bg-gray-200">
+                  <div 
+                    className="h-full bg-green-500 transition-all duration-300"
+                    style={{ 
+                      width: step > idx + 1 ? '100%' : 
+                             step === idx + 1 && isStepComplete() ? '50%' : '0%' 
+                    }}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
-        <div className="mt-4 h-2 bg-gray-200 rounded-full">
+        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
           <div 
             className="h-full bg-primary rounded-full transition-all duration-300"
             style={{ width: `${getStepProgress()}%` }}
@@ -159,7 +192,7 @@ export function StoryCreationFlow({ settings, onSettingsChange, onStart }: Story
         </motion.div>
       </AnimatePresence>
 
-      <div className="flex justify-between mt-12">
+      <div className="flex justify-between mt-8 md:mt-12">
         {step > 1 ? (
           <Button 
             variant="outline" 
