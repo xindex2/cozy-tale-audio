@@ -56,15 +56,15 @@ export async function generateStory(settings: StoryGenerationSettings): Promise<
 
     console.log("Story generation completed");
 
-    // Only proceed with audio generation if audio is enabled
-    if (settings.audio) {
+    // Only proceed with audio generation if audio is enabled AND voice is not 'none'
+    if (settings.audio && settings.voice && settings.voice !== 'none') {
       toast({
         title: "Generating Audio",
         description: "Please wait while we create the audio narration...",
       });
 
       // Generate audio using OpenAI TTS
-      const audioUrl = await openaiClient.generateSpeech(content, settings.voice || 'alloy');
+      const audioUrl = await openaiClient.generateSpeech(content, settings.voice);
       console.log("Audio generated successfully:", audioUrl);
 
       toast({
@@ -80,7 +80,7 @@ export async function generateStory(settings: StoryGenerationSettings): Promise<
       };
     }
 
-    // Return without audio if audio is disabled
+    // Return without audio if audio is disabled or voice is 'none'
     return {
       title,
       content,
